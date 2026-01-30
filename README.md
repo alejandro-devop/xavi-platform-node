@@ -1,12 +1,13 @@
-# Xavi Platform - Node.js Serverless
+# Xavi Platform - Node.js (Cloud Run)
 
-> Complete personal productivity and finance management platform rebuilt in Node.js serverless architecture
+> Complete personal productivity and finance management platform rebuilt in Node.js containerized architecture for Google Cloud Run
 
 ## 🎯 Project Status
 
 **Phase**: Architecture & Documentation Complete ✅  
 **Implementation**: Ready to Start 🚀  
-**Original System**: Laravel/PHP → **Target**: Node.js/TypeScript Serverless
+**Original System**: Laravel/PHP → **Target**: Node.js/TypeScript on Google Cloud Run  
+**Deployment**: Docker containers, fully managed serverless
 
 ---
 
@@ -14,28 +15,44 @@
 
 All comprehensive documentation is available in [`docs/architecture/`](./docs/architecture/):
 
-### 🌟 Start Here
+### 🌟 Start Here (Cloud Run Implementation)
+
 - **[README.md](./docs/architecture/README.md)** - Navigation guide for all stakeholders
+- **[CLOUD_RUN_ARCHITECTURE.md](./docs/architecture/CLOUD_RUN_ARCHITECTURE.md)** ⭐ - Complete Cloud Run design
+- **[CLOUD_RUN_ROADMAP.md](./docs/architecture/CLOUD_RUN_ROADMAP.md)** ⭐ - 10-week implementation plan
+- **[CLOUD_RUN_IMPLEMENTATION.md](./docs/architecture/CLOUD_RUN_IMPLEMENTATION.md)** ⭐ - Code examples & patterns
 - **[MASTER_SPEC.md](./docs/architecture/MASTER_SPEC.md)** - Complete overview, timeline, costs
 
 ### 📊 System Analysis (Current Laravel System)
+
 - **[STEP1_PROJECT_IDENTIFICATION.md](./docs/architecture/STEP1_PROJECT_IDENTIFICATION.md)** - 2 Laravel projects identified
 - **[SYSTEM_MAP.md](./docs/architecture/SYSTEM_MAP.md)** - Architecture, 54 tables, integrations
 - **[API_CONTRACTS.md](./docs/architecture/API_CONTRACTS.md)** - 150+ endpoints documented
 - **[DATA_MODEL.md](./docs/architecture/DATA_MODEL.md)** - Complete PostgreSQL schema
 - **[BEHAVIOR_SPEC.md](./docs/architecture/BEHAVIOR_SPEC.md)** - 15 use cases, business rules
 
-### 🎯 Target Architecture (Node.js Serverless)
-- **[TARGET_ARCHITECTURE.md](./docs/architecture/TARGET_ARCHITECTURE.md)** - Serverless design, 10 functions
-- **[ROUTING_AND_FUNCTIONS.md](./docs/architecture/ROUTING_AND_FUNCTIONS.md)** - API Gateway & routing
-- **[IMPLEMENTATION_BLUEPRINT_PART1.md](./docs/architecture/IMPLEMENTATION_BLUEPRINT_PART1.md)** - Structure & setup
+### 🎯 Target Architecture
 
-### 📋 Additional
-- **[COMPLETION_SUMMARY.md](./docs/architecture/COMPLETION_SUMMARY.md)** - What was accomplished
+- **[CLOUD_RUN_ARCHITECTURE.md](./docs/architecture/CLOUD_RUN_ARCHITECTURE.md)** ⭐ - Recommended containerized approach
+- **[TARGET_ARCHITECTURE.md](./docs/architecture/TARGET_ARCHITECTURE.md)** - Alternative multi-function serverless
+- **[ROUTING_AND_FUNCTIONS.md](./docs/architecture/ROUTING_AND_FUNCTIONS.md)** - API routing details
+- **[IMPLEMENTATION_BLUEPRINT_PART1.md](./docs/architecture/IMPLEMENTATION_BLUEPRINT_PART1.md)** - Foundation setup
 
 ---
 
 ## 🚀 Quick Start
+
+### For Developers (Cloud Run - RECOMMENDED)
+
+**Implementation Path:**
+
+1. 🌟 **[MASTER_SPEC.md](./docs/architecture/MASTER_SPEC.md)** - START HERE (overview, decisions)
+2. 🏗️ **[CLOUD_RUN_ARCHITECTURE.md](./docs/architecture/CLOUD_RUN_ARCHITECTURE.md)** - Architecture & infrastructure ⭐
+3. 📅 **[CLOUD_RUN_ROADMAP.md](./docs/architecture/CLOUD_RUN_ROADMAP.md)** - Week-by-week plan ⭐
+4. 💻 **[CLOUD_RUN_IMPLEMENTATION.md](./docs/architecture/CLOUD_RUN_IMPLEMENTATION.md)** - Code examples ⭐
+5. 🗄️ **[DATA_MODEL.md](./docs/architecture/DATA_MODEL.md)** - Database schema (54 tables)
+6. 📡 **[API_CONTRACTS.md](./docs/architecture/API_CONTRACTS.md)** - 150+ endpoints (request/response)
+7. 🎭 **[BEHAVIOR_SPEC.md](./docs/architecture/BEHAVIOR_SPEC.md)** - Business logic (15 use cases)
 
 ### For AI Code Generators (GitHub Copilot, ChatGPT, Claude)
 
@@ -44,7 +61,7 @@ All comprehensive documentation is available in [`docs/architecture/`](./docs/ar
 **Quick Reading Order:**
 
 1. 🌟 **[MASTER_SPEC.md](./docs/architecture/MASTER_SPEC.md)** - START HERE (overview, decisions, roadmap)
-2. 🏗️ **[TARGET_ARCHITECTURE.md](./docs/architecture/TARGET_ARCHITECTURE.md)** - How to build (serverless patterns)
+2. 🏗️ **[CLOUD_RUN_ARCHITECTURE.md](./docs/architecture/CLOUD_RUN_ARCHITECTURE.md)** - How to build (containerized patterns) ⭐
 3. 🗄️ **[DATA_MODEL.md](./docs/architecture/DATA_MODEL.md)** - Database schema (54 tables)
 4. 📡 **[API_CONTRACTS.md](./docs/architecture/API_CONTRACTS.md)** - 150+ endpoints (request/response)
 5. 🎭 **[BEHAVIOR_SPEC.md](./docs/architecture/BEHAVIOR_SPEC.md)** - Business logic (15 use cases)
@@ -93,12 +110,14 @@ All comprehensive documentation is available in [`docs/architecture/`](./docs/ar
 ## 🏗️ Architecture
 
 ### Current (Laravel/PHP)
+
 - 2 services: xavier-auth + xavier-api
 - PHP 8.1 + Laravel 10
 - MySQL (2 databases)
 - Redis (session caching)
 
 ### Target (Node.js Serverless)
+
 - 10 serverless functions (domain-based)
 - Node.js 18 + TypeScript 5
 - PostgreSQL (managed: RDS/Cloud SQL)
@@ -111,20 +130,21 @@ All comprehensive documentation is available in [`docs/architecture/`](./docs/ar
 
 ## 📈 Key Stats
 
-| Metric | Value |
-|--------|-------|
-| **API Endpoints** | 150+ |
-| **Database Tables** | 54 |
-| **Use Cases** | 15 |
-| **Functions** | 10 |
-| **Domains** | 10 |
-| **Documentation** | ~175 KB |
+| Metric              | Value   |
+| ------------------- | ------- |
+| **API Endpoints**   | 150+    |
+| **Database Tables** | 54      |
+| **Use Cases**       | 15      |
+| **Functions**       | 10      |
+| **Domains**         | 10      |
+| **Documentation**   | ~175 KB |
 
 ---
 
 ## 🛠️ Tech Stack
 
 ### Backend
+
 - Node.js 18 (LTS)
 - TypeScript 5
 - PostgreSQL
@@ -132,6 +152,7 @@ All comprehensive documentation is available in [`docs/architecture/`](./docs/ar
 - AWS Lambda / Google Cloud Functions
 
 ### Key Libraries
+
 - `pg` - PostgreSQL client
 - `ioredis` - Redis client
 - `jsonwebtoken` - JWT auth
@@ -140,6 +161,7 @@ All comprehensive documentation is available in [`docs/architecture/`](./docs/ar
 - `esbuild` - Bundling
 
 ### Infrastructure
+
 - Terraform (IaC)
 - GitHub Actions (CI/CD)
 - Docker (local dev)
@@ -149,29 +171,35 @@ All comprehensive documentation is available in [`docs/architecture/`](./docs/ar
 ## 📅 Implementation Roadmap
 
 ### Phase 1: Foundation (Week 1-2)
+
 - Repository setup
 - Shared modules (config, logger, database)
 - Local dev environment
 - Database migrations
 
 ### Phase 2: Auth Function (Week 3)
+
 - Registration, login, verification
 - Token management
 - Email queue
 
 ### Phase 3: Core Functions (Week 4-6)
+
 - Activity, Habit, Todo functions
 - Business logic implementation
 
 ### Phase 4: Finance (Week 7-8)
+
 - Wallet function
 - Balance consistency
 - Budget tracking
 
 ### Phase 5: Remaining (Week 9-10)
+
 - Shopping, Routine, Learning, Course, Sleep
 
 ### Phase 6: Production (Week 11-12)
+
 - Infrastructure setup
 - Testing, security audit
 - Deployment, monitoring
@@ -181,16 +209,19 @@ All comprehensive documentation is available in [`docs/architecture/`](./docs/ar
 ## ✅ Success Criteria
 
 ### Functional
+
 - ✅ All 150+ endpoints migrated
 - ✅ Business logic preserved
 - ✅ Zero data loss
 
 ### Non-Functional
+
 - ✅ p95 latency < 500ms
 - ✅ Error rate < 0.1%
 - ✅ 99.9% uptime
 
 ### Quality
+
 - ✅ 80%+ test coverage
 - ✅ Zero critical vulnerabilities
 - ✅ Complete documentation
@@ -212,6 +243,7 @@ This project is in the architecture/planning phase. Implementation will begin so
 ## 📞 Contact
 
 For questions or clarifications, refer to the "Open Questions" section in:
+
 - [MASTER_SPEC.md](./docs/architecture/MASTER_SPEC.md)
 - [BEHAVIOR_SPEC.md](./docs/architecture/BEHAVIOR_SPEC.md)
 

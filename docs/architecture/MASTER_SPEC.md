@@ -5,7 +5,8 @@
 This document provides a complete, implementation-ready blueprint to rebuild the **Xavier Personal Productivity System** from Laravel/PHP to **Node.js Serverless Architecture**.
 
 **Current System**: 2 Laravel services (xavier-auth + xavier-api) with 150+ REST endpoints  
-**Target System**: 10 serverless functions + PostgreSQL + Redis + Queue
+**Target System (Recommended)**: Single containerized service on Google Cloud Run + PostgreSQL + Redis  
+**Alternative**: 10 serverless functions + PostgreSQL + Redis + Queue
 
 ---
 
@@ -64,32 +65,48 @@ All specifications are in `/xavier-api/outputs/instruments/`:
    - State machines
    - Edge cases and invariants
 
-6. **TARGET_ARCHITECTURE.md**
-   - Serverless architecture design
+6. **CLOUD_RUN_ARCHITECTURE.md** ⭐ **RECOMMENDED**
+   - Google Cloud Run container deployment
+   - Single unified HTTP server architecture
+   - Dockerfile and infrastructure
+   - Database and Redis connection strategies
+   - CI/CD pipelines
+   - Cost optimization (~$60/month)
+
+7. **TARGET_ARCHITECTURE.md** (Alternative)
+   - Multi-function serverless design
    - 10 function boundaries
    - Database strategy (PostgreSQL + PgBouncer)
    - Auth strategy (JWT + Redis)
    - Queue processing
-   - Cost optimization
+   - Cost optimization (~$28/month AWS)
    - Observability
 
-7. **ROUTING_AND_FUNCTIONS.md**
+8. **ROUTING_AND_FUNCTIONS.md**
    - API Gateway configuration
    - Function-level routing
    - Middleware chain
    - Internal routers
 
-8. **IMPLEMENTATION_BLUEPRINT_PART1.md**
+9. **IMPLEMENTATION_BLUEPRINT_PART1.md**
    - Repository structure
    - Runtime decisions
    - Key dependencies
    - Shared module specifications
+
+10. **CLOUD_RUN_IMPLEMENTATION.md** ⭐ **PRACTICAL GUIDE**
+    - Concrete code examples for Cloud Run
+    - Project structure
+    - Core implementation files
+    - Controller and middleware examples
+    - TypeScript configuration
 
 ---
 
 ## Features Overview
 
 ### User Management & Auth
+
 - Email/password registration
 - Email verification (6-digit OTP)
 - JWT access tokens (1h expiration)
@@ -98,6 +115,7 @@ All specifications are in `/xavier-api/outputs/instruments/`:
 - Multi-device support
 
 ### Activity Tracking
+
 - Customizable categories (work, rest, learning, etc.)
 - Time tracking with start/end times
 - Follow-ups can span multiple days
@@ -105,6 +123,7 @@ All specifications are in `/xavier-api/outputs/instruments/`:
 - User-owned data
 
 ### Habit Tracking
+
 - 4 tracking modes: counter, timer, incremental, decremental
 - Daily goals (quantity, time, repetitions)
 - Streak calculation (current and max)
@@ -114,6 +133,7 @@ All specifications are in `/xavier-api/outputs/instruments/`:
 - Story/journal entries
 
 ### Todo Management
+
 - Nested lists and categories
 - Subtasks with independent completion
 - Recurring tasks (via frequencies)
@@ -122,6 +142,7 @@ All specifications are in `/xavier-api/outputs/instruments/`:
 - Bulk operations
 
 ### Wallet & Finance
+
 - Multiple wallets per user
 - Income and expense tracking
 - Double-entry accounting (debit/credit)
@@ -132,6 +153,7 @@ All specifications are in `/xavier-api/outputs/instruments/`:
 - Period-based organization
 
 ### Shopping
+
 - Multiple shopping lists
 - Item categorization
 - Quantity and price tracking
@@ -139,23 +161,27 @@ All specifications are in `/xavier-api/outputs/instruments/`:
 - Estimated vs actual cost comparison
 
 ### Routines
+
 - Reusable activity templates
 - Timed sequences
 - Active routine designation
 - Order management
 
 ### Learning
+
 - Resource categorization
 - Multi-tag support
 - Programming language organization
 - Topic types (framework, library, concept, tool)
 
 ### Courses
+
 - Lesson progress tracking
 - Daily follow-ups
 - Percentage calculation
 
 ### Sleep Tracking
+
 - Hours and minutes
 - Quality rating (1-5 scale)
 - One entry per day constraint
@@ -240,30 +266,35 @@ All specifications are in `/xavier-api/outputs/instruments/`:
 ## Key Technical Decisions
 
 ### Why Serverless?
+
 - **Auto-scaling**: Handle traffic spikes without provisioning
 - **Cost-effective**: Pay only for actual invocations
 - **Reduced ops**: No server management
 - **Fast iteration**: Deploy individual functions
 
 ### Why PostgreSQL over MySQL?
+
 - Native UUID types
 - Better JSON support (JSONB)
 - Superior connection pooling (PgBouncer)
 - Better Node.js ecosystem
 
 ### Why Domain Functions over Route Functions?
+
 - Shared warm instances (fewer cold starts)
 - Code reuse within domain
 - Manageable count (10 vs 150+)
 - Clear boundaries
 
 ### Why No ORM?
+
 - Raw SQL for performance
 - Full control over queries
 - Avoid N+1 query issues
 - Smaller bundle sizes
 
 ### Why Zod for Validation?
+
 - TypeScript-first
 - Runtime type checking
 - Clear error messages
@@ -274,6 +305,7 @@ All specifications are in `/xavier-api/outputs/instruments/`:
 ## Implementation Roadmap
 
 ### Phase 1: Foundation (Week 1-2)
+
 - [ ] Set up repository structure
 - [ ] Implement shared modules (config, logger, errors, database)
 - [ ] Set up local dev environment (Docker Compose)
@@ -281,6 +313,7 @@ All specifications are in `/xavier-api/outputs/instruments/`:
 - [ ] Set up CI/CD pipeline (GitHub Actions)
 
 ### Phase 2: Auth Function (Week 3)
+
 - [ ] Implement registration endpoint
 - [ ] Implement login endpoint
 - [ ] Implement email verification
@@ -290,6 +323,7 @@ All specifications are in `/xavier-api/outputs/instruments/`:
 - [ ] Deploy to dev environment
 
 ### Phase 3: Core Functions (Week 4-6)
+
 - [ ] Implement Activity function
 - [ ] Implement Habit function (with streak logic)
 - [ ] Implement Todo function
@@ -297,6 +331,7 @@ All specifications are in `/xavier-api/outputs/instruments/`:
 - [ ] Deploy to staging
 
 ### Phase 4: Finance Functions (Week 7-8)
+
 - [ ] Implement Wallet function
 - [ ] Wallet balance transaction logic
 - [ ] Budget tracking
@@ -304,6 +339,7 @@ All specifications are in `/xavier-api/outputs/instruments/`:
 - [ ] Test balance consistency
 
 ### Phase 5: Remaining Functions (Week 9-10)
+
 - [ ] Implement Shopping function
 - [ ] Implement Routine function
 - [ ] Implement Learning function
@@ -311,6 +347,7 @@ All specifications are in `/xavier-api/outputs/instruments/`:
 - [ ] Implement Sleep function
 
 ### Phase 6: Production Deployment (Week 11-12)
+
 - [ ] Set up production infrastructure (Terraform)
 - [ ] Performance testing
 - [ ] Security audit
@@ -324,6 +361,7 @@ All specifications are in `/xavier-api/outputs/instruments/`:
 ## Testing Strategy
 
 ### Unit Tests
+
 - All handler functions
 - Business logic (streak calculation, balance updates)
 - Validators
@@ -332,12 +370,14 @@ All specifications are in `/xavier-api/outputs/instruments/`:
 **Coverage Target**: 80%+
 
 ### Integration Tests
+
 - Database operations
 - Redis caching
 - Queue publishing
 - Auth middleware
 
 ### End-to-End Tests
+
 - Complete user flows (register → verify → login → create data)
 - Multi-step operations (create expense → check wallet balance)
 - Error scenarios (expired token, invalid input)
@@ -349,17 +389,20 @@ All specifications are in `/xavier-api/outputs/instruments/`:
 ## Deployment Strategy
 
 ### Environments
+
 - **Dev**: Auto-deploy on push to `develop`
 - **Staging**: Auto-deploy on push to `staging`
 - **Production**: Manual approval + deploy on merge to `main`
 
 ### Rollback Plan
+
 1. Monitor error rate post-deployment
 2. If error rate > 1%, auto-rollback to previous version
 3. Manual rollback command available
 4. Traffic shift allows gradual migration
 
 ### Infrastructure as Code
+
 - **Tool**: Terraform
 - **Modules**: Functions, database, Redis, queue, API Gateway, secrets, monitoring
 - **State**: Remote (S3/GCS)
@@ -386,12 +429,14 @@ All specifications are in `/xavier-api/outputs/instruments/`:
 ## Observability
 
 ### Logging
+
 - **Format**: Structured JSON (pino)
 - **Fields**: timestamp, level, message, traceId, userId, duration, error
 - **Destination**: CloudWatch Logs / Cloud Logging
 - **Retention**: 30 days
 
 ### Metrics
+
 - Request count (by function, endpoint, status code)
 - Request duration (p50, p95, p99)
 - Error rate
@@ -400,11 +445,13 @@ All specifications are in `/xavier-api/outputs/instruments/`:
 - Redis hit rate
 
 ### Tracing
+
 - **Tool**: OpenTelemetry / AWS X-Ray
 - **Propagation**: X-Trace-Id header
 - **Spans**: Function execution, DB queries, Redis calls, queue publish
 
 ### Alerts
+
 - Error rate > 1% (5 min window) → Page on-call
 - p95 latency > 2s → Slack notification
 - Database connection errors → Page on-call
@@ -416,15 +463,15 @@ All specifications are in `/xavier-api/outputs/instruments/`:
 
 ### AWS Example (100K requests/month)
 
-| Service | Usage | Cost/Month |
-|---------|-------|------------|
-| Lambda (10 functions) | 100K invocations @ 512MB, 500ms | $0.44 |
-| API Gateway | 100K requests | $0.35 |
-| RDS PostgreSQL (t3.micro) | 24/7 uptime | $15.00 |
-| ElastiCache Redis (t3.micro) | 24/7 uptime | $12.00 |
-| SQS | 100K messages | $0.04 |
-| CloudWatch Logs | 1GB ingestion | $0.50 |
-| **Total** | | **~$28.50** |
+| Service                      | Usage                           | Cost/Month  |
+| ---------------------------- | ------------------------------- | ----------- |
+| Lambda (10 functions)        | 100K invocations @ 512MB, 500ms | $0.44       |
+| API Gateway                  | 100K requests                   | $0.35       |
+| RDS PostgreSQL (t3.micro)    | 24/7 uptime                     | $15.00      |
+| ElastiCache Redis (t3.micro) | 24/7 uptime                     | $12.00      |
+| SQS                          | 100K messages                   | $0.04       |
+| CloudWatch Logs              | 1GB ingestion                   | $0.50       |
+| **Total**                    |                                 | **~$28.50** |
 
 **Scaling**: Linear with requests until ~500K/month, then DB may need upgrade.
 
@@ -448,6 +495,7 @@ All specifications are in `/xavier-api/outputs/instruments/`:
 ## Success Criteria
 
 ### Functional
+
 - [ ] All 150+ endpoints migrated
 - [ ] All business logic preserved (especially streak calculation, balance updates)
 - [ ] Data migration completed without loss
@@ -455,6 +503,7 @@ All specifications are in `/xavier-api/outputs/instruments/`:
 - [ ] Email verification works
 
 ### Non-Functional
+
 - [ ] p95 latency < 500ms (improvement over Laravel)
 - [ ] Error rate < 0.1%
 - [ ] 99.9% uptime
@@ -462,6 +511,7 @@ All specifications are in `/xavier-api/outputs/instruments/`:
 - [ ] Cold start < 1s for 90% of requests
 
 ### Quality
+
 - [ ] 80%+ test coverage
 - [ ] Zero critical security vulnerabilities
 - [ ] All endpoints documented
@@ -473,11 +523,13 @@ All specifications are in `/xavier-api/outputs/instruments/`:
 ## Team Recommendations
 
 ### Minimum Viable Team
+
 - **1 Backend Developer** (Node.js, TypeScript, serverless)
 - **1 DevOps Engineer** (Terraform, CI/CD, cloud)
 - **0.5 QA Engineer** (Testing automation)
 
 ### Skills Required
+
 - Node.js & TypeScript proficiency
 - SQL & database design
 - Serverless architecture patterns
@@ -487,6 +539,7 @@ All specifications are in `/xavier-api/outputs/instruments/`:
 - Testing frameworks (Jest)
 
 ### Timeline
+
 - **Minimum**: 12 weeks (1 person full-time)
 - **Recommended**: 8 weeks (2 people)
 - **Aggressive**: 6 weeks (3 people)
@@ -514,9 +567,9 @@ An AI or development team can use these documents to implement the system end-to
 
 ## Document Revision History
 
-| Version | Date | Author | Changes |
-|---------|------|--------|---------|
-| 1.0 | 2026-01-29 | GitHub Copilot | Initial complete specification |
+| Version | Date       | Author         | Changes                        |
+| ------- | ---------- | -------------- | ------------------------------ |
+| 1.0     | 2026-01-29 | GitHub Copilot | Initial complete specification |
 
 ---
 
