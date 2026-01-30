@@ -13,39 +13,40 @@ export interface RefreshTokenPayload {
   sub: string; // user_id
   iat: number;
   exp: number;
+  jti: string; // token_id (added)
   type: 'refresh';
 }
 
-export function generateAccessToken(userId: number, email: string): string {
-  const payload = {
-    sub: userId.toString(),
-    email,
-    jti: `${userId}_${Date.now()}`, // Unique token ID
+export function generateAccessToken(params: {
+  sub: string;
+  email: string;
+  jti: string;
+}): string {
+  const payload: Partial<JWTPayload> = {
+    sub: params.sub,
+    email: params.email,
+    jti: params.jti,
   };
 
-  const expiresIn = parseInt(process.env.JWT_ACCESS_EXPIRATION || '3600', 10);
-
-  return jwt.sign(payload, process.env.JWT_SECRET!, {
-    expiresIn,
+  return jwt.sign(payload, process.env.JWT_ACCESS_SECRET!, {
+    expiresIn: process.env.JWT_ACCESS_EXPIRES_IN || '15m',
   });
 }
 
-export function generateRefreshToken(userId: number): string {
-  const payload = {
-    sub: userId.toString(),
+export function generateRefreshToken(params: { sub: string; jti: string }): string {
+  const payload: Partial<RefreshTokenPayload> = {
+    sub: params.sub,
     type: 'refresh',
   };
 
-  const expiresIn = parseInt(process.env.JWT_REFRESH_EXPIRATION || '2592000', 10);
-
   return jwt.sign(payload, process.env.JWT_REFRESH_SECRET!, {
-    expiresIn,
+    expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
   });
 }
 
 export function verifyAccessToken(token: string): JWTPayload {
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JWTPayload;
+    const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET!) as JWTPayload;
     return decoded;
   } catch (error) {
     if (error instanceof jwt.TokenExpiredError) {

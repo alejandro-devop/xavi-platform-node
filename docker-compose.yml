@@ -68,6 +68,8 @@ services:
       LOG_LEVEL: debug
     volumes:
       - ./src:/app/src
+      - ./scripts:/app/scripts
+      - ./migrations:/app/migrations
       - ./tsconfig.json:/app/tsconfig.json
       - /app/node_modules
     depends_on:
