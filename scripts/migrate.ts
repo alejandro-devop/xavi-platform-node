@@ -33,9 +33,7 @@ async function runMigrations() {
     const migrationFiles = files.filter((f) => f.endsWith('.sql')).sort();
 
     // Check which migrations have been executed
-    const { rows: executedMigrations } = await pool.query(
-      'SELECT name FROM migrations'
-    );
+    const { rows: executedMigrations } = await pool.query('SELECT name FROM migrations');
     const executedNames = new Set(executedMigrations.map((r) => r.name));
 
     // Run pending migrations

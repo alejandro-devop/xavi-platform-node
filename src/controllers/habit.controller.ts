@@ -12,26 +12,36 @@ export async function createHabit(req: Request, res: Response): Promise<void> {
     `INSERT INTO habits (user_id, name, description, frequency, target_count, icon, color)
      VALUES ($1, $2, $3, $4, $5, $6, $7)
      RETURNING id, user_id, name, description, frequency, target_count, icon, color, is_active, created_at, updated_at`,
-    [userId, name, description || null, frequency || 'daily', targetCount || 1, icon || null, color || null]
+    [
+      userId,
+      name,
+      description || null,
+      frequency || 'daily',
+      targetCount || 1,
+      icon || null,
+      color || null,
+    ]
   );
 
   const habit = result.rows[0];
 
-  res.status(201).json(successResponse({
-    habit: {
-      id: habit.id,
-      userId: habit.user_id,
-      name: habit.name,
-      description: habit.description,
-      frequency: habit.frequency,
-      targetCount: habit.target_count,
-      icon: habit.icon,
-      color: habit.color,
-      isActive: habit.is_active,
-      createdAt: habit.created_at,
-      updatedAt: habit.updated_at,
-    },
-  }));
+  res.status(201).json(
+    successResponse({
+      habit: {
+        id: habit.id,
+        userId: habit.user_id,
+        name: habit.name,
+        description: habit.description,
+        frequency: habit.frequency,
+        targetCount: habit.target_count,
+        icon: habit.icon,
+        color: habit.color,
+        isActive: habit.is_active,
+        createdAt: habit.created_at,
+        updatedAt: habit.updated_at,
+      },
+    })
+  );
 }
 
 export async function getHabits(req: Request, res: Response): Promise<void> {
@@ -94,21 +104,23 @@ export async function getHabitById(req: Request, res: Response): Promise<void> {
     throw new ForbiddenError('You do not have permission to access this habit');
   }
 
-  res.json(successResponse({
-    habit: {
-      id: habit.id,
-      userId: habit.user_id,
-      name: habit.name,
-      description: habit.description,
-      frequency: habit.frequency,
-      targetCount: habit.target_count,
-      icon: habit.icon,
-      color: habit.color,
-      isActive: habit.is_active,
-      createdAt: habit.created_at,
-      updatedAt: habit.updated_at,
-    },
-  }));
+  res.json(
+    successResponse({
+      habit: {
+        id: habit.id,
+        userId: habit.user_id,
+        name: habit.name,
+        description: habit.description,
+        frequency: habit.frequency,
+        targetCount: habit.target_count,
+        icon: habit.icon,
+        color: habit.color,
+        isActive: habit.is_active,
+        createdAt: habit.created_at,
+        updatedAt: habit.updated_at,
+      },
+    })
+  );
 }
 
 export async function updateHabit(req: Request, res: Response): Promise<void> {
@@ -117,7 +129,9 @@ export async function updateHabit(req: Request, res: Response): Promise<void> {
   const userId = req.user!.id;
   const db = getDbPool();
 
-  const checkResult = await db.query('SELECT user_id FROM habits WHERE id = $1', [parseInt(id, 10)]);
+  const checkResult = await db.query('SELECT user_id FROM habits WHERE id = $1', [
+    parseInt(id, 10),
+  ]);
 
   if (checkResult.rows.length === 0) {
     throw new NotFoundError('Habit not found');
@@ -185,21 +199,23 @@ export async function updateHabit(req: Request, res: Response): Promise<void> {
 
   const habit = result.rows[0];
 
-  res.json(successResponse({
-    habit: {
-      id: habit.id,
-      userId: habit.user_id,
-      name: habit.name,
-      description: habit.description,
-      frequency: habit.frequency,
-      targetCount: habit.target_count,
-      icon: habit.icon,
-      color: habit.color,
-      isActive: habit.is_active,
-      createdAt: habit.created_at,
-      updatedAt: habit.updated_at,
-    },
-  }));
+  res.json(
+    successResponse({
+      habit: {
+        id: habit.id,
+        userId: habit.user_id,
+        name: habit.name,
+        description: habit.description,
+        frequency: habit.frequency,
+        targetCount: habit.target_count,
+        icon: habit.icon,
+        color: habit.color,
+        isActive: habit.is_active,
+        createdAt: habit.created_at,
+        updatedAt: habit.updated_at,
+      },
+    })
+  );
 }
 
 export async function deleteHabit(req: Request, res: Response): Promise<void> {
@@ -207,7 +223,9 @@ export async function deleteHabit(req: Request, res: Response): Promise<void> {
   const userId = req.user!.id;
   const db = getDbPool();
 
-  const checkResult = await db.query('SELECT user_id FROM habits WHERE id = $1', [parseInt(id, 10)]);
+  const checkResult = await db.query('SELECT user_id FROM habits WHERE id = $1', [
+    parseInt(id, 10),
+  ]);
 
   if (checkResult.rows.length === 0) {
     throw new NotFoundError('Habit not found');
@@ -219,9 +237,11 @@ export async function deleteHabit(req: Request, res: Response): Promise<void> {
 
   await db.query('DELETE FROM habits WHERE id = $1', [parseInt(id, 10)]);
 
-  res.json(successResponse({
-    message: 'Habit deleted successfully',
-  }));
+  res.json(
+    successResponse({
+      message: 'Habit deleted successfully',
+    })
+  );
 }
 
 export async function logHabitCompletion(req: Request, res: Response): Promise<void> {
@@ -231,7 +251,9 @@ export async function logHabitCompletion(req: Request, res: Response): Promise<v
   const db = getDbPool();
 
   // Verify habit ownership
-  const habitResult = await db.query('SELECT user_id FROM habits WHERE id = $1', [parseInt(id, 10)]);
+  const habitResult = await db.query('SELECT user_id FROM habits WHERE id = $1', [
+    parseInt(id, 10),
+  ]);
 
   if (habitResult.rows.length === 0) {
     throw new NotFoundError('Habit not found');
@@ -262,16 +284,18 @@ export async function logHabitCompletion(req: Request, res: Response): Promise<v
 
   const log = result.rows[0];
 
-  res.status(201).json(successResponse({
-    log: {
-      id: log.id,
-      habitId: log.habit_id,
-      completedDate: log.completed_date,
-      count: log.count,
-      notes: log.notes,
-      createdAt: log.created_at,
-    },
-  }));
+  res.status(201).json(
+    successResponse({
+      log: {
+        id: log.id,
+        habitId: log.habit_id,
+        completedDate: log.completed_date,
+        count: log.count,
+        notes: log.notes,
+        createdAt: log.created_at,
+      },
+    })
+  );
 }
 
 export async function getHabitLogs(req: Request, res: Response): Promise<void> {
@@ -281,7 +305,9 @@ export async function getHabitLogs(req: Request, res: Response): Promise<void> {
   const { startDate, endDate, limit = '30' } = req.query;
 
   // Verify habit ownership
-  const habitResult = await db.query('SELECT user_id FROM habits WHERE id = $1', [parseInt(id, 10)]);
+  const habitResult = await db.query('SELECT user_id FROM habits WHERE id = $1', [
+    parseInt(id, 10),
+  ]);
 
   if (habitResult.rows.length === 0) {
     throw new NotFoundError('Habit not found');
@@ -330,7 +356,9 @@ export async function getHabitStats(req: Request, res: Response): Promise<void> 
   const db = getDbPool();
 
   // Verify habit ownership
-  const habitResult = await db.query('SELECT user_id FROM habits WHERE id = $1', [parseInt(id, 10)]);
+  const habitResult = await db.query('SELECT user_id FROM habits WHERE id = $1', [
+    parseInt(id, 10),
+  ]);
 
   if (habitResult.rows.length === 0) {
     throw new NotFoundError('Habit not found');
@@ -359,7 +387,7 @@ export async function getHabitStats(req: Request, res: Response): Promise<void> 
   if (streakResult.rows.length > 0) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
 
@@ -369,12 +397,14 @@ export async function getHabitStats(req: Request, res: Response): Promise<void> 
     // Check if logged today or yesterday
     if (checkDate.getTime() === today.getTime() || checkDate.getTime() === yesterday.getTime()) {
       currentStreak = 1;
-      
+
       for (let i = 1; i < streakResult.rows.length; i++) {
         const prevDate = new Date(streakResult.rows[i - 1].completed_date);
         const currDate = new Date(streakResult.rows[i].completed_date);
-        const diffDays = Math.floor((prevDate.getTime() - currDate.getTime()) / (1000 * 60 * 60 * 24));
-        
+        const diffDays = Math.floor(
+          (prevDate.getTime() - currDate.getTime()) / (1000 * 60 * 60 * 24)
+        );
+
         if (diffDays === 1) {
           currentStreak++;
         } else {
@@ -392,12 +422,14 @@ export async function getHabitStats(req: Request, res: Response): Promise<void> 
     [parseInt(id, 10)]
   );
 
-  res.json(successResponse({
-    stats: {
-      totalCompletions: parseInt(totalResult.rows[0].total, 10),
-      totalCount: parseInt(totalResult.rows[0].total_count || '0', 10),
-      currentStreak,
-      last30Days: parseInt(last30DaysResult.rows[0].count, 10),
-    },
-  }));
+  res.json(
+    successResponse({
+      stats: {
+        totalCompletions: parseInt(totalResult.rows[0].total, 10),
+        totalCount: parseInt(totalResult.rows[0].total_count || '0', 10),
+        currentStreak,
+        last30Days: parseInt(last30DaysResult.rows[0].count, 10),
+      },
+    })
+  );
 }

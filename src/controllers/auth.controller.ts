@@ -4,12 +4,7 @@ import { hashPassword, comparePassword } from '../shared/utils/password';
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../shared/utils/jwt';
 import { generateOTP, encodeOTP } from '../shared/utils/otp';
 import { successResponse, errorResponse } from '../shared/utils/response';
-import { 
-  UnauthorizedError, 
-  ConflictError, 
-  NotFoundError, 
-  BadRequestError 
-} from '../shared/errors';
+import { UnauthorizedError, ConflictError, NotFoundError, BadRequestError } from '../shared/errors';
 import { v4 as uuidv4 } from 'uuid';
 
 export async function register(req: Request, res: Response): Promise<void> {
@@ -18,7 +13,7 @@ export async function register(req: Request, res: Response): Promise<void> {
 
   // Check if user already exists
   const existingUser = await db.query('SELECT id FROM users WHERE email = $1', [email]);
-  
+
   if (existingUser.rows.length > 0) {
     throw new ConflictError('User already exists with this email');
   }
@@ -105,16 +100,18 @@ export async function login(req: Request, res: Response): Promise<void> {
     [user.id, refreshToken, refreshJti, refreshExpiresAt]
   );
 
-  res.json(successResponse({
-    accessToken,
-    refreshToken,
-    user: {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      isAccountVerified: user.is_account_verified,
-    },
-  }));
+  res.json(
+    successResponse({
+      accessToken,
+      refreshToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        isAccountVerified: user.is_account_verified,
+      },
+    })
+  );
 }
 
 export async function verifyEmail(req: Request, res: Response): Promise<void> {
@@ -155,9 +152,11 @@ export async function verifyEmail(req: Request, res: Response): Promise<void> {
     [user.id]
   );
 
-  res.json(successResponse({
-    message: 'Email verified successfully',
-  }));
+  res.json(
+    successResponse({
+      message: 'Email verified successfully',
+    })
+  );
 }
 
 export async function refreshAccessToken(req: Request, res: Response): Promise<void> {
@@ -194,15 +193,17 @@ export async function refreshAccessToken(req: Request, res: Response): Promise<v
     jti: newJti,
   });
 
-  res.json(successResponse({
-    accessToken,
-    user: {
-      id: tokenRecord.user_id,
-      email: tokenRecord.email,
-      name: tokenRecord.name,
-      isAccountVerified: tokenRecord.is_account_verified,
-    },
-  }));
+  res.json(
+    successResponse({
+      accessToken,
+      user: {
+        id: tokenRecord.user_id,
+        email: tokenRecord.email,
+        name: tokenRecord.name,
+        isAccountVerified: tokenRecord.is_account_verified,
+      },
+    })
+  );
 }
 
 export async function logout(req: Request, res: Response): Promise<void> {
@@ -217,24 +218,27 @@ export async function logout(req: Request, res: Response): Promise<void> {
     const payload = verifyRefreshToken(refreshToken);
 
     // Revoke the refresh token
-    await db.query(
-      'UPDATE refresh_tokens SET is_revoked = TRUE WHERE jti = $1',
-      [payload.jti]
-    );
+    await db.query('UPDATE refresh_tokens SET is_revoked = TRUE WHERE jti = $1', [payload.jti]);
 
-    res.json(successResponse({
-      message: 'Logged out successfully',
-    }));
+    res.json(
+      successResponse({
+        message: 'Logged out successfully',
+      })
+    );
   } catch (error) {
     // Even if token is invalid, return success
-    res.json(successResponse({
-      message: 'Logged out successfully',
-    }));
+    res.json(
+      successResponse({
+        message: 'Logged out successfully',
+      })
+    );
   }
 }
 
 export async function getProfile(req: Request, res: Response): Promise<void> {
-  res.json(successResponse({
-    user: req.user,
-  }));
+  res.json(
+    successResponse({
+      user: req.user,
+    })
+  );
 }

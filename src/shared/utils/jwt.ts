@@ -17,11 +17,7 @@ export interface RefreshTokenPayload {
   type: 'refresh';
 }
 
-export function generateAccessToken(params: {
-  sub: string;
-  email: string;
-  jti: string;
-}): string {
+export function generateAccessToken(params: { sub: string; email: string; jti: string }): string {
   const payload: Partial<JWTPayload> = {
     sub: params.sub,
     email: params.email,

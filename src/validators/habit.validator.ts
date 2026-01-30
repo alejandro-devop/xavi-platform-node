@@ -48,7 +48,10 @@ export const getHabitsSchema = z.object({
 
 export const logHabitSchema = z.object({
   body: z.object({
-    completedDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format (use YYYY-MM-DD)').optional(),
+    completedDate: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format (use YYYY-MM-DD)')
+      .optional(),
     count: z.number().int().min(1).optional(),
     notes: z.string().optional(),
   }),
@@ -62,8 +65,14 @@ export const getHabitLogsSchema = z.object({
     id: z.string().regex(/^\d+$/, 'Invalid ID'),
   }),
   query: z.object({
-    startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
-    endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+    startDate: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/)
+      .optional(),
+    endDate: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/)
+      .optional(),
     limit: z.string().regex(/^\d+$/).optional(),
   }),
 });

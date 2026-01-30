@@ -3,6 +3,7 @@ import healthRoutes from './health';
 import authRoutes from './auth';
 import activityRoutes from './activity';
 import habitRoutes from './habit';
+import todoRoutes from './todo';
 
 const router = Router();
 
@@ -16,6 +17,7 @@ router.use('/auth', authRoutes);
 // Domain routes (all require authentication)
 router.use('/activity', activityRoutes);
 router.use('/habit', habitRoutes);
+router.use('/todo', todoRoutes);
 // router.use('/activity', activityRoutes);
 // router.use('/habit', habitRoutes);
 // router.use('/todo', todoRoutes);

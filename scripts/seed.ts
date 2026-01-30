@@ -18,10 +18,9 @@ async function seed() {
     console.log('🌱 Starting seed...');
 
     // Check if dev user already exists
-    const { rows } = await pool.query(
-      'SELECT id FROM users WHERE email = $1',
-      ['alejandro.devop@gmail.com']
-    );
+    const { rows } = await pool.query('SELECT id FROM users WHERE email = $1', [
+      'alejandro.devop@gmail.com',
+    ]);
 
     if (rows.length > 0) {
       console.log('⏭️  Dev user already exists, skipping');
@@ -30,7 +29,7 @@ async function seed() {
 
     // Create dev user
     const hashedPassword = await hashPassword('jkrules1212');
-    
+
     await pool.query(
       `INSERT INTO users (email, password, name, is_account_verified)
        VALUES ($1, $2, $3, $4)`,
