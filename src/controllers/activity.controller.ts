@@ -12,25 +12,34 @@ export async function createActivity(req: Request, res: Response): Promise<void>
     `INSERT INTO activities (user_id, title, description, status, priority, scheduled_date)
      VALUES ($1, $2, $3, $4, $5, $6)
      RETURNING id, user_id, title, description, status, priority, scheduled_date, completed_at, created_at, updated_at`,
-    [userId, title, description || null, status || 'pending', priority || 'medium', scheduledDate || null]
+    [
+      userId,
+      title,
+      description || null,
+      status || 'pending',
+      priority || 'medium',
+      scheduledDate || null,
+    ]
   );
 
   const activity = result.rows[0];
 
-  res.status(201).json(successResponse({
-    activity: {
-      id: activity.id,
-      userId: activity.user_id,
-      title: activity.title,
-      description: activity.description,
-      status: activity.status,
-      priority: activity.priority,
-      scheduledDate: activity.scheduled_date,
-      completedAt: activity.completed_at,
-      createdAt: activity.created_at,
-      updatedAt: activity.updated_at,
-    },
-  }));
+  res.status(201).json(
+    successResponse({
+      activity: {
+        id: activity.id,
+        userId: activity.user_id,
+        title: activity.title,
+        description: activity.description,
+        status: activity.status,
+        priority: activity.priority,
+        scheduledDate: activity.scheduled_date,
+        completedAt: activity.completed_at,
+        createdAt: activity.created_at,
+        updatedAt: activity.updated_at,
+      },
+    })
+  );
 }
 
 export async function getActivities(req: Request, res: Response): Promise<void> {
@@ -127,15 +136,17 @@ export async function getActivities(req: Request, res: Response): Promise<void> 
     updatedAt: row.updated_at,
   }));
 
-  res.json(successResponse({
-    activities,
-    pagination: {
-      page: pageNum,
-      limit: limitNum,
-      total,
-      totalPages: Math.ceil(total / limitNum),
-    },
-  }));
+  res.json(
+    successResponse({
+      activities,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total,
+        totalPages: Math.ceil(total / limitNum),
+      },
+    })
+  );
 }
 
 export async function getActivityById(req: Request, res: Response): Promise<void> {
@@ -143,10 +154,7 @@ export async function getActivityById(req: Request, res: Response): Promise<void
   const userId = req.user!.id;
   const db = getDbPool();
 
-  const result = await db.query(
-    'SELECT * FROM activities WHERE id = $1',
-    [parseInt(id, 10)]
-  );
+  const result = await db.query('SELECT * FROM activities WHERE id = $1', [parseInt(id, 10)]);
 
   if (result.rows.length === 0) {
     throw new NotFoundError('Activity not found');
@@ -159,20 +167,22 @@ export async function getActivityById(req: Request, res: Response): Promise<void
     throw new ForbiddenError('You do not have permission to access this activity');
   }
 
-  res.json(successResponse({
-    activity: {
-      id: activity.id,
-      userId: activity.user_id,
-      title: activity.title,
-      description: activity.description,
-      status: activity.status,
-      priority: activity.priority,
-      scheduledDate: activity.scheduled_date,
-      completedAt: activity.completed_at,
-      createdAt: activity.created_at,
-      updatedAt: activity.updated_at,
-    },
-  }));
+  res.json(
+    successResponse({
+      activity: {
+        id: activity.id,
+        userId: activity.user_id,
+        title: activity.title,
+        description: activity.description,
+        status: activity.status,
+        priority: activity.priority,
+        scheduledDate: activity.scheduled_date,
+        completedAt: activity.completed_at,
+        createdAt: activity.created_at,
+        updatedAt: activity.updated_at,
+      },
+    })
+  );
 }
 
 export async function updateActivity(req: Request, res: Response): Promise<void> {
@@ -182,10 +192,9 @@ export async function updateActivity(req: Request, res: Response): Promise<void>
   const db = getDbPool();
 
   // Check if activity exists and belongs to user
-  const checkResult = await db.query(
-    'SELECT user_id FROM activities WHERE id = $1',
-    [parseInt(id, 10)]
-  );
+  const checkResult = await db.query('SELECT user_id FROM activities WHERE id = $1', [
+    parseInt(id, 10),
+  ]);
 
   if (checkResult.rows.length === 0) {
     throw new NotFoundError('Activity not found');
@@ -242,20 +251,22 @@ export async function updateActivity(req: Request, res: Response): Promise<void>
 
   const activity = result.rows[0];
 
-  res.json(successResponse({
-    activity: {
-      id: activity.id,
-      userId: activity.user_id,
-      title: activity.title,
-      description: activity.description,
-      status: activity.status,
-      priority: activity.priority,
-      scheduledDate: activity.scheduled_date,
-      completedAt: activity.completed_at,
-      createdAt: activity.created_at,
-      updatedAt: activity.updated_at,
-    },
-  }));
+  res.json(
+    successResponse({
+      activity: {
+        id: activity.id,
+        userId: activity.user_id,
+        title: activity.title,
+        description: activity.description,
+        status: activity.status,
+        priority: activity.priority,
+        scheduledDate: activity.scheduled_date,
+        completedAt: activity.completed_at,
+        createdAt: activity.created_at,
+        updatedAt: activity.updated_at,
+      },
+    })
+  );
 }
 
 export async function deleteActivity(req: Request, res: Response): Promise<void> {
@@ -264,10 +275,9 @@ export async function deleteActivity(req: Request, res: Response): Promise<void>
   const db = getDbPool();
 
   // Check if activity exists and belongs to user
-  const checkResult = await db.query(
-    'SELECT user_id FROM activities WHERE id = $1',
-    [parseInt(id, 10)]
-  );
+  const checkResult = await db.query('SELECT user_id FROM activities WHERE id = $1', [
+    parseInt(id, 10),
+  ]);
 
   if (checkResult.rows.length === 0) {
     throw new NotFoundError('Activity not found');
@@ -279,9 +289,11 @@ export async function deleteActivity(req: Request, res: Response): Promise<void>
 
   await db.query('DELETE FROM activities WHERE id = $1', [parseInt(id, 10)]);
 
-  res.json(successResponse({
-    message: 'Activity deleted successfully',
-  }));
+  res.json(
+    successResponse({
+      message: 'Activity deleted successfully',
+    })
+  );
 }
 
 export async function completeActivity(req: Request, res: Response): Promise<void> {
@@ -290,10 +302,9 @@ export async function completeActivity(req: Request, res: Response): Promise<voi
   const db = getDbPool();
 
   // Check if activity exists and belongs to user
-  const checkResult = await db.query(
-    'SELECT user_id, status FROM activities WHERE id = $1',
-    [parseInt(id, 10)]
-  );
+  const checkResult = await db.query('SELECT user_id, status FROM activities WHERE id = $1', [
+    parseInt(id, 10),
+  ]);
 
   if (checkResult.rows.length === 0) {
     throw new NotFoundError('Activity not found');
@@ -314,18 +325,20 @@ export async function completeActivity(req: Request, res: Response): Promise<voi
 
   const activity = result.rows[0];
 
-  res.json(successResponse({
-    activity: {
-      id: activity.id,
-      userId: activity.user_id,
-      title: activity.title,
-      description: activity.description,
-      status: activity.status,
-      priority: activity.priority,
-      scheduledDate: activity.scheduled_date,
-      completedAt: activity.completed_at,
-      createdAt: activity.created_at,
-      updatedAt: activity.updated_at,
-    },
-  }));
+  res.json(
+    successResponse({
+      activity: {
+        id: activity.id,
+        userId: activity.user_id,
+        title: activity.title,
+        description: activity.description,
+        status: activity.status,
+        priority: activity.priority,
+        scheduledDate: activity.scheduled_date,
+        completedAt: activity.completed_at,
+        createdAt: activity.created_at,
+        updatedAt: activity.updated_at,
+      },
+    })
+  );
 }
