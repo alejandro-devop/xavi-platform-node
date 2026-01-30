@@ -11,7 +11,9 @@ export async function createSleepLog(req: Request, res: Response): Promise<void>
   // Calculate duration
   const bedtimeDate = new Date(bedtime);
   const wakeTimeDate = new Date(wakeTime);
-  const durationMinutes = Math.round((wakeTimeDate.getTime() - bedtimeDate.getTime()) / (1000 * 60));
+  const durationMinutes = Math.round(
+    (wakeTimeDate.getTime() - bedtimeDate.getTime()) / (1000 * 60)
+  );
 
   if (durationMinutes <= 0) {
     throw new BadRequestError('Wake time must be after bedtime');
@@ -21,7 +23,16 @@ export async function createSleepLog(req: Request, res: Response): Promise<void>
     `INSERT INTO sleep_logs (user_id, sleep_date, bedtime, wake_time, duration_minutes, quality, mood_on_waking, notes)
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
      RETURNING id, user_id, sleep_date, bedtime, wake_time, duration_minutes, quality, mood_on_waking, notes, created_at, updated_at`,
-    [userId, sleepDate, bedtime, wakeTime, durationMinutes, quality || null, moodOnWaking || null, notes || null]
+    [
+      userId,
+      sleepDate,
+      bedtime,
+      wakeTime,
+      durationMinutes,
+      quality || null,
+      moodOnWaking || null,
+      notes || null,
+    ]
   );
 
   const log = result.rows[0];
@@ -192,7 +203,9 @@ export async function updateSleepLog(req: Request, res: Response): Promise<void>
     const newWakeTime = wakeTime || checkResult.rows[0].wake_time;
     const bedtimeDate = new Date(newBedtime);
     const wakeTimeDate = new Date(newWakeTime);
-    const durationMinutes = Math.round((wakeTimeDate.getTime() - bedtimeDate.getTime()) / (1000 * 60));
+    const durationMinutes = Math.round(
+      (wakeTimeDate.getTime() - bedtimeDate.getTime()) / (1000 * 60)
+    );
 
     if (durationMinutes <= 0) {
       throw new BadRequestError('Wake time must be after bedtime');

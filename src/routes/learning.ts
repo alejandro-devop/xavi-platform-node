@@ -40,7 +40,15 @@ router.delete('/:id', validate(deleteLearningResourceSchema), asyncHandler(delet
 // ============ LEARNING PROGRESS ROUTES ============
 router.post('/:id/progress', validate(logProgressSchema), asyncHandler(logProgress));
 router.get('/:id/progress', validate(getProgressSessionsSchema), asyncHandler(getProgressSessions));
-router.put('/:id/progress/:sessionId', validate(updateProgressSessionSchema), asyncHandler(updateProgressSession));
-router.delete('/:id/progress/:sessionId', validate(deleteProgressSessionSchema), asyncHandler(deleteProgressSession));
+router.put(
+  '/:id/progress/:sessionId',
+  validate(updateProgressSessionSchema),
+  asyncHandler(updateProgressSession)
+);
+router.delete(
+  '/:id/progress/:sessionId',
+  validate(deleteProgressSessionSchema),
+  asyncHandler(deleteProgressSession)
+);
 
 export default router;

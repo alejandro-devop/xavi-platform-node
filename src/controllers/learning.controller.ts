@@ -6,7 +6,8 @@ import { NotFoundError, ForbiddenError, BadRequestError } from '../shared/errors
 // ============ LEARNING RESOURCES ============
 
 export async function createLearningResource(req: Request, res: Response): Promise<void> {
-  const { title, description, resourceType, url, category, priority, estimatedDurationMinutes } = req.body;
+  const { title, description, resourceType, url, category, priority, estimatedDurationMinutes } =
+    req.body;
   const userId = req.user!.id;
   const db = getDbPool();
 
@@ -14,7 +15,16 @@ export async function createLearningResource(req: Request, res: Response): Promi
     `INSERT INTO learning_resources (user_id, title, description, resource_type, url, category, priority, estimated_duration_minutes)
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
      RETURNING id, user_id, title, description, resource_type, url, category, priority, status, estimated_duration_minutes, created_at, updated_at`,
-    [userId, title, description || null, resourceType, url || null, category || null, priority || 'medium', estimatedDurationMinutes || null]
+    [
+      userId,
+      title,
+      description || null,
+      resourceType,
+      url || null,
+      category || null,
+      priority || 'medium',
+      estimatedDurationMinutes || null,
+    ]
   );
 
   const resource = result.rows[0];
@@ -194,7 +204,16 @@ export async function updateLearningResource(req: Request, res: Response): Promi
     throw new ForbiddenError('You do not have permission to update this resource');
   }
 
-  const { title, description, resourceType, url, category, priority, status, estimatedDurationMinutes } = req.body;
+  const {
+    title,
+    description,
+    resourceType,
+    url,
+    category,
+    priority,
+    status,
+    estimatedDurationMinutes,
+  } = req.body;
   const updates: string[] = [];
   const params: any[] = [];
   let paramIndex = 1;
@@ -332,7 +351,7 @@ export async function logProgress(req: Request, res: Response): Promise<void> {
   // Auto-update resource status based on progress
   if (progressPercentage !== undefined) {
     let newStatus = resourceResult.rows[0].status;
-    
+
     if (progressPercentage >= 100 && newStatus !== 'completed') {
       newStatus = 'completed';
     } else if (progressPercentage > 0 && progressPercentage < 100 && newStatus === 'not_started') {

@@ -9,6 +9,7 @@ import shoppingRoutes from './shopping';
 import routineRoutes from './routine';
 import learningRoutes from './learning';
 import sleepRoutes from './sleep';
+import courseRoutes from './course';
 
 const router = Router();
 
@@ -28,5 +29,6 @@ router.use('/shopping', shoppingRoutes);
 router.use('/routine', routineRoutes);
 router.use('/learning', learningRoutes);
 router.use('/sleep', sleepRoutes);
+router.use('/course', courseRoutes);
 
 export default router;

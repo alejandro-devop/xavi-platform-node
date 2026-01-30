@@ -16,7 +16,9 @@ export const createLearningResourceSchema = z.object({
 
 export const getLearningResourcesSchema = z.object({
   query: z.object({
-    resourceType: z.enum(['article', 'video', 'book', 'course', 'podcast', 'tutorial', 'other']).optional(),
+    resourceType: z
+      .enum(['article', 'video', 'book', 'course', 'podcast', 'tutorial', 'other'])
+      .optional(),
     status: z.enum(['not_started', 'in_progress', 'completed', 'archived']).optional(),
     priority: z.enum(['low', 'medium', 'high', 'urgent']).optional(),
     category: z.string().optional(),
@@ -38,7 +40,9 @@ export const updateLearningResourceSchema = z.object({
   body: z.object({
     title: z.string().min(1).max(255).optional(),
     description: z.string().optional(),
-    resourceType: z.enum(['article', 'video', 'book', 'course', 'podcast', 'tutorial', 'other']).optional(),
+    resourceType: z
+      .enum(['article', 'video', 'book', 'course', 'podcast', 'tutorial', 'other'])
+      .optional(),
     url: z.string().url().optional(),
     category: z.string().max(100).optional(),
     priority: z.enum(['low', 'medium', 'high', 'urgent']).optional(),
