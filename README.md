@@ -37,7 +37,23 @@ All comprehensive documentation is available in [`docs/architecture/`](./docs/ar
 
 ## 🚀 Quick Start
 
-### For Developers
+### For AI Code Generators (GitHub Copilot, ChatGPT, Claude)
+
+📖 **[READ THIS FIRST: AI Reading Guide](./docs/architecture/AI_READING_GUIDE.md)** - Complete strategy with examples, gotchas, and workflow
+
+**Quick Reading Order:**
+
+1. 🌟 **[MASTER_SPEC.md](./docs/architecture/MASTER_SPEC.md)** - START HERE (overview, decisions, roadmap)
+2. 🏗️ **[TARGET_ARCHITECTURE.md](./docs/architecture/TARGET_ARCHITECTURE.md)** - How to build (serverless patterns)
+3. 🗄️ **[DATA_MODEL.md](./docs/architecture/DATA_MODEL.md)** - Database schema (54 tables)
+4. 📡 **[API_CONTRACTS.md](./docs/architecture/API_CONTRACTS.md)** - 150+ endpoints (request/response)
+5. 🎭 **[BEHAVIOR_SPEC.md](./docs/architecture/BEHAVIOR_SPEC.md)** - Business logic (15 use cases)
+6. 🔀 **[ROUTING_AND_FUNCTIONS.md](./docs/architecture/ROUTING_AND_FUNCTIONS.md)** - Routing & middleware
+7. 📚 Reference as needed: SYSTEM_MAP, STEP1, IMPLEMENTATION_BLUEPRINT
+
+**Why this order?** Context → Architecture → Data → APIs → Logic → Implementation
+
+### For Human Developers
 
 1. **Read** [MASTER_SPEC.md](./docs/architecture/MASTER_SPEC.md) - Complete overview
 2. **Study** [TARGET_ARCHITECTURE.md](./docs/architecture/TARGET_ARCHITECTURE.md) - Serverless design
