@@ -22,6 +22,18 @@ All comprehensive documentation is available in [`docs/architecture/`](./docs/ar
 - **[CLOUD_RUN_ROADMAP.md](./docs/architecture/CLOUD_RUN_ROADMAP.md)** ⭐ - 10-week implementation plan
 - **[CLOUD_RUN_IMPLEMENTATION.md](./docs/architecture/CLOUD_RUN_IMPLEMENTATION.md)** ⭐ - Code examples & patterns
 - **[MASTER_SPEC.md](./docs/architecture/MASTER_SPEC.md)** - Complete overview, timeline, costs
+- **[AI_READING_GUIDE.md](./docs/architecture/AI_READING_GUIDE.md)** - How AI should read docs (with examples)
+
+### 🔥 NEW: GraphQL Implementation (Advanced Features)
+- **[GRAPHQL_OVERVIEW.md](./docs/architecture/GRAPHQL_OVERVIEW.md)** ⭐ - **START HERE** for GraphQL
+  - 15+ exclusive features not in REST API
+  - Wallet module: auto-scheduling, pay/cancel, bulk operations
+  - Habits: auto-streak calculation, archiving
+  - Complete differences analysis
+- **[GRAPHQL_SCHEMA_COMPLETE.md](./docs/architecture/GRAPHQL_SCHEMA_COMPLETE.md)** - All 101 operations (22 queries + 79 mutations)
+- **[GRAPHQL_IMPLEMENTATION_NODE.md](./docs/architecture/GRAPHQL_IMPLEMENTATION_NODE_PART1.md)** - Node.js implementation guide
+
+**⚠️ IMPORTANT**: The GraphQL API has significantly more features than REST, especially in Wallet module. See GRAPHQL_OVERVIEW.md for details.
 
 ### 📊 System Analysis (Current Laravel System)
 
@@ -130,6 +142,18 @@ All comprehensive documentation is available in [`docs/architecture/`](./docs/ar
 
 ## 📈 Key Stats
 
+<<<<<<< HEAD
+| Metric | Value |
+|--------|-------|
+| **REST Endpoints** | 150+ |
+| **GraphQL Operations** | 101 (22 queries + 79 mutations) ⭐ |
+| **Total API Operations** | 250+ |
+| **Database Tables** | 54 |
+| **Use Cases** | 15 |
+| **Functions** | 10 REST + 1 GraphQL |
+| **Domains** | 10 |
+| **Documentation** | ~300 KB (incl. GraphQL) |
+=======
 | Metric              | Value   |
 | ------------------- | ------- |
 | **API Endpoints**   | 150+    |
@@ -138,6 +162,7 @@ All comprehensive documentation is available in [`docs/architecture/`](./docs/ar
 | **Functions**       | 10      |
 | **Domains**         | 10      |
 | **Documentation**   | ~175 KB |
+>>>>>>> a834dea8371bf902dcee9a2baa50127553c0e6ae
 
 ---
 
@@ -152,11 +177,19 @@ All comprehensive documentation is available in [`docs/architecture/`](./docs/ar
 - AWS Lambda / Google Cloud Functions
 
 ### Key Libraries
+<<<<<<< HEAD
+- `@apollo/server` - GraphQL server ⭐
+- `graphql` - GraphQL core ⭐
+- `dataloader` - N+1 query prevention ⭐
+=======
 
+>>>>>>> a834dea8371bf902dcee9a2baa50127553c0e6ae
 - `pg` - PostgreSQL client
 - `ioredis` - Redis client
 - `jsonwebtoken` - JWT auth
 - `zod` - Validation
+- `pino` - Logging
+- `esbuild` - Bundling
 - `pino` - Logging
 - `esbuild` - Bundling
 
