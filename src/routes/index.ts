@@ -4,6 +4,7 @@ import authRoutes from './auth';
 import activityRoutes from './activity';
 import habitRoutes from './habit';
 import todoRoutes from './todo';
+import walletRoutes from './wallet';
 
 const router = Router();
 
@@ -18,6 +19,7 @@ router.use('/auth', authRoutes);
 router.use('/activity', activityRoutes);
 router.use('/habit', habitRoutes);
 router.use('/todo', todoRoutes);
+router.use('/wallet', walletRoutes);
 // router.use('/activity', activityRoutes);
 // router.use('/habit', habitRoutes);
 // router.use('/todo', todoRoutes);
