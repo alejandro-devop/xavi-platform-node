@@ -1,7 +1,15 @@
 import { z } from 'zod';
 
 // Valid days of week
-const daysOfWeekEnum = z.enum(['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']);
+const daysOfWeekEnum = z.enum([
+  'monday',
+  'tuesday',
+  'wednesday',
+  'thursday',
+  'friday',
+  'saturday',
+  'sunday',
+]);
 
 // ============ ROUTINES ============
 
@@ -10,7 +18,10 @@ export const createRoutineSchema = z.object({
     name: z.string().min(1).max(255),
     description: z.string().optional(),
     daysOfWeek: z.array(daysOfWeekEnum).optional().default([]),
-    timeOfDay: z.enum(['morning', 'afternoon', 'evening', 'night', 'anytime']).optional().default('anytime'),
+    timeOfDay: z
+      .enum(['morning', 'afternoon', 'evening', 'night', 'anytime'])
+      .optional()
+      .default('anytime'),
   }),
 });
 

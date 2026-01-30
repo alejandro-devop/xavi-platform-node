@@ -40,7 +40,15 @@ router.post('/:id/toggle', validate(toggleRoutineActiveSchema), asyncHandler(tog
 
 // ============ ROUTINE STEP ROUTES ============
 router.post('/:id/steps', validate(createRoutineStepSchema), asyncHandler(createRoutineStep));
-router.put('/:id/steps/:stepId', validate(updateRoutineStepSchema), asyncHandler(updateRoutineStep));
-router.delete('/:id/steps/:stepId', validate(deleteRoutineStepSchema), asyncHandler(deleteRoutineStep));
+router.put(
+  '/:id/steps/:stepId',
+  validate(updateRoutineStepSchema),
+  asyncHandler(updateRoutineStep)
+);
+router.delete(
+  '/:id/steps/:stepId',
+  validate(deleteRoutineStepSchema),
+  asyncHandler(deleteRoutineStep)
+);
 
 export default router;
