@@ -10,8 +10,12 @@ import routineRoutes from './routine';
 import learningRoutes from './learning';
 import sleepRoutes from './sleep';
 import courseRoutes from './course';
+import docsRoutes from './docs';
 
 const router = Router();
+
+// Documentation routes (no auth required)
+router.use('/docs', docsRoutes);
 
 // Health check routes (no auth required)
 router.use('/health', healthRoutes);

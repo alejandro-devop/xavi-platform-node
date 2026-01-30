@@ -14,7 +14,15 @@ export async function createCourse(req: Request, res: Response): Promise<void> {
     `INSERT INTO courses (user_id, title, description, instructor, duration_hours, difficulty, tags)
      VALUES ($1, $2, $3, $4, $5, $6, $7)
      RETURNING id, user_id, title, description, instructor, duration_hours, difficulty, tags, status, created_at, updated_at`,
-    [userId, title, description || null, instructor || null, durationHours || null, difficulty || null, tags || null]
+    [
+      userId,
+      title,
+      description || null,
+      instructor || null,
+      durationHours || null,
+      difficulty || null,
+      tags || null,
+    ]
   );
 
   const course = result.rows[0];
@@ -376,7 +384,10 @@ export async function updateModule(req: Request, res: Response): Promise<void> {
     throw new ForbiddenError('You do not have permission to update this module');
   }
 
-  const checkResult = await db.query('SELECT * FROM course_modules WHERE id = $1 AND course_id = $2', [moduleId, courseId]);
+  const checkResult = await db.query(
+    'SELECT * FROM course_modules WHERE id = $1 AND course_id = $2',
+    [moduleId, courseId]
+  );
 
   if (checkResult.rows.length === 0) {
     throw new NotFoundError('Module not found');
@@ -449,7 +460,10 @@ export async function deleteModule(req: Request, res: Response): Promise<void> {
     throw new ForbiddenError('You do not have permission to delete this module');
   }
 
-  const checkResult = await db.query('SELECT * FROM course_modules WHERE id = $1 AND course_id = $2', [moduleId, courseId]);
+  const checkResult = await db.query(
+    'SELECT * FROM course_modules WHERE id = $1 AND course_id = $2',
+    [moduleId, courseId]
+  );
 
   if (checkResult.rows.length === 0) {
     throw new NotFoundError('Module not found');
@@ -480,7 +494,10 @@ export async function createLesson(req: Request, res: Response): Promise<void> {
   }
 
   // Verify module exists in course
-  const moduleResult = await db.query('SELECT * FROM course_modules WHERE id = $1 AND course_id = $2', [moduleId, courseId]);
+  const moduleResult = await db.query(
+    'SELECT * FROM course_modules WHERE id = $1 AND course_id = $2',
+    [moduleId, courseId]
+  );
 
   if (moduleResult.rows.length === 0) {
     throw new NotFoundError('Module not found in this course');

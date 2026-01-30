@@ -47,16 +47,44 @@ router.delete('/:id', validate(deleteCourseSchema), asyncHandler(deleteCourse));
 
 // Module routes
 router.post('/:courseId/modules', validate(createModuleSchema), asyncHandler(createModule));
-router.put('/:courseId/modules/:moduleId', validate(updateModuleSchema), asyncHandler(updateModule));
-router.delete('/:courseId/modules/:moduleId', validate(deleteModuleSchema), asyncHandler(deleteModule));
+router.put(
+  '/:courseId/modules/:moduleId',
+  validate(updateModuleSchema),
+  asyncHandler(updateModule)
+);
+router.delete(
+  '/:courseId/modules/:moduleId',
+  validate(deleteModuleSchema),
+  asyncHandler(deleteModule)
+);
 
 // Lesson routes
-router.post('/:courseId/modules/:moduleId/lessons', validate(createLessonSchema), asyncHandler(createLesson));
-router.put('/:courseId/modules/:moduleId/lessons/:lessonId', validate(updateLessonSchema), asyncHandler(updateLesson));
-router.delete('/:courseId/modules/:moduleId/lessons/:lessonId', validate(deleteLessonSchema), asyncHandler(deleteLesson));
+router.post(
+  '/:courseId/modules/:moduleId/lessons',
+  validate(createLessonSchema),
+  asyncHandler(createLesson)
+);
+router.put(
+  '/:courseId/modules/:moduleId/lessons/:lessonId',
+  validate(updateLessonSchema),
+  asyncHandler(updateLesson)
+);
+router.delete(
+  '/:courseId/modules/:moduleId/lessons/:lessonId',
+  validate(deleteLessonSchema),
+  asyncHandler(deleteLesson)
+);
 
 // Progress routes
-router.post('/:courseId/lessons/:lessonId/progress', validate(markLessonCompleteSchema), asyncHandler(markLessonComplete));
-router.get('/:courseId/progress', validate(getCourseProgressSchema), asyncHandler(getCourseProgress));
+router.post(
+  '/:courseId/lessons/:lessonId/progress',
+  validate(markLessonCompleteSchema),
+  asyncHandler(markLessonComplete)
+);
+router.get(
+  '/:courseId/progress',
+  validate(getCourseProgressSchema),
+  asyncHandler(getCourseProgress)
+);
 
 export default router;
