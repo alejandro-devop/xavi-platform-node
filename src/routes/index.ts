@@ -5,6 +5,7 @@ import activityRoutes from './activity';
 import habitRoutes from './habit';
 import todoRoutes from './todo';
 import walletRoutes from './wallet';
+import shoppingRoutes from './shopping';
 
 const router = Router();
 
@@ -20,9 +21,7 @@ router.use('/activity', activityRoutes);
 router.use('/habit', habitRoutes);
 router.use('/todo', todoRoutes);
 router.use('/wallet', walletRoutes);
-// router.use('/activity', activityRoutes);
-// router.use('/habit', habitRoutes);
-// router.use('/todo', todoRoutes);
+router.use('/shopping', shoppingRoutes);
 // router.use('/wallet', walletRoutes);
 // router.use('/shopping', shoppingRoutes);
 // router.use('/routine', routineRoutes);
