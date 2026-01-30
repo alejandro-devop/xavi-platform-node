@@ -7,6 +7,8 @@ import todoRoutes from './todo';
 import walletRoutes from './wallet';
 import shoppingRoutes from './shopping';
 import routineRoutes from './routine';
+import learningRoutes from './learning';
+import sleepRoutes from './sleep';
 
 const router = Router();
 
@@ -24,5 +26,7 @@ router.use('/todo', todoRoutes);
 router.use('/wallet', walletRoutes);
 router.use('/shopping', shoppingRoutes);
 router.use('/routine', routineRoutes);
+router.use('/learning', learningRoutes);
+router.use('/sleep', sleepRoutes);
 
 export default router;
