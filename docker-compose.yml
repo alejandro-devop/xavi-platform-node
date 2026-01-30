@@ -1,0 +1,84 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: xavi-postgres
+    environment:
+      POSTGRES_DB: xavi_db
+      POSTGRES_USER: xavi_user
+      POSTGRES_PASSWORD: xavi_password
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U xavi_user -d xavi_db']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: xavi-redis
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: xavi-app
+    ports:
+      - '8080:8080'
+    environment:
+      NODE_ENV: development
+      PORT: 8080
+
+      # Database
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: xavi_db
+      DB_USER: xavi_user
+      DB_PASSWORD: xavi_password
+      DB_MAX_CONNECTIONS: 10
+
+      # Redis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      ENABLE_REDIS_CACHE: 'true'
+
+      # JWT
+      JWT_ACCESS_SECRET: dev-access-secret-change-in-production
+      JWT_REFRESH_SECRET: dev-refresh-secret-change-in-production
+      JWT_ACCESS_EXPIRES_IN: 15m
+      JWT_REFRESH_EXPIRES_IN: 7d
+
+      # CORS
+      CORS_ORIGIN: '*'
+
+      # Logging
+      LOG_LEVEL: debug
+    volumes:
+      - ./src:/app/src
+      - ./scripts:/app/scripts
+      - ./migrations:/app/migrations
+      - ./tsconfig.json:/app/tsconfig.json
+      - /app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: npm run dev
+
+volumes:
+  postgres_data:
+  redis_data:
