@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import healthRoutes from './health';
 import authRoutes from './auth';
+import activityRoutes from './activity';
 
 const router = Router();
 
@@ -10,6 +11,9 @@ router.use('/', healthRoutes); // Also expose at root for Cloud Run
 
 // Auth routes
 router.use('/auth', authRoutes);
+
+// Domain routes (all require authentication)
+router.use('/activity', activityRoutes);
 // router.use('/activity', activityRoutes);
 // router.use('/habit', habitRoutes);
 // router.use('/todo', todoRoutes);
