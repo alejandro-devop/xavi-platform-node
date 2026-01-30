@@ -46,11 +46,11 @@ export async function initializeServices(): Promise<void> {
     logger.info('All services initialized successfully');
   } catch (error) {
     logger.error(
-      { 
+      {
         error,
         errorMessage: error instanceof Error ? error.message : String(error),
-        errorStack: error instanceof Error ? error.stack : undefined
-      }, 
+        errorStack: error instanceof Error ? error.stack : undefined,
+      },
       'Failed to initialize services'
     );
     throw error;
