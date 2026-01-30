@@ -745,7 +745,7 @@ const documentation: ModuleDoc[] = [
 export async function getDocumentation(req: Request, res: Response): Promise<void> {
   // Remove CSP header to allow inline scripts for documentation page
   res.removeHeader('Content-Security-Policy');
-  
+
   const html = `
 <!DOCTYPE html>
 <html lang="en">
