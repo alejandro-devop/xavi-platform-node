@@ -17,18 +17,6 @@ All comprehensive documentation is available in [`docs/architecture/`](./docs/ar
 ### 🌟 Start Here
 - **[README.md](./docs/architecture/README.md)** - Navigation guide for all stakeholders
 - **[MASTER_SPEC.md](./docs/architecture/MASTER_SPEC.md)** - Complete overview, timeline, costs
-- **[AI_READING_GUIDE.md](./docs/architecture/AI_READING_GUIDE.md)** - How AI should read docs (with examples)
-
-### 🔥 NEW: GraphQL Implementation (Advanced Features)
-- **[GRAPHQL_OVERVIEW.md](./docs/architecture/GRAPHQL_OVERVIEW.md)** ⭐ - **START HERE** for GraphQL
-  - 15+ exclusive features not in REST API
-  - Wallet module: auto-scheduling, pay/cancel, bulk operations
-  - Habits: auto-streak calculation, archiving
-  - Complete differences analysis
-- **[GRAPHQL_SCHEMA_COMPLETE.md](./docs/architecture/GRAPHQL_SCHEMA_COMPLETE.md)** - All 101 operations (22 queries + 79 mutations)
-- **[GRAPHQL_IMPLEMENTATION_NODE.md](./docs/architecture/GRAPHQL_IMPLEMENTATION_NODE_PART1.md)** - Node.js implementation guide
-
-**⚠️ IMPORTANT**: The GraphQL API has significantly more features than REST, especially in Wallet module. See GRAPHQL_OVERVIEW.md for details.
 
 ### 📊 System Analysis (Current Laravel System)
 - **[STEP1_PROJECT_IDENTIFICATION.md](./docs/architecture/STEP1_PROJECT_IDENTIFICATION.md)** - 2 Laravel projects identified
@@ -125,14 +113,12 @@ All comprehensive documentation is available in [`docs/architecture/`](./docs/ar
 
 | Metric | Value |
 |--------|-------|
-| **REST Endpoints** | 150+ |
-| **GraphQL Operations** | 101 (22 queries + 79 mutations) ⭐ |
-| **Total API Operations** | 250+ |
+| **API Endpoints** | 150+ |
 | **Database Tables** | 54 |
 | **Use Cases** | 15 |
-| **Functions** | 10 REST + 1 GraphQL |
+| **Functions** | 10 |
 | **Domains** | 10 |
-| **Documentation** | ~300 KB (incl. GraphQL) |
+| **Documentation** | ~175 KB |
 
 ---
 
@@ -146,15 +132,10 @@ All comprehensive documentation is available in [`docs/architecture/`](./docs/ar
 - AWS Lambda / Google Cloud Functions
 
 ### Key Libraries
-- `@apollo/server` - GraphQL server ⭐
-- `graphql` - GraphQL core ⭐
-- `dataloader` - N+1 query prevention ⭐
 - `pg` - PostgreSQL client
 - `ioredis` - Redis client
 - `jsonwebtoken` - JWT auth
 - `zod` - Validation
-- `pino` - Logging
-- `esbuild` - Bundling
 - `pino` - Logging
 - `esbuild` - Bundling
 
