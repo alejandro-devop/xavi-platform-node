@@ -6,27 +6,48 @@ let pool: Pool | null = null;
 export function initializeDbPool(): Pool {
   if (pool) return pool;
 
-  const isCloudRun = process.env.K_SERVICE !== undefined;
+  // Use DATABASE_URL if available (Neon, Heroku, etc.)
+  // Otherwise fall back to individual env vars
+  const databaseUrl = process.env.DATABASE_URL;
 
-  const config: PoolConfig = {
-    host: isCloudRun
-      ? `/cloudsql/${process.env.CLOUD_SQL_CONNECTION_NAME}` // Unix socket for Cloud SQL
-      : process.env.DB_HOST, // TCP for local
-    port: isCloudRun ? undefined : parseInt(process.env.DB_PORT || '5432', 10),
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
+  let config: PoolConfig;
 
-    // Connection pool settings optimized for Cloud Run
-    max: 10, // Max connections per container
-    min: 2, // Min connections to keep alive
-    idleTimeoutMillis: 30000, // Close idle connections after 30s
-    connectionTimeoutMillis: 5000,
+  if (databaseUrl) {
+    // Use connection string (Neon, Heroku, etc.)
+    config = {
+      connectionString: databaseUrl,
+      ssl:
+        databaseUrl.includes('neon.tech') || databaseUrl.includes('amazonaws.com')
+          ? { rejectUnauthorized: false }
+          : undefined,
 
-    // Keep-alive to prevent connection drops
-    keepAlive: true,
-    keepAliveInitialDelayMillis: 10000,
-  };
+      // Connection pool settings optimized for Cloud Run
+      max: 10,
+      min: 2,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 5000,
+      keepAlive: true,
+      keepAliveInitialDelayMillis: 10000,
+    };
+  } else {
+    // Fall back to individual env vars for local development
+    const isCloudRun = process.env.K_SERVICE !== undefined;
+
+    config = {
+      host: isCloudRun ? `/cloudsql/${process.env.CLOUD_SQL_CONNECTION_NAME}` : process.env.DB_HOST,
+      port: isCloudRun ? undefined : parseInt(process.env.DB_PORT || '5432', 10),
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
+
+      max: 10,
+      min: 2,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 5000,
+      keepAlive: true,
+      keepAliveInitialDelayMillis: 10000,
+    };
+  }
 
   pool = new Pool(config);
 
@@ -48,7 +69,7 @@ export function initializeDbPool(): Pool {
     {
       max: config.max,
       min: config.min,
-      host: isCloudRun ? 'unix-socket' : config.host,
+      host: config.connectionString ? 'connection-string' : config.host,
     },
     'Database pool initialized'
   );

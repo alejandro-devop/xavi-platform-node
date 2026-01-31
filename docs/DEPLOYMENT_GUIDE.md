@@ -33,93 +33,83 @@ gcloud config list
 ```bash
 gcloud services enable cloudbuild.googleapis.com
 gcloud services enable run.googleapis.com
-gcloud services enable sqladmin.googleapis.com
 gcloud services enable secretmanager.googleapis.com
-gcloud services enable redis.googleapis.com
 gcloud services enable artifactregistry.googleapis.com
 ```
 
-## Paso 2: Crear Cloud SQL (PostgreSQL)
+**Nota:** No necesitamos `sqladmin` ni `redis` porque usaremos servicios externos (Neon + Upstash).
 
-### 2.1 Crear instancia de PostgreSQL
+## Paso 2: Configurar Base de Datos con Neon (PostgreSQL Serverless)
 
-```bash
-# Crear instancia (esto toma ~10 minutos)
-gcloud sql instances create xavi-postgres \
-  --database-version=POSTGRES_15 \
-  --tier=db-f1-micro \
-  --region=us-central1 \
-  --root-password=CHANGE_THIS_PASSWORD \
-  --storage-type=SSD \
-  --storage-size=10GB
+### 2.1 Crear proyecto en Neon
 
-# Verificar que se creó
-gcloud sql instances list
-```
+1. Ve a [https://neon.tech](https://neon.tech)
+2. Crea una cuenta (ya lo hiciste ✅)
+3. Crea un nuevo proyecto:
+   - **Name:** Xavier API
+   - **Region:** AWS East 2 (Ohio) - seleccionado ✅
+   - **Postgres version:** 15 (default)
 
 ### 2.2 Crear base de datos
 
-```bash
-gcloud sql databases create xavi_db \
-  --instance=xavi-postgres
-```
+1. En el dashboard de Neon, ve a la sección **Databases**
+2. Click en **New Database**
+3. Nombre: `xavi_db`
+4. Click en **Create**
 
-### 2.3 Obtener el connection name
+### 2.3 Obtener la Connection String
 
-```bash
-# Guardar este valor, lo necesitarás más adelante
-gcloud sql instances describe xavi-postgres \
-  --format="value(connectionName)"
-```
+1. En el dashboard, ve a **Connection Details**
+2. Copia la **Connection string** completa
+3. Debería verse así:
+   ```
+   postgresql://username:password@ep-xxxxx.us-east-2.aws.neon.tech/xavi_db?sslmode=require
+   ```
+4. **Guarda esta URL** - la necesitarás en el Paso 4
 
-Resultado será algo como: `PROJECT_ID:us-central1:xavi-postgres`
+## Paso 3: Configurar Redis con Upstash (Serverless)
 
-## Paso 3: Configurar Redis (Opción A - Memorystore o Opción B - Upstash)
+### 3.1 Crear cuenta en Upstash
 
-### Opción A: Google Cloud Memorystore (Recomendado para producción)
+1. Ve a [https://upstash.com/](https://upstash.com/)
+2. Crea una cuenta gratuita (GitHub/Google)
+3. Verifica tu email
 
-```bash
-# Crear instancia de Redis
-gcloud redis instances create xavi-redis \
-  --size=1 \
-  --region=us-central1 \
-  --tier=basic
+### 3.2 Crear Redis database
 
-# Obtener la IP del Redis
-gcloud redis instances describe xavi-redis \
-  --region=us-central1 \
-  --format="value(host)"
-```
+1. Click en **Create Database**
+2. Configuración:
+   - **Name:** xavi-redis
+   - **Region:** AWS East 2 (us-east-2) - misma que Neon
+   - **Type:** Regional (más barato)
+3. Click en **Create**
 
-### Opción B: Upstash (Más económico, serverless)
+### 3.3 Obtener la Connection String
 
-1. Ir a [https://upstash.com/](https://upstash.com/)
-2. Crear cuenta gratuita
-3. Crear Redis database
-4. Copiar la URL de conexión (formato: `redis://...`)
+1. En el dashboard del database creado
+2. Copia el **UPSTASH_REDIS_REST_URL** (formato REST)
+3. O usa **Redis URL** (formato: `redis://...`)
+4. **Guarda esta URL** - la necesitarás en el Paso 4
 
 ## Paso 4: Configurar Secret Manager
 
 ### 4.1 Crear secretos
 
 ```bash
-# JWT Secret (genera uno aleatorio)
+# JWT Secret (genera uno aleatorio seguro)
 echo -n "$(openssl rand -base64 32)" | \
   gcloud secrets create jwt-secret --data-file=-
 
-# Database URL (reemplaza con tus valores)
-echo -n "postgresql://postgres:YOUR_PASSWORD@/xavi_db?host=/cloudsql/PROJECT_ID:us-central1:xavi-postgres" | \
+# Database URL - usa la Connection String de Neon (Paso 2.3)
+echo -n "postgresql://username:password@ep-xxxxx.us-east-2.aws.neon.tech/xavi_db?sslmode=require" | \
   gcloud secrets create database-url --data-file=-
 
-# Redis URL
-# Si usas Memorystore:
-echo -n "redis://REDIS_IP:6379" | \
-  gcloud secrets create redis-url --data-file=-
-
-# Si usas Upstash:
-echo -n "YOUR_UPSTASH_REDIS_URL" | \
+# Redis URL - usa la URL de Upstash (Paso 3.3)
+echo -n "redis://default:xxxxx@us2-xxxxx.upstash.io:6379" | \
   gcloud secrets create redis-url --data-file=-
 ```
+
+**Importante:** Reemplaza las URLs con tus valores reales de Neon y Upstash.
 
 ### 4.2 Verificar secretos creados
 
@@ -166,16 +156,13 @@ docker push us-central1-docker.pkg.dev/PROJECT_ID/xavi-api/app:latest
 gcloud iam service-accounts create xavi-api-sa \
   --display-name="Xavier API Service Account"
 
-# Dar permisos para Cloud SQL
-gcloud projects add-iam-policy-binding PROJECT_ID \
-  --member="serviceAccount:xavi-api-sa@PROJECT_ID.iam.gserviceaccount.com" \
-  --role="roles/cloudsql.client"
-
 # Dar permisos para Secret Manager
 gcloud projects add-iam-policy-binding PROJECT_ID \
   --member="serviceAccount:xavi-api-sa@PROJECT_ID.iam.gserviceaccount.com" \
   --role="roles/secretmanager.secretAccessor"
 ```
+
+**Nota:** No necesitamos permisos de Cloud SQL porque usamos Neon (externo).
 
 ### 6.2 Desplegar a Cloud Run
 
@@ -186,7 +173,6 @@ gcloud run deploy xavi-api \
   --region=us-central1 \
   --allow-unauthenticated \
   --service-account=xavi-api-sa@PROJECT_ID.iam.gserviceaccount.com \
-  --add-cloudsql-instances=PROJECT_ID:us-central1:xavi-postgres \
   --set-secrets="DATABASE_URL=database-url:latest,JWT_SECRET=jwt-secret:latest,REDIS_URL=redis-url:latest" \
   --set-env-vars="NODE_ENV=production,PORT=8080" \
   --memory=512Mi \
@@ -195,6 +181,11 @@ gcloud run deploy xavi-api \
   --max-instances=10 \
   --min-instances=0
 ```
+
+**Cambios vs Cloud SQL:**
+
+- ❌ Removimos `--add-cloudsql-instances` (no se necesita)
+- ✅ La app se conecta directamente a Neon vía internet
 
 ### 6.3 Obtener la URL del servicio
 
@@ -207,28 +198,19 @@ gcloud run services describe xavi-api \
 
 ## Paso 7: Ejecutar Migraciones en Producción
 
-### 7.1 Conectarse a Cloud SQL vía Cloud SQL Proxy (local)
+### 7.1 Ejecutar migraciones desde local
 
 ```bash
-# Descargar Cloud SQL Proxy
-curl -o cloud-sql-proxy https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.8.0/cloud-sql-proxy.darwin.amd64
-chmod +x cloud-sql-proxy
-
-# Ejecutar proxy en una terminal
-./cloud-sql-proxy PROJECT_ID:us-central1:xavi-postgres
-```
-
-### 7.2 En otra terminal, ejecutar migraciones
-
-```bash
-# Establecer variables de entorno
-export DATABASE_URL="postgresql://postgres:YOUR_PASSWORD@localhost:5432/xavi_db"
+# Establecer la DATABASE_URL de Neon (desde el Paso 2.3)
+export DATABASE_URL="postgresql://username:password@ep-xxxxx.us-east-2.aws.neon.tech/xavi_db?sslmode=require"
 
 # Ejecutar migraciones
 npm run migrate
 ```
 
-### Alternativa: Ejecutar migraciones desde Cloud Run
+**¡Mucho más simple!** No necesitas Cloud SQL Proxy - te conectas directamente a Neon.
+
+### 7.2 Alternativa: Ejecutar migraciones desde Cloud Run Job (opcional)
 
 ```bash
 # Crear un Cloud Run Job para migraciones
@@ -236,7 +218,6 @@ gcloud run jobs create xavi-migrate \
   --image=us-central1-docker.pkg.dev/PROJECT_ID/xavi-api/app:latest \
   --region=us-central1 \
   --service-account=xavi-api-sa@PROJECT_ID.iam.gserviceaccount.com \
-  --add-cloudsql-instances=PROJECT_ID:us-central1:xavi-postgres \
   --set-secrets="DATABASE_URL=database-url:latest" \
   --command="npm" \
   --args="run,migrate"
@@ -377,39 +358,55 @@ gcloud run services describe xavi-api \
 ### Eliminar recursos (cleanup)
 
 ```bash
-# Eliminar servicio
+# Eliminar servicio de Cloud Run
 gcloud run services delete xavi-api --region=us-central1
-
-# Eliminar Cloud SQL
-gcloud sql instances delete xavi-postgres
-
-# Eliminar Redis
-gcloud redis instances delete xavi-redis --region=us-central1
 
 # Eliminar secretos
 gcloud secrets delete jwt-secret
 gcloud secrets delete database-url
 gcloud secrets delete redis-url
+
+# Eliminar repositorio de imágenes
+gcloud artifacts repositories delete xavi-api --location=us-central1
 ```
 
-## Costos Estimados (región us-central1)
+**Recursos externos (desde sus consolas):**
 
-- **Cloud Run**: ~$0 (free tier cubre hasta 2M requests/mes)
-- **Cloud SQL (db-f1-micro)**: ~$8-15/mes
-- **Redis Memorystore (basic 1GB)**: ~$35/mes
-- **Redis Upstash (free tier)**: $0 hasta 10K requests/día
-- **Artifact Registry**: $0.10/GB/mes
-- **Secret Manager**: $0.06 por 10K accesos
+- **Neon:** Eliminar proyecto desde [console.neon.tech](https://console.neon.tech)
+- **Upstash:** Eliminar database desde [console.upstash.com](https://console.upstash.com)
 
-**Total estimado**: $15-50/mes (dependiendo de Redis)
+## Costos Estimados (configuración serverless)
+
+- **Cloud Run**: ~$0 (free tier: 2M requests + 360K GB-segundos/mes)
+- **Neon PostgreSQL**: ~$0 (free tier: 0.5GB storage + compute on-demand)
+- **Upstash Redis**: ~$0 (free tier: 10K requests/día)
+- **Artifact Registry**: ~$0.50/mes (almacenamiento de imágenes)
+- **Secret Manager**: ~$0.06 por 10K accesos
+
+**Total estimado con free tiers**: ~$0-2/mes 🎉
+
+**Cuando superes free tiers:**
+
+- Neon: ~$19/mes (plan Launch)
+- Upstash: ~$10/mes (plan Pay as you go)
+- Cloud Run: $0.40 por millón de requests adicionales
+
+**Total estimado en producción moderada**: ~$10-30/mes
 
 ## Troubleshooting
 
-### Error: "Cloud SQL connection failed"
+### Error: "Database connection failed"
 
-- Verificar que el service account tiene rol `roles/cloudsql.client`
-- Verificar que la instancia de Cloud SQL está en running
-- Verificar el connection name en la DATABASE_URL
+- Verificar que la DATABASE_URL de Neon es correcta
+- Verificar que incluye `?sslmode=require` al final
+- Probar conexión desde local: `psql "$DATABASE_URL"`
+- Verificar en Neon Console que el proyecto está activo
+
+### Error: "Redis connection failed"
+
+- Verificar la REDIS_URL de Upstash
+- Verificar que el database está activo en Upstash Console
+- Probar con `redis-cli -u "$REDIS_URL" PING`
 
 ### Error: "Secret not found"
 
@@ -428,16 +425,28 @@ gcloud secrets delete redis-url
 
 ## Próximos Pasos
 
-1. ✅ Configurar backups automáticos de Cloud SQL
-2. ✅ Configurar alertas de monitoreo
-3. ✅ Implementar rate limiting con Redis
-4. ✅ Configurar Cloud Armor para WAF
-5. ✅ Implementar health checks personalizados
+1. ✅ Configurar backups automáticos (Neon los hace automáticamente)
+2. ✅ Configurar alertas de monitoreo en GCP
+3. ✅ Implementar rate limiting con Upstash Redis
+4. ✅ Configurar dominio personalizado
+5. ✅ Implementar CI/CD con GitHub Actions
 
-## Soporte
+## Recursos Útiles
 
-Si encuentras problemas, revisa:
+**Neon:**
 
-- Documentación oficial: https://cloud.google.com/run/docs
-- Logs de Cloud Run: `gcloud run services logs read xavi-api`
+- Dashboard: https://console.neon.tech
+- Docs: https://neon.tech/docs
+- Branching: https://neon.tech/docs/guides/branching
+
+**Upstash:**
+
+- Dashboard: https://console.upstash.com
+- Docs: https://docs.upstash.com
+- Rate limiting: https://docs.upstash.com/redis/features/ratelimiting
+
+**Google Cloud:**
+
+- Cloud Run docs: https://cloud.google.com/run/docs
+- Logs: `gcloud run services logs read xavi-api`
 - Estado de servicios: https://status.cloud.google.com/

@@ -7,15 +7,14 @@ WORKDIR /app
 COPY package*.json ./
 COPY tsconfig.json ./
 
-# Install dependencies
-RUN npm ci --only=production && npm cache clean --force
+# Install ALL dependencies (including devDependencies for build)
+RUN npm ci && npm cache clean --force
 
 # Copy source code
 COPY src ./src
 
 # Build TypeScript
-RUN npm install -g typescript
-RUN tsc
+RUN npm run build
 
 # Production stage
 FROM node:18-alpine
@@ -25,12 +24,14 @@ WORKDIR /app
 # Install dumb-init for proper signal handling
 RUN apk add --no-cache dumb-init
 
-# Copy production dependencies
-COPY --from=builder /app/node_modules ./node_modules
-
-# Copy built application
-COPY --from=builder /app/dist ./dist
+# Copy package files first
 COPY package*.json ./
+
+# Install ONLY production dependencies
+RUN npm ci --only=production && npm cache clean --force
+
+# Copy built application from builder
+COPY --from=builder /app/dist ./dist
 
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001

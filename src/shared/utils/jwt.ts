@@ -1,4 +1,4 @@
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 import { UnauthorizedError } from '../errors';
 
 export interface JWTPayload {
@@ -18,25 +18,26 @@ export interface RefreshTokenPayload {
 }
 
 export function generateAccessToken(params: { sub: string; email: string; jti: string }): string {
-  const payload: Partial<JWTPayload> = {
+  const payload = {
     sub: params.sub,
     email: params.email,
     jti: params.jti,
   };
 
   return jwt.sign(payload, process.env.JWT_ACCESS_SECRET!, {
-    expiresIn: process.env.JWT_ACCESS_EXPIRES_IN || '15m',
+    expiresIn: (process.env.JWT_ACCESS_EXPIRES_IN || '15m') as any,
   });
 }
 
 export function generateRefreshToken(params: { sub: string; jti: string }): string {
-  const payload: Partial<RefreshTokenPayload> = {
+  const payload = {
     sub: params.sub,
-    type: 'refresh',
+    jti: params.jti,
+    type: 'refresh' as const,
   };
 
   return jwt.sign(payload, process.env.JWT_REFRESH_SECRET!, {
-    expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
+    expiresIn: (process.env.JWT_REFRESH_EXPIRES_IN || '7d') as any,
   });
 }
 
