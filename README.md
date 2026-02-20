@@ -35,6 +35,34 @@ All comprehensive documentation is available in [`docs/architecture/`](./docs/ar
 
 **⚠️ IMPORTANT**: The GraphQL API has significantly more features than REST, especially in Wallet module. See GRAPHQL_OVERVIEW.md for details.
 
+#### 🚀 GraphiQL IDE (Interactive Documentation)
+
+**Explore the API with GraphiQL:**
+- **URL**: `http://localhost:8080/graphiql` (development only)
+- **Features**:
+  - 📚 Full schema documentation and type explorer
+  - ✨ Intelligent autocomplete (Ctrl+Space)
+  - 🔍 Query history and favorites
+  - 🔐 Custom headers for authentication
+  - 🎨 Syntax highlighting and validation
+  - ⚡ Real-time error detection
+
+**Quick Start:**
+```bash
+# Start the server
+npm run dev
+
+# Visit http://localhost:8080/graphiql in your browser
+# Try the default query or explore the schema using the "Docs" panel
+```
+
+**For authenticated queries**, add your JWT token in the Headers panel:
+```json
+{
+  "Authorization": "Bearer YOUR_TOKEN_HERE"
+}
+```
+
 ### 📊 System Analysis (Current Laravel System)
 
 - **[STEP1_PROJECT_IDENTIFICATION.md](./docs/architecture/STEP1_PROJECT_IDENTIFICATION.md)** - 2 Laravel projects identified

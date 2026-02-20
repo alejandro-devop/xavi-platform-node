@@ -46,135 +46,121 @@ async function start() {
     );
     console.log('✅ GraphQL endpoint mounted at /graphql');
 
-    // Mount GraphQL Playground at /playground (only in dev)
+    // Mount GraphiQL IDE at /graphiql (only in dev) - Full featured GraphQL explorer with docs
     if (process.env.NODE_ENV !== 'production') {
-      app.get('/playground', (_req, res) => {
+      app.get('/graphiql', (_req, res) => {
         res.send(`
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GraphQL Playground - Xavi API</title>
+  <title>GraphiQL - Xavi Platform API</title>
+  <link rel="stylesheet" href="https://unpkg.com/graphiql@3.1.1/graphiql.min.css" />
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      padding: 0;
       height: 100vh;
-      display: flex;
-      background: #0f1419;
-      color: #e4e4e4;
+      overflow: hidden;
     }
-    .container { display: flex; width: 100%; height: 100vh; }
-    .left-panel { flex: 1; display: flex; flex-direction: column; border-right: 1px solid #2a2e35; }
-    .right-panel { flex: 1; display: flex; flex-direction: column; }
-    .header {
-      padding: 15px 20px;
+    #graphiql {
+      height: 100vh;
+    }
+    .graphiql-container {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+    /* Custom styling for the toolbar */
+    .graphiql-toolbar {
       background: #1a1e24;
-      border-bottom: 1px solid #2a2e35;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
     }
-    .title { font-size: 14px; font-weight: 600; color: #61dafb; }
-    .execute-btn {
-      background: #61dafb;
-      color: #0f1419;
-      border: none;
-      padding: 8px 20px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 13px;
+    .graphiql-toolbar-button {
+      color: #61dafb;
     }
-    .execute-btn:hover { background: #4fc3dc; }
-    .editor-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-    textarea, .output {
-      flex: 1;
-      padding: 15px;
-      background: #1a1e24;
-      border: none;
-      color: #e4e4e4;
-      font-family: 'Monaco', 'Menlo', monospace;
-      font-size: 13px;
-      resize: none;
-      outline: none;
-      overflow: auto;
-    }
-    .output { background: #0f1419; white-space: pre-wrap; }
-    .success { color: #98c379; }
-    .error { color: #e06c75; }
-    .info { color: #61afef; font-size: 12px; padding: 10px 15px; background: #1a1e24; border-bottom: 1px solid #2a2e35; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="left-panel">
-      <div class="header">
-        <span class="title">Query</span>
-        <button class="execute-btn" id="executeBtn">Execute ▶</button>
-      </div>
-      <div class="info">Endpoint: /graphql</div>
-      <div class="editor-area">
-        <textarea id="query" placeholder="# Write your GraphQL query here&#10;&#10;query {&#10;  health {&#10;    status&#10;    timestamp&#10;  }&#10;}">query {
+  <div id="graphiql">Loading...</div>
+  
+  <script 
+    crossorigin 
+    src="https://unpkg.com/react@18/umd/react.production.min.js"
+  ></script>
+  <script 
+    crossorigin 
+    src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"
+  ></script>
+  <script 
+    crossorigin 
+    src="https://unpkg.com/graphiql@3.1.1/graphiql.min.js"
+  ></script>
+  
+  <script>
+    const root = ReactDOM.createRoot(document.getElementById('graphiql'));
+    const fetcher = GraphiQL.createFetcher({
+      url: '/graphql',
+    });
+    
+    // Default query to help users get started
+    const defaultQuery = \`# ¡Bienvenido a GraphiQL!
+# 
+# GraphiQL es un IDE interactivo para explorar tu API GraphQL.
+# 
+# Características:
+# - Autocompletado inteligente (Ctrl+Space)
+# - Explorador de esquema (botón "Docs" a la derecha)
+# - Historial de queries
+# - Variables y headers personalizados
+# - Prettier integrado (Shift+Ctrl+P para formatear)
+#
+# Atajos de teclado:
+# - Ejecutar query: Cmd/Ctrl + Enter
+# - Auto-completar: Ctrl + Space
+# - Formatear: Shift + Ctrl + P
+# - Buscar en el editor: Cmd/Ctrl + F
+#
+# Ejemplo básico - Health Check:
+
+query HealthCheck {
   health {
     status
     timestamp
   }
-}</textarea>
-      </div>
-    </div>
-    <div class="right-panel">
-      <div class="header">
-        <span class="title">Response</span>
-      </div>
-      <div class="editor-area">
-        <div class="output" id="output">// Execute a query to see results</div>
-      </div>
-    </div>
-  </div>
-  
-  <script>
-    async function executeQuery() {
-      const query = document.getElementById('query').value;
-      const output = document.getElementById('output');
-      
-      output.textContent = '// Executing...';
-      output.className = 'output';
-      
-      try {
-        const response = await fetch('/graphql', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ query })
-        });
-        
-        const result = await response.json();
-        output.textContent = JSON.stringify(result, null, 2);
-        output.className = result.errors ? 'output error' : 'output success';
-      } catch (error) {
-        output.textContent = 'Error: ' + error.message;
-        output.className = 'output error';
-      }
-    }
-    
-    // Add event listener to button
-    document.getElementById('executeBtn').addEventListener('click', executeQuery);
-    
-    // Allow Cmd+Enter or Ctrl+Enter to execute
-    document.getElementById('query').addEventListener('keydown', (e) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
-        executeQuery();
-      }
-    });
+}
+
+# Ejemplo - Consultar wallets:
+# (requiere autenticación - añade Authorization header)
+
+# query GetWallets {
+#   wallets {
+#     id
+#     name
+#     currency
+#     balance
+#     createdAt
+#   }
+# }
+
+# Para queries autenticadas, añade un header:
+# {
+#   "Authorization": "Bearer TU_TOKEN_AQUI"
+# }
+\`;
+
+    root.render(
+      React.createElement(GraphiQL, {
+        fetcher: fetcher,
+        defaultQuery: defaultQuery,
+        headerEditorEnabled: true,
+        shouldPersistHeaders: true,
+      })
+    );
   </script>
 </body>
 </html>
         `);
       });
-      console.log('✅ GraphQL Playground mounted at /playground');
+      console.log('✅ GraphiQL IDE mounted at /graphiql');
     }
 
     // Start server immediately
@@ -182,6 +168,9 @@ async function start() {
     server = httpServer.listen(PORT, () => {
       console.log('✅ Server listening on port', PORT);
       console.log('📊 GraphQL endpoint: http://localhost:' + PORT + '/graphql');
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('🚀 GraphiQL IDE: http://localhost:' + PORT + '/graphiql');
+      }
       logger.info({ port: PORT }, 'Server started successfully');
     });
 

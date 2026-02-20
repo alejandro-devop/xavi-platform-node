@@ -127,6 +127,49 @@ curl http://localhost:8080/ready
 }
 ```
 
+### GraphiQL IDE (Interactive GraphQL Explorer)
+
+The best way to explore and test the GraphQL API is using the built-in GraphiQL IDE:
+
+**URL**: http://localhost:8080/graphiql (development only)
+
+**Features**:
+- 📚 **Documentation Explorer** - Click "Docs" to browse all queries, mutations, and types
+- ✨ **Autocomplete** - Press `Ctrl+Space` while typing to see available fields
+- 🔍 **Query History** - All your previous queries are saved
+- 🎨 **Syntax Highlighting** - Color-coded GraphQL queries
+- ⚡ **Real-time Validation** - Errors shown as you type
+- 🔐 **Headers Editor** - Add authentication tokens easily
+
+**Try your first query:**
+```graphql
+query HealthCheck {
+  health {
+    status
+    timestamp
+  }
+}
+```
+
+**For authenticated queries**, click the "Headers" tab at the bottom and add:
+```json
+{
+  "Authorization": "Bearer YOUR_JWT_TOKEN_HERE"
+}
+```
+
+**Keyboard Shortcuts**:
+- `Cmd/Ctrl + Enter` - Execute query
+- `Ctrl + Space` - Trigger autocomplete
+- `Shift + Ctrl + P` - Prettify query
+- `Cmd/Ctrl + F` - Search in editor
+
+**Tips**:
+- Explore the schema by clicking "< Docs" button on the right
+- Use fragments to reuse field selections
+- Try introspection queries to learn about the schema
+- Save complex queries for later reuse
+
 ## Available Scripts
 
 - `npm run dev` - Start development server with hot reload
