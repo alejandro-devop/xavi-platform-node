@@ -1,5 +1,10 @@
 import { getDb } from '../shared/database/drizzle';
-import { walletExpenses, walletWallets, walletExpenseCategories, walletBudgets } from '../shared/database/schema';
+import {
+  walletExpenses,
+  walletWallets,
+  walletExpenseCategories,
+  walletBudgets,
+} from '../shared/database/schema';
 import { eq, and, gte, lte, desc, sql } from 'drizzle-orm';
 import { NotFoundError, ForbiddenError, BadRequestError } from '../shared/errors';
 
@@ -49,373 +54,269 @@ export const expenseService = {
   /**
    * Get expenses with optional filters
    */
-  async getExpenses(userId: string, filter?: GetExpensesFilter): Promise<Expense[]> {
-    const db = getDbPool();
+  async getExpenses(userId: number, filter?: GetExpensesFilter): Promise<Expense[]> {
+    const db = getDb();
 
-    let query = `SELECT id, user_id, wallet_id, category_id, budget_id, debit, credit, note, date, created_at, updated_at
-                 FROM wallet_expenses
-                 WHERE user_id = $1`;
-    const params: any[] = [userId];
-    let paramIndex = 2;
+    const conditions = [eq(walletExpenses.userId, userId)];
 
     if (filter?.walletId) {
-      query += ` AND wallet_id = $${paramIndex}`;
-      params.push(filter.walletId);
-      paramIndex++;
+      conditions.push(eq(walletExpenses.walletId, filter.walletId));
     }
 
     if (filter?.categoryId) {
-      query += ` AND category_id = $${paramIndex}`;
-      params.push(filter.categoryId);
-      paramIndex++;
+      conditions.push(eq(walletExpenses.categoryId, filter.categoryId));
     }
 
     if (filter?.budgetId) {
-      query += ` AND budget_id = $${paramIndex}`;
-      params.push(filter.budgetId);
-      paramIndex++;
+      conditions.push(eq(walletExpenses.budgetId, filter.budgetId));
     }
 
     if (filter?.startDate) {
-      query += ` AND date >= $${paramIndex}`;
-      params.push(filter.startDate);
-      paramIndex++;
+      conditions.push(gte(walletExpenses.date, filter.startDate));
     }
 
     if (filter?.endDate) {
-      query += ` AND date <= $${paramIndex}`;
-      params.push(filter.endDate);
-      paramIndex++;
+      conditions.push(lte(walletExpenses.date, filter.endDate));
     }
 
-    query += ' ORDER BY date DESC, created_at DESC';
+    const expenses = await db.query.walletExpenses.findMany({
+      where: and(...conditions),
+      orderBy: [desc(walletExpenses.date), desc(walletExpenses.createdAt)],
+    });
 
-    const result = await db.query(query, params);
-
-    return result.rows.map((row) => ({
-      id: row.id,
-      userId: row.user_id,
-      walletId: row.wallet_id,
-      categoryId: row.category_id,
-      budgetId: row.budget_id,
-      debit: parseFloat(row.debit),
-      credit: parseFloat(row.credit),
-      note: row.note,
-      date: row.date,
-      createdAt: row.created_at,
-      updatedAt: row.updated_at,
+    return expenses.map((expense) => ({
+      ...expense,
+      debit: parseFloat(expense.debit),
+      credit: parseFloat(expense.credit),
     }));
   },
 
   /**
    * Get an expense by ID
    */
-  async getExpenseById(id: string, userId: string): Promise<Expense> {
-    const db = getDbPool();
-    const result = await db.query(
-      `SELECT id, user_id, wallet_id, category_id, budget_id, debit, credit, note, date, created_at, updated_at
-       FROM wallet_expenses
-       WHERE id = $1`,
-      [id]
-    );
+  async getExpenseById(id: string, userId: number): Promise<Expense> {
+    const db = getDb();
 
-    if (result.rows.length === 0) {
+    const expense = await db.query.walletExpenses.findFirst({
+      where: eq(walletExpenses.id, id),
+    });
+
+    if (!expense) {
       throw new NotFoundError('Expense not found');
     }
 
-    const expense = result.rows[0];
-
-    // Convert both to string for comparison (userId from JWT is string, user_id from DB is integer)
-    if (expense.user_id.toString() !== userId.toString()) {
+    // Verify ownership
+    if (expense.userId.toString() !== userId.toString()) {
       throw new ForbiddenError('You do not have permission to access this expense');
     }
 
     return {
-      id: expense.id,
-      userId: expense.user_id,
-      walletId: expense.wallet_id,
-      categoryId: expense.category_id,
-      budgetId: expense.budget_id,
+      ...expense,
       debit: parseFloat(expense.debit),
       credit: parseFloat(expense.credit),
-      note: expense.note,
-      date: expense.date,
-      createdAt: expense.created_at,
-      updatedAt: expense.updated_at,
     };
   },
 
   /**
    * Create a new expense and update wallet/budget balances
    */
-  async createExpense(userId: string, input: CreateExpenseInput): Promise<Expense> {
-    const db = getDbPool();
+  async createExpense(userId: number, input: CreateExpenseInput): Promise<Expense> {
+    const db = getDb();
 
     // Verify wallet ownership
-    const walletResult = await db.query('SELECT id, user_id FROM wallet_wallets WHERE id = $1', [
-      input.walletId,
-    ]);
+    const wallet = await db.query.walletWallets.findFirst({
+      where: eq(walletWallets.id, input.walletId),
+    });
 
-    if (walletResult.rows.length === 0) {
+    if (!wallet) {
       throw new NotFoundError('Wallet not found');
     }
 
-    // Convert both to string for comparison
-    if (walletResult.rows[0].user_id.toString() !== userId.toString()) {
+    if (wallet.userId.toString() !== userId.toString()) {
       throw new ForbiddenError('You do not have permission to add expenses to this wallet');
     }
 
     // Verify category if provided
     if (input.categoryId) {
-      const categoryResult = await db.query(
-        'SELECT id, user_id FROM wallet_expense_categories WHERE id = $1',
-        [input.categoryId]
-      );
-      if (categoryResult.rows.length === 0) {
+      const category = await db.query.walletExpenseCategories.findFirst({
+        where: eq(walletExpenseCategories.id, input.categoryId),
+      });
+      if (!category) {
         throw new NotFoundError('Category not found');
       }
-      // Convert both to string for comparison
-      if (categoryResult.rows[0].user_id.toString() !== userId.toString()) {
+      if (category.userId.toString() !== userId.toString()) {
         throw new ForbiddenError('You do not have permission to use this category');
       }
     }
 
     // Verify budget if provided
     if (input.budgetId) {
-      const budgetResult = await db.query('SELECT id, user_id FROM wallet_budgets WHERE id = $1', [
-        input.budgetId,
-      ]);
-      if (budgetResult.rows.length === 0) {
+      const budget = await db.query.walletBudgets.findFirst({
+        where: eq(walletBudgets.id, input.budgetId),
+      });
+      if (!budget) {
         throw new NotFoundError('Budget not found');
       }
-      // Convert both to string for comparison
-      if (budgetResult.rows[0].user_id.toString() !== userId.toString()) {
+      if (budget.userId.toString() !== userId.toString()) {
         throw new ForbiddenError('You do not have permission to use this budget');
       }
     }
 
-    await db.query('BEGIN');
+    // Use Drizzle transaction
+    const result = await db.transaction(async (tx) => {
+      const debitValue = input.debit?.toString() || '0';
+      const creditValue = input.credit?.toString() || '0';
 
-    try {
       // Create expense
-      const expenseResult = await db.query(
-        `INSERT INTO wallet_expenses (user_id, wallet_id, category_id, budget_id, debit, credit, note, date)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-         RETURNING id, user_id, wallet_id, category_id, budget_id, debit, credit, note, date, created_at, updated_at`,
-        [
+      const [expense] = await tx
+        .insert(walletExpenses)
+        .values({
           userId,
-          input.walletId,
-          input.categoryId || null,
-          input.budgetId || null,
-          input.debit || 0,
-          input.credit || 0,
-          input.note || null,
-          input.date || new Date(),
-        ]
-      );
-
-      const expense = expenseResult.rows[0];
+          walletId: input.walletId,
+          categoryId: input.categoryId || null,
+          budgetId: input.budgetId || null,
+          debit: debitValue,
+          credit: creditValue,
+          description: input.description,
+          date: input.date || new Date().toISOString().split('T')[0],
+        })
+        .returning();
 
       // Update wallet balance: balance += credit - debit
       const balanceChange = parseFloat(expense.credit) - parseFloat(expense.debit);
-      await db.query('UPDATE wallet_wallets SET balance = balance + $1 WHERE id = $2', [
-        balanceChange,
-        input.walletId,
-      ]);
+      await tx
+        .update(walletWallets)
+        .set({ balance: sql`balance + ${balanceChange}` })
+        .where(eq(walletWallets.id, input.walletId));
 
       // Update budget balance if linked: balance += debit - credit
       if (input.budgetId) {
         const budgetBalanceChange = parseFloat(expense.debit) - parseFloat(expense.credit);
-        await db.query('UPDATE wallet_budgets SET balance = balance + $1 WHERE id = $2', [
-          budgetBalanceChange,
-          input.budgetId,
-        ]);
+        await tx
+          .update(walletBudgets)
+          .set({ balance: sql`balance + ${budgetBalanceChange}` })
+          .where(eq(walletBudgets.id, input.budgetId));
       }
 
-      await db.query('COMMIT');
+      return expense;
+    });
 
-      return {
-        id: expense.id,
-        userId: expense.user_id,
-        walletId: expense.wallet_id,
-        categoryId: expense.category_id,
-        budgetId: expense.budget_id,
-        debit: parseFloat(expense.debit),
-        credit: parseFloat(expense.credit),
-        note: expense.note,
-        date: expense.date,
-        createdAt: expense.created_at,
-        updatedAt: expense.updated_at,
-      };
-    } catch (error) {
-      await db.query('ROLLBACK');
-      throw error;
-    }
+    return {
+      ...result,
+      debit: parseFloat(result.debit),
+      credit: parseFloat(result.credit),
+    };
   },
 
   /**
    * Update an expense and adjust wallet/budget balances
    */
-  async updateExpense(id: string, userId: string, input: UpdateExpenseInput): Promise<Expense> {
-    const db = getDbPool();
+  async updateExpense(id: string, userId: number, input: UpdateExpenseInput): Promise<Expense> {
+    const db = getDb();
 
     // Get existing expense
     const existingExpense = await this.getExpenseById(id, userId);
 
-    await db.query('BEGIN');
-
-    try {
+    // Use Drizzle transaction
+    const result = await db.transaction(async (tx) => {
       // Reverse old balance changes
       const oldBalanceChange = existingExpense.credit - existingExpense.debit;
-      await db.query('UPDATE wallet_wallets SET balance = balance - $1 WHERE id = $2', [
-        oldBalanceChange,
-        existingExpense.walletId,
-      ]);
+      await tx
+        .update(walletWallets)
+        .set({ balance: sql`balance - ${oldBalanceChange}` })
+        .where(eq(walletWallets.id, existingExpense.walletId));
 
       if (existingExpense.budgetId) {
         const oldBudgetChange = existingExpense.debit - existingExpense.credit;
-        await db.query('UPDATE wallet_budgets SET balance = balance - $1 WHERE id = $2', [
-          oldBudgetChange,
-          existingExpense.budgetId,
-        ]);
+        await tx
+          .update(walletBudgets)
+          .set({ balance: sql`balance - ${oldBudgetChange}` })
+          .where(eq(walletBudgets.id, existingExpense.budgetId));
       }
 
-      // Update expense
-      const updates: string[] = [];
-      const params: any[] = [];
-      let paramIndex = 1;
+      // Build update object
+      const updateData: Partial<typeof walletExpenses.$inferInsert> = {};
 
-      if (input.walletId !== undefined) {
-        updates.push(`wallet_id = $${paramIndex}`);
-        params.push(input.walletId);
-        paramIndex++;
-      }
+      if (input.walletId !== undefined) updateData.walletId = input.walletId;
+      if (input.categoryId !== undefined) updateData.categoryId = input.categoryId;
+      if (input.budgetId !== undefined) updateData.budgetId = input.budgetId;
+      if (input.debit !== undefined) updateData.debit = input.debit.toString();
+      if (input.credit !== undefined) updateData.credit = input.credit.toString();
+      if (input.description !== undefined) updateData.description = input.description;
+      if (input.date !== undefined) updateData.date = input.date;
 
-      if (input.categoryId !== undefined) {
-        updates.push(`category_id = $${paramIndex}`);
-        params.push(input.categoryId);
-        paramIndex++;
-      }
-
-      if (input.budgetId !== undefined) {
-        updates.push(`budget_id = $${paramIndex}`);
-        params.push(input.budgetId);
-        paramIndex++;
-      }
-
-      if (input.debit !== undefined) {
-        updates.push(`debit = $${paramIndex}`);
-        params.push(input.debit);
-        paramIndex++;
-      }
-
-      if (input.credit !== undefined) {
-        updates.push(`credit = $${paramIndex}`);
-        params.push(input.credit);
-        paramIndex++;
-      }
-
-      if (input.note !== undefined) {
-        updates.push(`note = $${paramIndex}`);
-        params.push(input.note);
-        paramIndex++;
-      }
-
-      if (input.date !== undefined) {
-        updates.push(`date = $${paramIndex}`);
-        params.push(input.date);
-        paramIndex++;
-      }
-
-      if (updates.length === 0) {
+      if (Object.keys(updateData).length === 0) {
         throw new BadRequestError('No fields to update');
       }
 
-      params.push(id);
+      // Always update timestamp
+      updateData.updatedAt = new Date();
 
-      const result = await db.query(
-        `UPDATE wallet_expenses SET ${updates.join(', ')}, updated_at = NOW()
-         WHERE id = $${paramIndex}
-         RETURNING id, user_id, wallet_id, category_id, budget_id, debit, credit, note, date, created_at, updated_at`,
-        params
-      );
-
-      const expense = result.rows[0];
+      // Update expense
+      const [expense] = await tx
+        .update(walletExpenses)
+        .set(updateData)
+        .where(eq(walletExpenses.id, id))
+        .returning();
 
       // Apply new balance changes
       const newBalanceChange = parseFloat(expense.credit) - parseFloat(expense.debit);
       const targetWalletId = input.walletId || existingExpense.walletId;
-      await db.query('UPDATE wallet_wallets SET balance = balance + $1 WHERE id = $2', [
-        newBalanceChange,
-        targetWalletId,
-      ]);
+      await tx
+        .update(walletWallets)
+        .set({ balance: sql`balance + ${newBalanceChange}` })
+        .where(eq(walletWallets.id, targetWalletId));
 
       const targetBudgetId =
         input.budgetId !== undefined ? input.budgetId : existingExpense.budgetId;
       if (targetBudgetId) {
         const newBudgetChange = parseFloat(expense.debit) - parseFloat(expense.credit);
-        await db.query('UPDATE wallet_budgets SET balance = balance + $1 WHERE id = $2', [
-          newBudgetChange,
-          targetBudgetId,
-        ]);
+        await tx
+          .update(walletBudgets)
+          .set({ balance: sql`balance + ${newBudgetChange}` })
+          .where(eq(walletBudgets.id, targetBudgetId));
       }
 
-      await db.query('COMMIT');
+      return expense;
+    });
 
-      return {
-        id: expense.id,
-        userId: expense.user_id,
-        walletId: expense.wallet_id,
-        categoryId: expense.category_id,
-        budgetId: expense.budget_id,
-        debit: parseFloat(expense.debit),
-        credit: parseFloat(expense.credit),
-        note: expense.note,
-        date: expense.date,
-        createdAt: expense.created_at,
-        updatedAt: expense.updated_at,
-      };
-    } catch (error) {
-      await db.query('ROLLBACK');
-      throw error;
-    }
+    return {
+      ...result,
+      debit: parseFloat(result.debit),
+      credit: parseFloat(result.credit),
+    };
   },
 
   /**
    * Delete an expense and reverse balance changes
    */
-  async deleteExpense(id: string, userId: string): Promise<boolean> {
-    const db = getDbPool();
+  async deleteExpense(id: string, userId: number): Promise<boolean> {
+    const db = getDb();
 
     // Get existing expense
     const expense = await this.getExpenseById(id, userId);
 
-    await db.query('BEGIN');
-
-    try {
+    // Use Drizzle transaction
+    await db.transaction(async (tx) => {
       // Reverse balance changes
       const balanceChange = expense.credit - expense.debit;
-      await db.query('UPDATE wallet_wallets SET balance = balance - $1 WHERE id = $2', [
-        balanceChange,
-        expense.walletId,
-      ]);
+      await tx
+        .update(walletWallets)
+        .set({ balance: sql`balance - ${balanceChange}` })
+        .where(eq(walletWallets.id, expense.walletId));
 
       if (expense.budgetId) {
         const budgetChange = expense.debit - expense.credit;
-        await db.query('UPDATE wallet_budgets SET balance = balance - $1 WHERE id = $2', [
-          budgetChange,
-          expense.budgetId,
-        ]);
+        await tx
+          .update(walletBudgets)
+          .set({ balance: sql`balance - ${budgetChange}` })
+          .where(eq(walletBudgets.id, expense.budgetId));
       }
 
       // Delete expense
-      await db.query('DELETE FROM wallet_expenses WHERE id = $1', [id]);
+      await tx.delete(walletExpenses).where(eq(walletExpenses.id, id));
+    });
 
-      await db.query('COMMIT');
-      return true;
-    } catch (error) {
-      await db.query('ROLLBACK');
-      throw error;
-    }
+    return true;
   },
 };

@@ -67,7 +67,7 @@ export const walletService = {
     }
 
     // Verify ownership
-    if (wallet.userId !== userId) {
+    if (wallet.userId.toString() !== userId.toString()) {
       throw new ForbiddenError('You do not have permission to access this wallet');
     }
 

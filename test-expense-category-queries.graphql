@@ -1,0 +1,106 @@
+# Test queries for expense categories
+
+# 1. Get all categories for user
+query GetAllCategories {
+  walletExpenseCategories {
+    id
+    name
+    type
+    color
+    icon
+    isSystem
+    createdAt
+    updatedAt
+  }
+}
+
+# 2. Get only expense categories
+query GetExpenseCategories {
+  walletExpenseCategories(type: expense) {
+    id
+    name
+    type
+    color
+    icon
+    isSystem
+  }
+}
+
+# 3. Get only income categories
+query GetIncomeCategories {
+  walletExpenseCategories(type: income) {
+    id
+    name
+    type
+    color
+    icon
+    isSystem
+  }
+}
+
+# 4. Get category by ID
+query GetCategoryById {
+  walletExpenseCategory(id: "1") {
+    id
+    name
+    type
+    color
+    icon
+    isSystem
+    createdAt
+    updatedAt
+  }
+}
+
+# 5. Create a new expense category
+mutation CreateExpenseCategory {
+  walletExpenseCategoryCreate(
+    input: { name: "Transporte", type: expense, color: "#FF5733", icon: "🚗" }
+  ) {
+    id
+    name
+    type
+    color
+    icon
+    isSystem
+    createdAt
+  }
+}
+
+# 6. Create a new income category
+mutation CreateIncomeCategory {
+  walletExpenseCategoryCreate(
+    input: { name: "Salario", type: income, color: "#33FF57", icon: "💰" }
+  ) {
+    id
+    name
+    type
+    color
+    icon
+    isSystem
+    createdAt
+  }
+}
+
+# 7. Update a category
+mutation UpdateCategory {
+  walletExpenseCategoryUpdate(
+    id: "1"
+    input: { name: "Transporte Actualizado", color: "#FF9933" }
+  ) {
+    id
+    name
+    type
+    color
+    icon
+    updatedAt
+  }
+}
+
+# 8. Delete a category
+mutation DeleteCategory {
+  walletExpenseCategoryRemove(id: "1") {
+    success
+    message
+  }
+}

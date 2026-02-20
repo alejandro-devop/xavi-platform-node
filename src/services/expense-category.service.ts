@@ -51,22 +51,7 @@ export const expenseCategoryService = {
   /**
    * Get a category by ID
    */
-  async getCategoryById(id: string, userId: string): Promise<ExpenseCategory> {
-    const db = getDbPool();
-    const result = await db.query(
-      `SELECT id, user_id, name, type, color, icon, is_system, created_at, updated_at
-       FROM wallet_expense_categories
-       WHERE id = $1`,
-      [id]
-    );
-
-    if (result.rows.length === 0) {
-      throw new NotFoundError('Category not found');
-    }
-
-    const category = result.rows[0];
-
-    // Convert both to strinnumber, userId: number): Promise<ExpenseCategory> {
+  async getCategoryById(id: number, userId: number): Promise<ExpenseCategory> {
     const db = getDb();
 
     const category = await db.query.walletExpenseCategories.findFirst({
@@ -78,17 +63,18 @@ export const expenseCategoryService = {
     }
 
     // Verify ownership
-    if (category.userId !== userId) {
+    if (category.userId.toString() !== userId.toString()) {
       throw new ForbiddenError('You do not have permission to access this category');
     }
 
-    return category  RETURNING id, user_id, name, type, color, icon, is_system, created_at, updated_at`,
-      [userId, input.name, input.type, input.color || null, input.icon || null]
-    );
+    return category;
+  },
 
-    const category = result.rows[0];
-
-    return {number,
+  /**
+   * Create a new expense category
+   */
+  async createCategory(
+    userId: number,
     input: CreateExpenseCategoryInput
   ): Promise<ExpenseCategory> {
     const db = getDb();
@@ -105,21 +91,12 @@ export const expenseCategoryService = {
       })
       .returning();
 
-    return categoryonst category = await this.getCategoryById(id, userId);
-
-    if (category.isSystem) {
-      throw new BadRequestError('Cannot update system categories');
-    }
-
-    const updates: string[] = [];
-    const params: any[] = [];
-    let paramIndex = 1;
-
-    if (input.name !== undefined) {
-      updates.push(`name = $${paramIndex}`);
-      params.push(input.name);
-      paramIndex++;
-    }number,
+    return category;
+  } /**
+   * Update a category
+   */,
+  async updateCategory(
+    id: number,
     userId: number,
     input: UpdateExpenseCategoryInput
   ): Promise<ExpenseCategory> {
@@ -153,7 +130,11 @@ export const expenseCategoryService = {
       .where(eq(walletExpenseCategories.id, id))
       .returning();
 
-    return updatedCategorynumber, userId: number): Promise<boolean> {
+    return updatedCategory;
+  } /**
+   * Delete a category
+   */,
+  async deleteCategory(id: number, userId: number): Promise<boolean> {
     const db = getDb();
 
     // Verify ownership
@@ -163,4 +144,8 @@ export const expenseCategoryService = {
       throw new BadRequestError('Cannot delete system categories');
     }
 
-    await db.delete(walletExpenseCategories).where(eq(walletExpenseCategories.id, id)
+    await db.delete(walletExpenseCategories).where(eq(walletExpenseCategories.id, id));
+
+    return true;
+  },
+};

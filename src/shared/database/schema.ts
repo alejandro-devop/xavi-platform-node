@@ -50,7 +50,7 @@ export const walletExpenseCategories = pgTable('wallet_expense_categories', {
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
   name: varchar('name', { length: 255 }).notNull(),
-  type: varchar('type', { length: 50 }).notNull(), // 'income' | 'expense'
+  type: varchar('type', { length: 50 }).notNull().$type<'income' | 'expense'>(),
   color: varchar('color', { length: 7 }),
   icon: varchar('icon', { length: 50 }),
   description: text('description'),
