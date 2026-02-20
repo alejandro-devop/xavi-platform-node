@@ -123,7 +123,8 @@ export const expenseService = {
 
     const expense = result.rows[0];
 
-    if (expense.user_id !== userId) {
+    // Convert both to string for comparison (userId from JWT is string, user_id from DB is integer)
+    if (expense.user_id.toString() !== userId.toString()) {
       throw new ForbiddenError('You do not have permission to access this expense');
     }
 
@@ -157,7 +158,8 @@ export const expenseService = {
       throw new NotFoundError('Wallet not found');
     }
 
-    if (walletResult.rows[0].user_id !== userId) {
+    // Convert both to string for comparison
+    if (walletResult.rows[0].user_id.toString() !== userId.toString()) {
       throw new ForbiddenError('You do not have permission to add expenses to this wallet');
     }
 
@@ -170,7 +172,8 @@ export const expenseService = {
       if (categoryResult.rows.length === 0) {
         throw new NotFoundError('Category not found');
       }
-      if (categoryResult.rows[0].user_id !== userId) {
+      // Convert both to string for comparison
+      if (categoryResult.rows[0].user_id.toString() !== userId.toString()) {
         throw new ForbiddenError('You do not have permission to use this category');
       }
     }
@@ -183,7 +186,8 @@ export const expenseService = {
       if (budgetResult.rows.length === 0) {
         throw new NotFoundError('Budget not found');
       }
-      if (budgetResult.rows[0].user_id !== userId) {
+      // Convert both to string for comparison
+      if (budgetResult.rows[0].user_id.toString() !== userId.toString()) {
         throw new ForbiddenError('You do not have permission to use this budget');
       }
     }

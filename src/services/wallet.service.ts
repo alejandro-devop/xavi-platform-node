@@ -73,7 +73,8 @@ export const walletService = {
 
     const wallet = result.rows[0];
 
-    if (wallet.user_id !== userId) {
+    // Convert both to string for comparison (userId from JWT is string, user_id from DB is integer)
+    if (wallet.user_id.toString() !== userId.toString()) {
       throw new ForbiddenError('You do not have permission to access this wallet');
     }
 

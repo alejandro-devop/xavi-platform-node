@@ -79,7 +79,8 @@ export const expenseCategoryService = {
 
     const category = result.rows[0];
 
-    if (category.user_id !== userId) {
+    // Convert both to string for comparison (userId from JWT is string, user_id from DB is integer)
+    if (category.user_id.toString() !== userId.toString()) {
       throw new ForbiddenError('You do not have permission to access this category');
     }
 
