@@ -1,7 +1,6 @@
 import { ApolloServer } from '@apollo/server';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
 import { ApolloServerPluginLandingPageDisabled } from '@apollo/server/plugin/disabled';
-import { expressMiddleware } from '@as-integrations/express4';
 import { typeDefs } from './schema';
 import { resolvers } from './resolvers';
 import { Request } from 'express';
