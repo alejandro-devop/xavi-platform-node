@@ -2,32 +2,11 @@ import { getDb } from '../shared/database/drizzle';
 import { walletExpenseCategories } from '../shared/database/schema';
 import { eq, and, desc, asc } from 'drizzle-orm';
 import { NotFoundError, ForbiddenError, BadRequestError } from '../shared/errors';
-
-export interface ExpenseCategory {
-  id: number;
-  userId: number;
-  name: string;
-  type: 'income' | 'expense';
-  color?: string | null;
-  icon?: string | null;
-  isSystem: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface CreateExpenseCategoryInput {
-  name: string;
-  type: 'income' | 'expense';
-  color?: string;
-  icon?: string;
-}
-
-export interface UpdateExpenseCategoryInput {
-  name?: string;
-  type?: 'income' | 'expense';
-  color?: string;
-  icon?: string;
-}
+import type {
+  ExpenseCategory,
+  CreateExpenseCategoryInput,
+  UpdateExpenseCategoryInput,
+} from '../types/services/expense-category.types';
 
 export const expenseCategoryService = {
   /**

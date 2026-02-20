@@ -2,33 +2,7 @@ import { getDb } from '../shared/database/drizzle';
 import { walletWallets } from '../shared/database/schema';
 import { eq, and, desc } from 'drizzle-orm';
 import { NotFoundError, ForbiddenError, BadRequestError } from '../shared/errors';
-
-export interface Wallet {
-  id: string;
-  userId: number;
-  name: string;
-  icon?: string | null;
-  balance: number;
-  initialBalance: number;
-  isMain: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface CreateWalletInput {
-  name: string;
-  icon?: string;
-  initialBalance?: number;
-  isMain?: boolean;
-}
-
-export interface UpdateWalletInput {
-  name?: string;
-  icon?: string;
-  balance?: number;
-  initialBalance?: number;
-  isMain?: boolean;
-}
+import type { Wallet, CreateWalletInput, UpdateWalletInput } from '../types/services/wallet.types';
 
 export const walletService = {
   /**
