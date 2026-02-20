@@ -22,9 +22,13 @@
     "docker:build": "docker build -t xavi-api .",
     "docker:run": "docker run -p 8080:8080 --env-file .env xavi-api",
     "docker:up": "docker compose up -d",
+    "docker:stop": "docker compose stop",
     "docker:down": "docker compose down",
+    "docker:down:clean": "docker compose down -v",
+    "docker:restart": "docker compose restart",
     "docker:logs": "docker compose logs -f",
-    "docker:health": "docker compose logs app --tail=20"
+    "docker:health": "docker compose logs app --tail=20",
+    "stop": "docker compose stop"
   },
   "keywords": [
     "productivity",
