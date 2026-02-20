@@ -17,11 +17,11 @@ export function createApp(): Application {
           : {
               directives: {
                 defaultSrc: ["'self'"],
-                scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://unpkg.com"],
-                styleSrc: ["'self'", "'unsafe-inline'", "https://unpkg.com"],
+                scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", 'https://unpkg.com'],
+                styleSrc: ["'self'", "'unsafe-inline'", 'https://unpkg.com'],
                 connectSrc: ["'self'"],
-                imgSrc: ["'self'", "data:", "https:"],
-                fontSrc: ["'self'", "data:"],
+                imgSrc: ["'self'", 'data:', 'https:'],
+                fontSrc: ["'self'", 'data:'],
                 objectSrc: ["'none'"],
                 mediaSrc: ["'self'"],
                 frameSrc: ["'none'"],

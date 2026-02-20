@@ -134,6 +134,7 @@ The best way to explore and test the GraphQL API is using the built-in GraphiQL 
 **URL**: http://localhost:8080/graphiql (development only)
 
 **Features**:
+
 - 📚 **Documentation Explorer** - Click "Docs" to browse all queries, mutations, and types
 - ✨ **Autocomplete** - Press `Ctrl+Space` while typing to see available fields
 - 🔍 **Query History** - All your previous queries are saved
@@ -142,6 +143,7 @@ The best way to explore and test the GraphQL API is using the built-in GraphiQL 
 - 🔐 **Headers Editor** - Add authentication tokens easily
 
 **Try your first query:**
+
 ```graphql
 query HealthCheck {
   health {
@@ -152,6 +154,7 @@ query HealthCheck {
 ```
 
 **For authenticated queries**, click the "Headers" tab at the bottom and add:
+
 ```json
 {
   "Authorization": "Bearer YOUR_JWT_TOKEN_HERE"
@@ -159,12 +162,14 @@ query HealthCheck {
 ```
 
 **Keyboard Shortcuts**:
+
 - `Cmd/Ctrl + Enter` - Execute query
 - `Ctrl + Space` - Trigger autocomplete
 - `Shift + Ctrl + P` - Prettify query
 - `Cmd/Ctrl + F` - Search in editor
 
 **Tips**:
+
 - Explore the schema by clicking "< Docs" button on the right
 - Use fragments to reuse field selections
 - Try introspection queries to learn about the schema

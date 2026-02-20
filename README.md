@@ -25,6 +25,7 @@ All comprehensive documentation is available in [`docs/architecture/`](./docs/ar
 - **[AI_READING_GUIDE.md](./docs/architecture/AI_READING_GUIDE.md)** - How AI should read docs (with examples)
 
 ### 🔥 NEW: GraphQL Implementation (Advanced Features)
+
 - **[GRAPHQL_OVERVIEW.md](./docs/architecture/GRAPHQL_OVERVIEW.md)** ⭐ - **START HERE** for GraphQL
   - 15+ exclusive features not in REST API
   - Wallet module: auto-scheduling, pay/cancel, bulk operations
@@ -38,6 +39,7 @@ All comprehensive documentation is available in [`docs/architecture/`](./docs/ar
 #### 🚀 GraphiQL IDE (Interactive Documentation)
 
 **Explore the API with GraphiQL:**
+
 - **URL**: `http://localhost:8080/graphiql` (development only)
 - **Features**:
   - 📚 Full schema documentation and type explorer
@@ -48,6 +50,7 @@ All comprehensive documentation is available in [`docs/architecture/`](./docs/ar
   - ⚡ Real-time error detection
 
 **Quick Start:**
+
 ```bash
 # Start the server
 npm run dev
@@ -57,6 +60,7 @@ npm run dev
 ```
 
 **For authenticated queries**, add your JWT token in the Headers panel:
+
 ```json
 {
   "Authorization": "Bearer YOUR_TOKEN_HERE"
@@ -182,15 +186,16 @@ npm run dev
 | **Domains** | 10 |
 | **Documentation** | ~300 KB (incl. GraphQL) |
 =======
-| Metric              | Value   |
+| Metric | Value |
 | ------------------- | ------- |
-| **API Endpoints**   | 150+    |
-| **Database Tables** | 54      |
-| **Use Cases**       | 15      |
-| **Functions**       | 10      |
-| **Domains**         | 10      |
-| **Documentation**   | ~175 KB |
->>>>>>> a834dea8371bf902dcee9a2baa50127553c0e6ae
+| **API Endpoints** | 150+ |
+| **Database Tables** | 54 |
+| **Use Cases** | 15 |
+| **Functions** | 10 |
+| **Domains** | 10 |
+| **Documentation** | ~175 KB |
+
+> > > > > > > a834dea8371bf902dcee9a2baa50127553c0e6ae
 
 ---
 
@@ -205,13 +210,15 @@ npm run dev
 - AWS Lambda / Google Cloud Functions
 
 ### Key Libraries
+
 <<<<<<< HEAD
+
 - `@apollo/server` - GraphQL server ⭐
 - `graphql` - GraphQL core ⭐
-- `dataloader` - N+1 query prevention ⭐
-=======
+- # `dataloader` - N+1 query prevention ⭐
 
->>>>>>> a834dea8371bf902dcee9a2baa50127553c0e6ae
+> > > > > > > a834dea8371bf902dcee9a2baa50127553c0e6ae
+
 - `pg` - PostgreSQL client
 - `ioredis` - Redis client
 - `jsonwebtoken` - JWT auth

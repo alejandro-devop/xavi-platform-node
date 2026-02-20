@@ -13,32 +13,38 @@ GraphiQL es un IDE (Entorno de Desarrollo Integrado) interactivo para explorar y
 ## ✨ Características Principales
 
 ### 1. **Explorador de Documentación**
+
 - Haz clic en el botón **"< Docs"** en la esquina superior derecha
 - Navega por todas las queries, mutations y tipos disponibles
 - Lee descripciones detalladas de cada campo
 - Explora el esquema completo de forma interactiva
 
 ### 2. **Autocompletado Inteligente**
+
 - Presiona `Ctrl + Space` mientras escribes para ver sugerencias
 - El autocompletado es consciente del contexto y del esquema
 - Sugerencias incluyen campos, argumentos y tipos
 
 ### 3. **Validación en Tiempo Real**
+
 - Los errores de sintaxis se muestran mientras escribes
 - Validación de tipos automática
 - Sugerencias de corrección en el editor
 
 ### 4. **Editor de Headers**
+
 - Haz clic en "Headers" en la parte inferior
 - Añade headers personalizados (especialmente útil para autenticación)
 - Los headers persisten entre sesiones
 
 ### 5. **Historial de Queries**
+
 - Todas tus queries se guardan automáticamente
 - Accede al historial desde el panel lateral
 - Reutiliza queries anteriores
 
 ### 6. **Formateo Automático**
+
 - Presiona `Shift + Ctrl + P` para formatear tu query
 - Mantén un código limpio y legible
 - Indentación automática
@@ -57,6 +63,7 @@ query HealthCheck {
 ```
 
 **Resultado esperado:**
+
 ```json
 {
   "data": {
@@ -73,6 +80,7 @@ query HealthCheck {
 Para queries que requieren autenticación:
 
 **1. Obtén tu token JWT** (usando el endpoint de login REST):
+
 ```bash
 curl -X POST http://localhost:8080/api/auth/login \
   -H "Content-Type: application/json" \
@@ -83,6 +91,7 @@ curl -X POST http://localhost:8080/api/auth/login \
 ```
 
 **2. En GraphiQL, abre el panel de Headers** (parte inferior):
+
 ```json
 {
   "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
@@ -90,6 +99,7 @@ curl -X POST http://localhost:8080/api/auth/login \
 ```
 
 **3. Ejecuta tu query:**
+
 ```graphql
 query GetMyWallets {
   wallets {
@@ -154,15 +164,17 @@ mutation CreateExpense {
 ### 3. Usando Variables
 
 En el panel de **Variables** (parte inferior):
+
 ```json
 {
   "walletId": "123e4567-e89b-12d3-a456-426614174000",
-  "amount": 75.50,
+  "amount": 75.5,
   "description": "Gasolina"
 }
 ```
 
 En el editor de queries:
+
 ```graphql
 mutation CreateExpense($walletId: ID!, $amount: Decimal!, $description: String!) {
   walletExpenseAdd(
@@ -183,20 +195,20 @@ mutation CreateExpense($walletId: ID!, $amount: Decimal!, $description: String!)
 
 ## ⌨️ Atajos de Teclado
 
-| Atajo | Acción |
-|-------|--------|
-| `Cmd/Ctrl + Enter` | Ejecutar query |
-| `Ctrl + Space` | Activar autocompletado |
-| `Shift + Ctrl + P` | Formatear query |
-| `Cmd/Ctrl + F` | Buscar en el editor |
-| `Cmd/Ctrl + /` | Comentar/descomentar línea |
+| Atajo              | Acción                        |
+| ------------------ | ----------------------------- |
+| `Cmd/Ctrl + Enter` | Ejecutar query                |
+| `Ctrl + Space`     | Activar autocompletado        |
+| `Shift + Ctrl + P` | Formatear query               |
+| `Cmd/Ctrl + F`     | Buscar en el editor           |
+| `Cmd/Ctrl + /`     | Comentar/descomentar línea    |
 | `Shift + Ctrl + F` | Formatear query (alternativo) |
 
 ## 🔍 Exploración del Esquema
 
 ### Navegación por Tipos
 
-1. Haz clic en **"< Docs"** 
+1. Haz clic en **"< Docs"**
 2. Verás tres secciones principales:
    - **Query** - Todas las consultas disponibles (22 queries)
    - **Mutation** - Todas las mutaciones disponibles (79 mutations)
@@ -280,6 +292,7 @@ query GetWallet($includeExpenses: Boolean!) {
 ```
 
 Variables:
+
 ```json
 {
   "includeExpenses": true
@@ -326,6 +339,7 @@ if (process.env.NODE_ENV !== 'production') {
 - **Courses** (Cursos): 3 operaciones
 
 Para ver la documentación completa de todas las operaciones, consulta:
+
 - [GRAPHQL_SCHEMA_COMPLETE.md](./architecture/GRAPHQL_SCHEMA_COMPLETE.md)
 - [GRAPHQL_OVERVIEW.md](./architecture/GRAPHQL_OVERVIEW.md)
 
@@ -336,6 +350,7 @@ Para ver la documentación completa de todas las operaciones, consulta:
 **Problema**: Página en blanco o error de carga
 
 **Solución**:
+
 1. Verifica que el servidor esté corriendo: `npm run dev`
 2. Confirma que no estás en modo producción
 3. Revisa la consola del navegador para errores de CSP
@@ -346,6 +361,7 @@ Para ver la documentación completa de todas las operaciones, consulta:
 **Problema**: "Unauthorized" en queries protegidas
 
 **Solución**:
+
 1. Verifica que el token JWT esté en el header `Authorization`
 2. Asegúrate de usar el formato: `Bearer <token>`
 3. Confirma que el token no haya expirado
@@ -356,6 +372,7 @@ Para ver la documentación completa de todas las operaciones, consulta:
 **Problema**: `Ctrl+Space` no muestra sugerencias
 
 **Solución**:
+
 1. Espera a que GraphiQL cargue el esquema completamente
 2. Verifica que el endpoint GraphQL esté respondiendo
 3. Revisa la consola para errores de introspección
