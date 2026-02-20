@@ -163,7 +163,7 @@ export async function getActivityById(req: Request, res: Response): Promise<void
   const activity = result.rows[0];
 
   // Check ownership
-  if (activity.user_id !== userId) {
+  if (activity.user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to access this activity');
   }
 
@@ -200,7 +200,7 @@ export async function updateActivity(req: Request, res: Response): Promise<void>
     throw new NotFoundError('Activity not found');
   }
 
-  if (checkResult.rows[0].user_id !== userId) {
+  if (checkResult.rows[0].user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to update this activity');
   }
 
@@ -283,7 +283,7 @@ export async function deleteActivity(req: Request, res: Response): Promise<void>
     throw new NotFoundError('Activity not found');
   }
 
-  if (checkResult.rows[0].user_id !== userId) {
+  if (checkResult.rows[0].user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to delete this activity');
   }
 
@@ -310,7 +310,7 @@ export async function completeActivity(req: Request, res: Response): Promise<voi
     throw new NotFoundError('Activity not found');
   }
 
-  if (checkResult.rows[0].user_id !== userId) {
+  if (checkResult.rows[0].user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to complete this activity');
   }
 

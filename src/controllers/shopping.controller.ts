@@ -123,7 +123,7 @@ export async function getShoppingListById(req: Request, res: Response): Promise<
 
   const list = listResult.rows[0];
 
-  if (list.user_id !== userId) {
+  if (list.user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to access this shopping list');
   }
 
@@ -176,7 +176,7 @@ export async function updateShoppingList(req: Request, res: Response): Promise<v
     throw new NotFoundError('Shopping list not found');
   }
 
-  if (checkResult.rows[0].user_id !== userId) {
+  if (checkResult.rows[0].user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to update this shopping list');
   }
 
@@ -249,7 +249,7 @@ export async function deleteShoppingList(req: Request, res: Response): Promise<v
     throw new NotFoundError('Shopping list not found');
   }
 
-  if (checkResult.rows[0].user_id !== userId) {
+  if (checkResult.rows[0].user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to delete this shopping list');
   }
 
@@ -269,7 +269,7 @@ export async function completeShoppingList(req: Request, res: Response): Promise
     throw new NotFoundError('Shopping list not found');
   }
 
-  if (checkResult.rows[0].user_id !== userId) {
+  if (checkResult.rows[0].user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to complete this shopping list');
   }
 
@@ -311,7 +311,7 @@ export async function createShoppingItem(req: Request, res: Response): Promise<v
     throw new NotFoundError('Shopping list not found');
   }
 
-  if (listResult.rows[0].user_id !== userId) {
+  if (listResult.rows[0].user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to add items to this shopping list');
   }
 
@@ -365,7 +365,7 @@ export async function updateShoppingItem(req: Request, res: Response): Promise<v
     throw new NotFoundError('Shopping list not found');
   }
 
-  if (listResult.rows[0].user_id !== userId) {
+  if (listResult.rows[0].user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to update items in this shopping list');
   }
 
@@ -477,7 +477,7 @@ export async function deleteShoppingItem(req: Request, res: Response): Promise<v
     throw new NotFoundError('Shopping list not found');
   }
 
-  if (listResult.rows[0].user_id !== userId) {
+  if (listResult.rows[0].user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to delete items from this shopping list');
   }
 
@@ -508,7 +508,7 @@ export async function toggleItemPurchased(req: Request, res: Response): Promise<
     throw new NotFoundError('Shopping list not found');
   }
 
-  if (listResult.rows[0].user_id !== userId) {
+  if (listResult.rows[0].user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to update items in this shopping list');
   }
 

@@ -135,7 +135,7 @@ export async function getSleepLogById(req: Request, res: Response): Promise<void
 
   const log = result.rows[0];
 
-  if (log.user_id !== userId) {
+  if (log.user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to access this sleep log');
   }
 
@@ -170,7 +170,7 @@ export async function updateSleepLog(req: Request, res: Response): Promise<void>
     throw new NotFoundError('Sleep log not found');
   }
 
-  if (checkResult.rows[0].user_id !== userId) {
+  if (checkResult.rows[0].user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to update this sleep log');
   }
 
@@ -278,7 +278,7 @@ export async function deleteSleepLog(req: Request, res: Response): Promise<void>
     throw new NotFoundError('Sleep log not found');
   }
 
-  if (checkResult.rows[0].user_id !== userId) {
+  if (checkResult.rows[0].user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to delete this sleep log');
   }
 

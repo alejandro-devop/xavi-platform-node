@@ -130,7 +130,7 @@ export async function getTodoById(req: Request, res: Response): Promise<void> {
 
   const todo = result.rows[0];
 
-  if (todo.user_id !== userId) {
+  if (todo.user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to access this todo');
   }
 
@@ -181,7 +181,7 @@ export async function updateTodo(req: Request, res: Response): Promise<void> {
     throw new NotFoundError('Todo not found');
   }
 
-  if (checkResult.rows[0].user_id !== userId) {
+  if (checkResult.rows[0].user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to update this todo');
   }
 
@@ -260,7 +260,7 @@ export async function deleteTodo(req: Request, res: Response): Promise<void> {
     throw new NotFoundError('Todo not found');
   }
 
-  if (checkResult.rows[0].user_id !== userId) {
+  if (checkResult.rows[0].user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to delete this todo');
   }
 
@@ -284,7 +284,7 @@ export async function completeTodo(req: Request, res: Response): Promise<void> {
     throw new NotFoundError('Todo not found');
   }
 
-  if (checkResult.rows[0].user_id !== userId) {
+  if (checkResult.rows[0].user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to complete this todo');
   }
 
@@ -330,7 +330,7 @@ export async function createSubtask(req: Request, res: Response): Promise<void> 
     throw new NotFoundError('Todo not found');
   }
 
-  if (todoResult.rows[0].user_id !== userId) {
+  if (todoResult.rows[0].user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to add subtasks to this todo');
   }
 
@@ -371,7 +371,7 @@ export async function updateSubtask(req: Request, res: Response): Promise<void> 
     throw new NotFoundError('Todo not found');
   }
 
-  if (todoResult.rows[0].user_id !== userId) {
+  if (todoResult.rows[0].user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to update this subtask');
   }
 
@@ -446,7 +446,7 @@ export async function deleteSubtask(req: Request, res: Response): Promise<void> 
     throw new NotFoundError('Todo not found');
   }
 
-  if (todoResult.rows[0].user_id !== userId) {
+  if (todoResult.rows[0].user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to delete this subtask');
   }
 

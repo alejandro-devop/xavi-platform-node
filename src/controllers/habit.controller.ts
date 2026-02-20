@@ -100,7 +100,7 @@ export async function getHabitById(req: Request, res: Response): Promise<void> {
 
   const habit = result.rows[0];
 
-  if (habit.user_id !== userId) {
+  if (habit.user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to access this habit');
   }
 
@@ -137,7 +137,7 @@ export async function updateHabit(req: Request, res: Response): Promise<void> {
     throw new NotFoundError('Habit not found');
   }
 
-  if (checkResult.rows[0].user_id !== userId) {
+  if (checkResult.rows[0].user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to update this habit');
   }
 
@@ -231,7 +231,7 @@ export async function deleteHabit(req: Request, res: Response): Promise<void> {
     throw new NotFoundError('Habit not found');
   }
 
-  if (checkResult.rows[0].user_id !== userId) {
+  if (checkResult.rows[0].user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to delete this habit');
   }
 
@@ -259,7 +259,7 @@ export async function logHabitCompletion(req: Request, res: Response): Promise<v
     throw new NotFoundError('Habit not found');
   }
 
-  if (habitResult.rows[0].user_id !== userId) {
+  if (habitResult.rows[0].user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to log this habit');
   }
 
@@ -313,7 +313,7 @@ export async function getHabitLogs(req: Request, res: Response): Promise<void> {
     throw new NotFoundError('Habit not found');
   }
 
-  if (habitResult.rows[0].user_id !== userId) {
+  if (habitResult.rows[0].user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to access these logs');
   }
 
@@ -364,7 +364,7 @@ export async function getHabitStats(req: Request, res: Response): Promise<void> 
     throw new NotFoundError('Habit not found');
   }
 
-  if (habitResult.rows[0].user_id !== userId) {
+  if (habitResult.rows[0].user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to access these stats');
   }
 

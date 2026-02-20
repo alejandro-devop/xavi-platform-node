@@ -121,7 +121,7 @@ export async function getRoutineById(req: Request, res: Response): Promise<void>
 
   const routine = routineResult.rows[0];
 
-  if (routine.user_id !== userId) {
+  if (routine.user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to access this routine');
   }
 
@@ -171,7 +171,7 @@ export async function updateRoutine(req: Request, res: Response): Promise<void> 
     throw new NotFoundError('Routine not found');
   }
 
-  if (checkResult.rows[0].user_id !== userId) {
+  if (checkResult.rows[0].user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to update this routine');
   }
 
@@ -251,7 +251,7 @@ export async function deleteRoutine(req: Request, res: Response): Promise<void> 
     throw new NotFoundError('Routine not found');
   }
 
-  if (checkResult.rows[0].user_id !== userId) {
+  if (checkResult.rows[0].user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to delete this routine');
   }
 
@@ -271,7 +271,7 @@ export async function toggleRoutineActive(req: Request, res: Response): Promise<
     throw new NotFoundError('Routine not found');
   }
 
-  if (checkResult.rows[0].user_id !== userId) {
+  if (checkResult.rows[0].user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to update this routine');
   }
 
@@ -314,7 +314,7 @@ export async function createRoutineStep(req: Request, res: Response): Promise<vo
     throw new NotFoundError('Routine not found');
   }
 
-  if (routineResult.rows[0].user_id !== userId) {
+  if (routineResult.rows[0].user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to add steps to this routine');
   }
 
@@ -355,7 +355,7 @@ export async function updateRoutineStep(req: Request, res: Response): Promise<vo
     throw new NotFoundError('Routine not found');
   }
 
-  if (routineResult.rows[0].user_id !== userId) {
+  if (routineResult.rows[0].user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to update steps in this routine');
   }
 
@@ -439,7 +439,7 @@ export async function deleteRoutineStep(req: Request, res: Response): Promise<vo
     throw new NotFoundError('Routine not found');
   }
 
-  if (routineResult.rows[0].user_id !== userId) {
+  if (routineResult.rows[0].user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to delete steps from this routine');
   }
 

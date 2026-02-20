@@ -147,7 +147,7 @@ export async function getLearningResourceById(req: Request, res: Response): Prom
 
   const resource = resourceResult.rows[0];
 
-  if (resource.user_id !== userId) {
+  if (resource.user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to access this resource');
   }
 
@@ -200,7 +200,7 @@ export async function updateLearningResource(req: Request, res: Response): Promi
     throw new NotFoundError('Learning resource not found');
   }
 
-  if (checkResult.rows[0].user_id !== userId) {
+  if (checkResult.rows[0].user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to update this resource');
   }
 
@@ -310,7 +310,7 @@ export async function deleteLearningResource(req: Request, res: Response): Promi
     throw new NotFoundError('Learning resource not found');
   }
 
-  if (checkResult.rows[0].user_id !== userId) {
+  if (checkResult.rows[0].user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to delete this resource');
   }
 
@@ -334,7 +334,7 @@ export async function logProgress(req: Request, res: Response): Promise<void> {
     throw new NotFoundError('Learning resource not found');
   }
 
-  if (resourceResult.rows[0].user_id !== userId) {
+  if (resourceResult.rows[0].user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to log progress for this resource');
   }
 
@@ -391,7 +391,7 @@ export async function getProgressSessions(req: Request, res: Response): Promise<
     throw new NotFoundError('Learning resource not found');
   }
 
-  if (resourceResult.rows[0].user_id !== userId) {
+  if (resourceResult.rows[0].user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to access this resource');
   }
 
@@ -426,7 +426,7 @@ export async function updateProgressSession(req: Request, res: Response): Promis
     throw new NotFoundError('Learning resource not found');
   }
 
-  if (resourceResult.rows[0].user_id !== userId) {
+  if (resourceResult.rows[0].user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to update progress for this resource');
   }
 
@@ -510,7 +510,7 @@ export async function deleteProgressSession(req: Request, res: Response): Promis
     throw new NotFoundError('Learning resource not found');
   }
 
-  if (resourceResult.rows[0].user_id !== userId) {
+  if (resourceResult.rows[0].user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to delete progress for this resource');
   }
 

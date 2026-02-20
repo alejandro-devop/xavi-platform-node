@@ -111,7 +111,7 @@ export async function getAccountById(req: Request, res: Response): Promise<void>
 
   const account = result.rows[0];
 
-  if (account.user_id !== userId) {
+  if (account.user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to access this account');
   }
 
@@ -146,7 +146,7 @@ export async function updateAccount(req: Request, res: Response): Promise<void> 
     throw new NotFoundError('Account not found');
   }
 
-  if (checkResult.rows[0].user_id !== userId) {
+  if (checkResult.rows[0].user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to update this account');
   }
 
@@ -235,7 +235,7 @@ export async function deleteAccount(req: Request, res: Response): Promise<void> 
     throw new NotFoundError('Account not found');
   }
 
-  if (checkResult.rows[0].user_id !== userId) {
+  if (checkResult.rows[0].user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to delete this account');
   }
 
@@ -322,7 +322,7 @@ export async function updateCategory(req: Request, res: Response): Promise<void>
 
   const category = checkResult.rows[0];
 
-  if (category.user_id !== userId) {
+  if (category.user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to update this category');
   }
 
@@ -402,7 +402,7 @@ export async function deleteCategory(req: Request, res: Response): Promise<void>
 
   const category = checkResult.rows[0];
 
-  if (category.user_id !== userId) {
+  if (category.user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to delete this category');
   }
 
@@ -429,7 +429,7 @@ export async function createTransaction(req: Request, res: Response): Promise<vo
     throw new NotFoundError('Account not found');
   }
 
-  if (accountResult.rows[0].user_id !== userId) {
+  if (accountResult.rows[0].user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to add transactions to this account');
   }
 
@@ -441,7 +441,7 @@ export async function createTransaction(req: Request, res: Response): Promise<vo
     if (categoryResult.rows.length === 0) {
       throw new NotFoundError('Category not found');
     }
-    if (categoryResult.rows[0].user_id !== userId) {
+    if (categoryResult.rows[0].user_id.toString() !== userId.toString()) {
       throw new ForbiddenError('You do not have permission to use this category');
     }
   }
@@ -619,7 +619,7 @@ export async function getTransactionById(req: Request, res: Response): Promise<v
 
   const t = result.rows[0];
 
-  if (t.user_id !== userId) {
+  if (t.user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to access this transaction');
   }
 
@@ -659,7 +659,7 @@ export async function updateTransaction(req: Request, res: Response): Promise<vo
 
   const oldTransaction = checkResult.rows[0];
 
-  if (oldTransaction.user_id !== userId) {
+  if (oldTransaction.user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to update this transaction');
   }
 
@@ -776,7 +776,7 @@ export async function deleteTransaction(req: Request, res: Response): Promise<vo
 
   const transaction = checkResult.rows[0];
 
-  if (transaction.user_id !== userId) {
+  if (transaction.user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to delete this transaction');
   }
 
@@ -818,7 +818,7 @@ export async function getAccountSummary(req: Request, res: Response): Promise<vo
     throw new NotFoundError('Account not found');
   }
 
-  if (accountResult.rows[0].user_id !== userId) {
+  if (accountResult.rows[0].user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to access this account');
   }
 

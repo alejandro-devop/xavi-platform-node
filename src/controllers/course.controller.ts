@@ -138,7 +138,7 @@ export async function getCourseById(req: Request, res: Response): Promise<void> 
 
   const course = courseResult.rows[0];
 
-  if (course.user_id !== userId) {
+  if (course.user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to access this course');
   }
 
@@ -222,7 +222,7 @@ export async function updateCourse(req: Request, res: Response): Promise<void> {
     throw new NotFoundError('Course not found');
   }
 
-  if (checkResult.rows[0].user_id !== userId) {
+  if (checkResult.rows[0].user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to update this course');
   }
 
@@ -316,7 +316,7 @@ export async function deleteCourse(req: Request, res: Response): Promise<void> {
     throw new NotFoundError('Course not found');
   }
 
-  if (checkResult.rows[0].user_id !== userId) {
+  if (checkResult.rows[0].user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to delete this course');
   }
 
@@ -340,7 +340,7 @@ export async function createModule(req: Request, res: Response): Promise<void> {
     throw new NotFoundError('Course not found');
   }
 
-  if (courseResult.rows[0].user_id !== userId) {
+  if (courseResult.rows[0].user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to add modules to this course');
   }
 
@@ -380,7 +380,7 @@ export async function updateModule(req: Request, res: Response): Promise<void> {
     throw new NotFoundError('Course not found');
   }
 
-  if (courseResult.rows[0].user_id !== userId) {
+  if (courseResult.rows[0].user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to update this module');
   }
 
@@ -456,7 +456,7 @@ export async function deleteModule(req: Request, res: Response): Promise<void> {
     throw new NotFoundError('Course not found');
   }
 
-  if (courseResult.rows[0].user_id !== userId) {
+  if (courseResult.rows[0].user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to delete this module');
   }
 
@@ -489,7 +489,7 @@ export async function createLesson(req: Request, res: Response): Promise<void> {
     throw new NotFoundError('Course not found');
   }
 
-  if (courseResult.rows[0].user_id !== userId) {
+  if (courseResult.rows[0].user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to add lessons to this course');
   }
 
@@ -541,7 +541,7 @@ export async function updateLesson(req: Request, res: Response): Promise<void> {
     throw new NotFoundError('Course not found');
   }
 
-  if (courseResult.rows[0].user_id !== userId) {
+  if (courseResult.rows[0].user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to update this lesson');
   }
 
@@ -631,7 +631,7 @@ export async function deleteLesson(req: Request, res: Response): Promise<void> {
     throw new NotFoundError('Course not found');
   }
 
-  if (courseResult.rows[0].user_id !== userId) {
+  if (courseResult.rows[0].user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to delete this lesson');
   }
 
@@ -671,7 +671,7 @@ export async function markLessonComplete(req: Request, res: Response): Promise<v
     throw new NotFoundError('Lesson not found in this course');
   }
 
-  if (lessonResult.rows[0].user_id !== userId) {
+  if (lessonResult.rows[0].user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to update progress for this course');
   }
 
@@ -743,7 +743,7 @@ export async function getCourseProgress(req: Request, res: Response): Promise<vo
     throw new NotFoundError('Course not found');
   }
 
-  if (courseResult.rows[0].user_id !== userId) {
+  if (courseResult.rows[0].user_id.toString() !== userId.toString()) {
     throw new ForbiddenError('You do not have permission to access this course');
   }
 
