@@ -5,6 +5,7 @@ export interface Wallet {
   id: string;
   userId: string;
   name: string;
+  icon?: string | null;
   balance: number;
   initialBalance: number;
   isMain: boolean;
@@ -14,12 +15,14 @@ export interface Wallet {
 
 export interface CreateWalletInput {
   name: string;
+  icon?: string;
   initialBalance?: number;
   isMain?: boolean;
 }
 
 export interface UpdateWalletInput {
   name?: string;
+  icon?: string;
   balance?: number;
   initialBalance?: number;
   isMain?: boolean;
@@ -32,7 +35,7 @@ export const walletService = {
   async getWallets(userId: string): Promise<Wallet[]> {
     const db = getDbPool();
     const result = await db.query(
-      `SELECT id, user_id, name, balance, initial_balance, is_main, created_at, updated_at
+      `SELECT id, user_id, name, icon, balance, initial_balance, is_main, created_at, updated_at
        FROM wallet_wallets
        WHERE user_id = $1
        ORDER BY is_main DESC, created_at DESC`,
@@ -43,6 +46,7 @@ export const walletService = {
       id: row.id,
       userId: row.user_id,
       name: row.name,
+      icon: row.icon,
       balance: parseFloat(row.balance),
       initialBalance: parseFloat(row.initial_balance),
       isMain: row.is_main,
@@ -57,7 +61,7 @@ export const walletService = {
   async getWalletById(id: string, userId: string): Promise<Wallet> {
     const db = getDbPool();
     const result = await db.query(
-      `SELECT id, user_id, name, balance, initial_balance, is_main, created_at, updated_at
+      `SELECT id, user_id, name, icon, balance, initial_balance, is_main, created_at, updated_at
        FROM wallet_wallets
        WHERE id = $1`,
       [id]
@@ -77,6 +81,7 @@ export const walletService = {
       id: wallet.id,
       userId: wallet.user_id,
       name: wallet.name,
+      icon: wallet.icon,
       balance: parseFloat(wallet.balance),
       initialBalance: parseFloat(wallet.initial_balance),
       isMain: wallet.is_main,
@@ -97,10 +102,10 @@ export const walletService = {
     }
 
     const result = await db.query(
-      `INSERT INTO wallet_wallets (user_id, name, balance, initial_balance, is_main)
-       VALUES ($1, $2, $3, $3, $4)
-       RETURNING id, user_id, name, balance, initial_balance, is_main, created_at, updated_at`,
-      [userId, input.name, input.initialBalance || 0, input.isMain || false]
+      `INSERT INTO wallet_wallets (user_id, name, icon, balance, initial_balance, is_main)
+       VALUES ($1, $2, $3, $4, $4, $5)
+       RETURNING id, user_id, name, icon, balance, initial_balance, is_main, created_at, updated_at`,
+      [userId, input.name, input.icon || null, input.initialBalance || 0, input.isMain || false]
     );
 
     const wallet = result.rows[0];
@@ -109,6 +114,7 @@ export const walletService = {
       id: wallet.id,
       userId: wallet.user_id,
       name: wallet.name,
+      icon: wallet.icon,
       balance: parseFloat(wallet.balance),
       initialBalance: parseFloat(wallet.initial_balance),
       isMain: wallet.is_main,
@@ -133,6 +139,12 @@ export const walletService = {
     if (input.name !== undefined) {
       updates.push(`name = $${paramIndex}`);
       params.push(input.name);
+      paramIndex++;
+    }
+
+    if (input.icon !== undefined) {
+      updates.push(`icon = $${paramIndex}`);
+      params.push(input.icon);
       paramIndex++;
     }
 
@@ -167,7 +179,7 @@ export const walletService = {
     const result = await db.query(
       `UPDATE wallet_wallets SET ${updates.join(', ')}, updated_at = NOW()
        WHERE id = $${paramIndex}
-       RETURNING id, user_id, name, balance, initial_balance, is_main, created_at, updated_at`,
+       RETURNING id, user_id, name, icon, balance, initial_balance, is_main, created_at, updated_at`,
       params
     );
 
@@ -177,6 +189,7 @@ export const walletService = {
       id: wallet.id,
       userId: wallet.user_id,
       name: wallet.name,
+      icon: wallet.icon,
       balance: parseFloat(wallet.balance),
       initialBalance: parseFloat(wallet.initial_balance),
       isMain: wallet.is_main,
