@@ -1,0 +1,125 @@
+# ============================================
+# QUERIES DE PRUEBA PARA WALLETS (DRIZZLE)
+# ============================================
+# Usar en GraphiQL: http://localhost:8080/graphiql
+#
+# IMPORTANTE: Necesitas un token JWT válido
+# 1. Primero haz login para obtener un token
+# 2. Añade el token en Headers (abajo):
+#    {
+#      "Authorization": "Bearer TU_TOKEN_AQUI"
+#    }
+# ============================================
+
+# --------------------------------------------
+# 1. LOGIN (Para obtener token)
+# --------------------------------------------
+mutation Login {
+  login(email: "test@example.com", password: "password123") {
+    token
+    user {
+      id
+      email
+      name
+    }
+  }
+}
+
+# --------------------------------------------
+# 2. OBTENER TODOS LOS WALLETS
+# --------------------------------------------
+query GetAllWallets {
+  wallets {
+    id
+    name
+    icon
+    balance
+    initialBalance
+    isMain
+    createdAt
+    updatedAt
+  }
+}
+
+# --------------------------------------------
+# 3. OBTENER UN WALLET POR ID
+# --------------------------------------------
+query GetWalletById {
+  wallet(id: "WALLET_ID_AQUI") {
+    id
+    name
+    icon
+    balance
+    initialBalance
+    isMain
+    createdAt
+    updatedAt
+  }
+}
+
+# --------------------------------------------
+# 4. CREAR UN WALLET NUEVO
+# --------------------------------------------
+mutation CreateWallet {
+  createWallet(
+    input: { name: "Mi Wallet de Prueba Drizzle", icon: "💰", initialBalance: 1000, isMain: false }
+  ) {
+    id
+    name
+    icon
+    balance
+    initialBalance
+    isMain
+    createdAt
+  }
+}
+
+# --------------------------------------------
+# 5. ACTUALIZAR UN WALLET
+# --------------------------------------------
+mutation UpdateWallet {
+  updateWallet(
+    id: "WALLET_ID_AQUI"
+    input: { name: "Wallet Actualizado con Drizzle", balance: 2500.50, isMain: true }
+  ) {
+    id
+    name
+    balance
+    isMain
+    updatedAt
+  }
+}
+
+# --------------------------------------------
+# 6. ELIMINAR UN WALLET
+# --------------------------------------------
+mutation DeleteWallet {
+  deleteWallet(id: "WALLET_ID_AQUI")
+}
+
+# --------------------------------------------
+# 7. CLEAN SLATE (Eliminar todos los wallets)
+# --------------------------------------------
+mutation CleanSlate {
+  cleanSlate
+}
+
+# ============================================
+# QUERIES AVANZADAS (Para probar relations)
+# ============================================
+
+# Wallet con sus expenses relacionados (requiere migrar expense.service)
+# query WalletWithExpenses {
+#   wallet(id: "WALLET_ID_AQUI") {
+#     id
+#     name
+#     balance
+#     expenses {
+#       id
+#       description
+#       debit
+#       credit
+#       date
+#     }
+#   }
+# }

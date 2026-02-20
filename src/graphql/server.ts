@@ -9,7 +9,7 @@ import { verifyAccessToken } from '../shared/utils/jwt';
 
 export interface GraphQLContext {
   user?: {
-    id: string;
+    id: number;
     email: string;
   };
 }
@@ -45,7 +45,7 @@ export async function getGraphQLContext({ req }: { req: Request }): Promise<Grap
     try {
       const payload = verifyAccessToken(token);
       context.user = {
-        id: payload.sub,
+        id: parseInt(payload.sub, 10), // Convert string to number
         email: payload.email,
       };
     } catch (error) {

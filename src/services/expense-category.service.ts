@@ -1,13 +1,15 @@
-import { getDbPool } from '../shared/database/pool';
+import { getDb } from '../shared/database/drizzle';
+import { walletExpenseCategories } from '../shared/database/schema';
+import { eq, and, desc, asc } from 'drizzle-orm';
 import { NotFoundError, ForbiddenError, BadRequestError } from '../shared/errors';
 
 export interface ExpenseCategory {
-  id: string;
-  userId: string;
+  id: number;
+  userId: number;
   name: string;
   type: 'income' | 'expense';
-  color?: string;
-  icon?: string;
+  color?: string | null;
+  icon?: string | null;
   isSystem: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -31,34 +33,19 @@ export const expenseCategoryService = {
   /**
    * Get all expense categories for a user
    */
-  async getCategories(userId: string, type?: 'income' | 'expense'): Promise<ExpenseCategory[]> {
-    const db = getDbPool();
+  async getCategories(userId: number, type?: 'income' | 'expense'): Promise<ExpenseCategory[]> {
+    const db = getDb();
 
-    let query = `SELECT id, user_id, name, type, color, icon, is_system, created_at, updated_at
-                 FROM wallet_expense_categories
-                 WHERE user_id = $1`;
-    const params: any[] = [userId];
+    const whereConditions = type
+      ? and(eq(walletExpenseCategories.userId, userId), eq(walletExpenseCategories.type, type))
+      : eq(walletExpenseCategories.userId, userId);
 
-    if (type) {
-      query += ' AND type = $2';
-      params.push(type);
-    }
+    const categories = await db.query.walletExpenseCategories.findMany({
+      where: whereConditions,
+      orderBy: [desc(walletExpenseCategories.isSystem), asc(walletExpenseCategories.name)],
+    });
 
-    query += ' ORDER BY is_system DESC, name ASC';
-
-    const result = await db.query(query, params);
-
-    return result.rows.map((row) => ({
-      id: row.id,
-      userId: row.user_id,
-      name: row.name,
-      type: row.type,
-      color: row.color,
-      icon: row.icon,
-      isSystem: row.is_system,
-      createdAt: row.created_at,
-      updatedAt: row.updated_at,
-    }));
+    return categories;
   },
 
   /**
@@ -79,67 +66,46 @@ export const expenseCategoryService = {
 
     const category = result.rows[0];
 
-    // Convert both to string for comparison (userId from JWT is string, user_id from DB is integer)
-    if (category.user_id.toString() !== userId.toString()) {
+    // Convert both to strinnumber, userId: number): Promise<ExpenseCategory> {
+    const db = getDb();
+
+    const category = await db.query.walletExpenseCategories.findFirst({
+      where: eq(walletExpenseCategories.id, id),
+    });
+
+    if (!category) {
+      throw new NotFoundError('Category not found');
+    }
+
+    // Verify ownership
+    if (category.userId !== userId) {
       throw new ForbiddenError('You do not have permission to access this category');
     }
 
-    return {
-      id: category.id,
-      userId: category.user_id,
-      name: category.name,
-      type: category.type,
-      color: category.color,
-      icon: category.icon,
-      isSystem: category.is_system,
-      createdAt: category.created_at,
-      updatedAt: category.updated_at,
-    };
-  },
-
-  /**
-   * Create a new expense category
-   */
-  async createCategory(
-    userId: string,
-    input: CreateExpenseCategoryInput
-  ): Promise<ExpenseCategory> {
-    const db = getDbPool();
-
-    const result = await db.query(
-      `INSERT INTO wallet_expense_categories (user_id, name, type, color, icon, is_system)
-       VALUES ($1, $2, $3, $4, $5, false)
-       RETURNING id, user_id, name, type, color, icon, is_system, created_at, updated_at`,
+    return category  RETURNING id, user_id, name, type, color, icon, is_system, created_at, updated_at`,
       [userId, input.name, input.type, input.color || null, input.icon || null]
     );
 
     const category = result.rows[0];
 
-    return {
-      id: category.id,
-      userId: category.user_id,
-      name: category.name,
-      type: category.type,
-      color: category.color,
-      icon: category.icon,
-      isSystem: category.is_system,
-      createdAt: category.created_at,
-      updatedAt: category.updated_at,
-    };
-  },
-
-  /**
-   * Update an expense category
-   */
-  async updateCategory(
-    id: string,
-    userId: string,
-    input: UpdateExpenseCategoryInput
+    return {number,
+    input: CreateExpenseCategoryInput
   ): Promise<ExpenseCategory> {
-    const db = getDbPool();
+    const db = getDb();
 
-    // Verify ownership
-    const category = await this.getCategoryById(id, userId);
+    const [category] = await db
+      .insert(walletExpenseCategories)
+      .values({
+        userId,
+        name: input.name,
+        type: input.type,
+        color: input.color || null,
+        icon: input.icon || null,
+        isSystem: false,
+      })
+      .returning();
+
+    return categoryonst category = await this.getCategoryById(id, userId);
 
     if (category.isSystem) {
       throw new BadRequestError('Cannot update system categories');
@@ -153,59 +119,42 @@ export const expenseCategoryService = {
       updates.push(`name = $${paramIndex}`);
       params.push(input.name);
       paramIndex++;
+    }number,
+    userId: number,
+    input: UpdateExpenseCategoryInput
+  ): Promise<ExpenseCategory> {
+    const db = getDb();
+
+    // Verify ownership
+    const category = await this.getCategoryById(id, userId);
+
+    if (category.isSystem) {
+      throw new BadRequestError('Cannot update system categories');
     }
 
-    if (input.type !== undefined) {
-      updates.push(`type = $${paramIndex}`);
-      params.push(input.type);
-      paramIndex++;
-    }
+    // Build update object
+    const updateData: Partial<typeof walletExpenseCategories.$inferInsert> = {};
 
-    if (input.color !== undefined) {
-      updates.push(`color = $${paramIndex}`);
-      params.push(input.color);
-      paramIndex++;
-    }
+    if (input.name !== undefined) updateData.name = input.name;
+    if (input.type !== undefined) updateData.type = input.type;
+    if (input.color !== undefined) updateData.color = input.color;
+    if (input.icon !== undefined) updateData.icon = input.icon;
 
-    if (input.icon !== undefined) {
-      updates.push(`icon = $${paramIndex}`);
-      params.push(input.icon);
-      paramIndex++;
-    }
-
-    if (updates.length === 0) {
+    if (Object.keys(updateData).length === 0) {
       throw new BadRequestError('No fields to update');
     }
 
-    params.push(id);
+    // Always update timestamp
+    updateData.updatedAt = new Date();
 
-    const result = await db.query(
-      `UPDATE wallet_expense_categories SET ${updates.join(', ')}, updated_at = NOW()
-       WHERE id = $${paramIndex}
-       RETURNING id, user_id, name, type, color, icon, is_system, created_at, updated_at`,
-      params
-    );
+    const [updatedCategory] = await db
+      .update(walletExpenseCategories)
+      .set(updateData)
+      .where(eq(walletExpenseCategories.id, id))
+      .returning();
 
-    const updatedCategory = result.rows[0];
-
-    return {
-      id: updatedCategory.id,
-      userId: updatedCategory.user_id,
-      name: updatedCategory.name,
-      type: updatedCategory.type,
-      color: updatedCategory.color,
-      icon: updatedCategory.icon,
-      isSystem: updatedCategory.is_system,
-      createdAt: updatedCategory.created_at,
-      updatedAt: updatedCategory.updated_at,
-    };
-  },
-
-  /**
-   * Delete an expense category
-   */
-  async deleteCategory(id: string, userId: string): Promise<boolean> {
-    const db = getDbPool();
+    return updatedCategorynumber, userId: number): Promise<boolean> {
+    const db = getDb();
 
     // Verify ownership
     const category = await this.getCategoryById(id, userId);
@@ -214,8 +163,4 @@ export const expenseCategoryService = {
       throw new BadRequestError('Cannot delete system categories');
     }
 
-    await db.query('DELETE FROM wallet_expense_categories WHERE id = $1', [id]);
-
-    return true;
-  },
-};
+    await db.delete(walletExpenseCategories).where(eq(walletExpenseCategories.id, id)

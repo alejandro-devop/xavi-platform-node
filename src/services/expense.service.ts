@@ -1,46 +1,48 @@
-import { getDbPool } from '../shared/database/pool';
+import { getDb } from '../shared/database/drizzle';
+import { walletExpenses, walletWallets, walletExpenseCategories, walletBudgets } from '../shared/database/schema';
+import { eq, and, gte, lte, desc, sql } from 'drizzle-orm';
 import { NotFoundError, ForbiddenError, BadRequestError } from '../shared/errors';
 
 export interface Expense {
   id: string;
-  userId: string;
+  userId: number;
   walletId: string;
-  categoryId?: string;
-  budgetId?: string;
+  categoryId?: number | null;
+  budgetId?: string | null;
   debit: number;
   credit: number;
-  note?: string;
-  date: Date;
+  description: string;
+  date: string;
   createdAt: Date;
   updatedAt: Date;
 }
 
 export interface CreateExpenseInput {
   walletId: string;
-  categoryId?: string;
+  categoryId?: number;
   budgetId?: string;
   debit?: number;
   credit?: number;
-  note?: string;
-  date?: Date;
+  description: string;
+  date?: string;
 }
 
 export interface UpdateExpenseInput {
   walletId?: string;
-  categoryId?: string;
+  categoryId?: number;
   budgetId?: string;
   debit?: number;
   credit?: number;
-  note?: string;
-  date?: Date;
+  description?: string;
+  date?: string;
 }
 
 export interface GetExpensesFilter {
   walletId?: string;
-  categoryId?: string;
+  categoryId?: number;
   budgetId?: string;
-  startDate?: Date;
-  endDate?: Date;
+  startDate?: string;
+  endDate?: string;
 }
 
 export const expenseService = {

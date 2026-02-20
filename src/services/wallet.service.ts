@@ -1,9 +1,11 @@
-import { getDbPool } from '../shared/database/pool';
+import { getDb } from '../shared/database/drizzle';
+import { walletWallets } from '../shared/database/schema';
+import { eq, and, desc } from 'drizzle-orm';
 import { NotFoundError, ForbiddenError, BadRequestError } from '../shared/errors';
 
 export interface Wallet {
   id: string;
-  userId: string;
+  userId: number;
   name: string;
   icon?: string | null;
   balance: number;
@@ -32,224 +34,156 @@ export const walletService = {
   /**
    * Get all wallets for a user
    */
-  async getWallets(userId: string): Promise<Wallet[]> {
-    const db = getDbPool();
-    const result = await db.query(
-      `SELECT id, user_id, name, icon, balance, initial_balance, is_main, created_at, updated_at
-       FROM wallet_wallets
-       WHERE user_id = $1
-       ORDER BY is_main DESC, created_at DESC`,
-      [userId]
-    );
+  async getWallets(userId: number): Promise<Wallet[]> {
+    const db = getDb();
 
-    return result.rows.map((row) => ({
-      id: row.id,
-      userId: row.user_id,
-      name: row.name,
-      icon: row.icon,
-      balance: parseFloat(row.balance),
-      initialBalance: parseFloat(row.initial_balance),
-      isMain: row.is_main,
-      createdAt: row.created_at,
-      updatedAt: row.updated_at,
-    }));
+    const wallets = await db.query.walletWallets.findMany({
+      where: eq(walletWallets.userId, userId),
+      orderBy: [desc(walletWallets.isMain), walletWallets.createdAt], // ASC by default (oldest first)
+    });
+
+    // Convert decimal strings to numbers
+    return wallets.map(
+      (wallet): Wallet => ({
+        ...wallet,
+        balance: parseFloat(wallet.balance),
+        initialBalance: parseFloat(wallet.initialBalance),
+      })
+    );
   },
 
   /**
    * Get a wallet by ID
    */
-  async getWalletById(id: string, userId: string): Promise<Wallet> {
-    const db = getDbPool();
-    const result = await db.query(
-      `SELECT id, user_id, name, icon, balance, initial_balance, is_main, created_at, updated_at
-       FROM wallet_wallets
-       WHERE id = $1`,
-      [id]
-    );
+  async getWalletById(id: string, userId: number): Promise<Wallet> {
+    const db = getDb();
 
-    if (result.rows.length === 0) {
+    const wallet = await db.query.walletWallets.findFirst({
+      where: eq(walletWallets.id, id),
+    });
+
+    if (!wallet) {
       throw new NotFoundError('Wallet not found');
     }
 
-    const wallet = result.rows[0];
-
-    // Convert both to string for comparison (userId from JWT is string, user_id from DB is integer)
-    if (wallet.user_id.toString() !== userId.toString()) {
+    // Verify ownership
+    if (wallet.userId !== userId) {
       throw new ForbiddenError('You do not have permission to access this wallet');
     }
 
     return {
-      id: wallet.id,
-      userId: wallet.user_id,
-      name: wallet.name,
-      icon: wallet.icon,
+      ...wallet,
       balance: parseFloat(wallet.balance),
-      initialBalance: parseFloat(wallet.initial_balance),
-      isMain: wallet.is_main,
-      createdAt: wallet.created_at,
-      updatedAt: wallet.updated_at,
+      initialBalance: parseFloat(wallet.initialBalance),
     };
   },
 
   /**
    * Create a new wallet
    */
-  async createWallet(userId: string, input: CreateWalletInput): Promise<Wallet> {
-    const db = getDbPool();
+  async createWallet(userId: number, input: CreateWalletInput): Promise<Wallet> {
+    const db = getDb();
 
     // If this is marked as main, unset other main wallets
     if (input.isMain) {
-      await db.query('UPDATE wallet_wallets SET is_main = false WHERE user_id = $1', [userId]);
+      await db.update(walletWallets).set({ isMain: false }).where(eq(walletWallets.userId, userId));
     }
 
-    const result = await db.query(
-      `INSERT INTO wallet_wallets (user_id, name, icon, balance, initial_balance, is_main)
-       VALUES ($1, $2, $3, $4, $4, $5)
-       RETURNING id, user_id, name, icon, balance, initial_balance, is_main, created_at, updated_at`,
-      [userId, input.name, input.icon || null, input.initialBalance || 0, input.isMain || false]
-    );
+    const initialBalance = input.initialBalance?.toString() || '0';
 
-    const wallet = result.rows[0];
+    const [wallet] = await db
+      .insert(walletWallets)
+      .values({
+        userId,
+        name: input.name,
+        icon: input.icon || null,
+        balance: initialBalance,
+        initialBalance: initialBalance,
+        isMain: input.isMain || false,
+      })
+      .returning();
 
     return {
-      id: wallet.id,
-      userId: wallet.user_id,
-      name: wallet.name,
-      icon: wallet.icon,
+      ...wallet,
       balance: parseFloat(wallet.balance),
-      initialBalance: parseFloat(wallet.initial_balance),
-      isMain: wallet.is_main,
-      createdAt: wallet.created_at,
-      updatedAt: wallet.updated_at,
+      initialBalance: parseFloat(wallet.initialBalance),
     };
   },
 
   /**
    * Update a wallet
    */
-  async updateWallet(id: string, userId: string, input: UpdateWalletInput): Promise<Wallet> {
-    const db = getDbPool();
+  async updateWallet(id: string, userId: number, input: UpdateWalletInput): Promise<Wallet> {
+    const db = getDb();
 
     // Verify ownership
     await this.getWalletById(id, userId);
 
-    const updates: string[] = [];
-    const params: any[] = [];
-    let paramIndex = 1;
+    // Build update object with only provided fields
+    const updateData: Partial<typeof walletWallets.$inferInsert> = {};
 
-    if (input.name !== undefined) {
-      updates.push(`name = $${paramIndex}`);
-      params.push(input.name);
-      paramIndex++;
-    }
-
-    if (input.icon !== undefined) {
-      updates.push(`icon = $${paramIndex}`);
-      params.push(input.icon);
-      paramIndex++;
-    }
-
-    if (input.balance !== undefined) {
-      updates.push(`balance = $${paramIndex}`);
-      params.push(input.balance);
-      paramIndex++;
-    }
-
-    if (input.initialBalance !== undefined) {
-      updates.push(`initial_balance = $${paramIndex}`);
-      params.push(input.initialBalance);
-      paramIndex++;
-    }
+    if (input.name !== undefined) updateData.name = input.name;
+    if (input.icon !== undefined) updateData.icon = input.icon;
+    if (input.balance !== undefined) updateData.balance = input.balance.toString();
+    if (input.initialBalance !== undefined)
+      updateData.initialBalance = input.initialBalance.toString();
 
     if (input.isMain !== undefined) {
       // If setting to main, unset other main wallets
       if (input.isMain) {
-        await db.query('UPDATE wallet_wallets SET is_main = false WHERE user_id = $1', [userId]);
+        await db
+          .update(walletWallets)
+          .set({ isMain: false })
+          .where(eq(walletWallets.userId, userId));
       }
-      updates.push(`is_main = $${paramIndex}`);
-      params.push(input.isMain);
-      paramIndex++;
+      updateData.isMain = input.isMain;
     }
 
-    if (updates.length === 0) {
+    if (Object.keys(updateData).length === 0) {
       throw new BadRequestError('No fields to update');
     }
 
-    params.push(id);
+    // Always update the updatedAt timestamp
+    updateData.updatedAt = new Date();
 
-    const result = await db.query(
-      `UPDATE wallet_wallets SET ${updates.join(', ')}, updated_at = NOW()
-       WHERE id = $${paramIndex}
-       RETURNING id, user_id, name, icon, balance, initial_balance, is_main, created_at, updated_at`,
-      params
-    );
-
-    const wallet = result.rows[0];
+    const [wallet] = await db
+      .update(walletWallets)
+      .set(updateData)
+      .where(eq(walletWallets.id, id))
+      .returning();
 
     return {
-      id: wallet.id,
-      userId: wallet.user_id,
-      name: wallet.name,
-      icon: wallet.icon,
+      ...wallet,
       balance: parseFloat(wallet.balance),
-      initialBalance: parseFloat(wallet.initial_balance),
-      isMain: wallet.is_main,
-      createdAt: wallet.created_at,
-      updatedAt: wallet.updated_at,
+      initialBalance: parseFloat(wallet.initialBalance),
     };
   },
 
   /**
    * Delete a wallet and all related data
    */
-  async deleteWallet(id: string, userId: string): Promise<boolean> {
-    const db = getDbPool();
+  async deleteWallet(id: string, userId: number): Promise<boolean> {
+    const db = getDb();
 
     // Verify ownership
     await this.getWalletById(id, userId);
 
-    await db.query('BEGIN');
+    // Drizzle will handle cascading deletes as defined in the schema
+    // But we can be explicit if needed
+    await db.delete(walletWallets).where(eq(walletWallets.id, id));
 
-    try {
-      // Delete related data (cascading will handle most, but let's be explicit)
-      await db.query('DELETE FROM wallet_expenses WHERE wallet_id = $1', [id]);
-      await db.query('DELETE FROM wallet_scheduled_expenses WHERE wallet_id = $1', [id]);
-      await db.query('DELETE FROM wallet_budgets WHERE wallet_id = $1', [id]);
-
-      // Delete the wallet
-      await db.query('DELETE FROM wallet_wallets WHERE id = $1', [id]);
-
-      await db.query('COMMIT');
-      return true;
-    } catch (error) {
-      await db.query('ROLLBACK');
-      throw error;
-    }
+    return true;
   },
 
   /**
    * Clean slate - delete ALL wallet data for a user
    */
-  async cleanSlate(userId: string): Promise<boolean> {
-    const db = getDbPool();
+  async cleanSlate(userId: number): Promise<boolean> {
+    const db = getDb();
 
-    await db.query('BEGIN');
+    // Delete wallets first - cascade will handle related data
+    await db.delete(walletWallets).where(eq(walletWallets.userId, userId));
 
-    try {
-      // Delete in correct order to respect foreign keys
-      await db.query('DELETE FROM wallet_budget_follow_ups WHERE user_id = $1', [userId]);
-      await db.query('DELETE FROM wallet_expenses WHERE user_id = $1', [userId]);
-      await db.query('DELETE FROM wallet_scheduled_expenses WHERE user_id = $1', [userId]);
-      await db.query('DELETE FROM wallet_budgets WHERE user_id = $1', [userId]);
-      await db.query('DELETE FROM wallet_wallets WHERE user_id = $1', [userId]);
-      await db.query('DELETE FROM wallet_periods WHERE user_id = $1', [userId]);
-      // Don't delete frequencies as they might be system-wide
-
-      await db.query('COMMIT');
-      return true;
-    } catch (error) {
-      await db.query('ROLLBACK');
-      throw error;
-    }
+    return true;
   },
 };

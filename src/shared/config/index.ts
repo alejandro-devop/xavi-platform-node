@@ -1,16 +1,22 @@
 import { initializeDbPool, shutdownDbPool } from '../database/pool';
+import { initializeDrizzle, closeDrizzle, getDrizzlePool } from '../database/drizzle';
 import { initializeRedisClient, shutdownRedisClient } from '../redis/client';
 import { logger } from '../logger';
 
 export async function initializeServices(): Promise<void> {
   try {
-    // Initialize database pool
-    const dbPool = initializeDbPool();
-    logger.info('Database pool initialized');
+    // Initialize Drizzle ORM
+    const db = initializeDrizzle();
+    logger.info('Drizzle ORM initialized');
 
-    // Test database connection
-    await dbPool.query('SELECT 1');
-    logger.info('Database connection verified');
+    // Test database connection using Drizzle's pool
+    const pool = getDrizzlePool();
+    await pool.query('SELECT 1');
+    logger.info('Database connection verified (Drizzle)');
+
+    // Keep legacy pool for services that haven't been migrated yet
+    const dbPool = initializeDbPool();
+    logger.info('Legacy database pool initialized (for non-migrated services)');
 
     // Initialize Redis client (only if enabled)
     if (process.env.ENABLE_REDIS_CACHE === 'true') {
@@ -61,7 +67,7 @@ export async function shutdownServices(): Promise<void> {
   logger.info('Shutting down services...');
 
   try {
-    const shutdownPromises = [shutdownDbPool()];
+    const shutdownPromises = [closeDrizzle(), shutdownDbPool()];
 
     if (process.env.ENABLE_REDIS_CACHE === 'true') {
       shutdownPromises.push(shutdownRedisClient());
