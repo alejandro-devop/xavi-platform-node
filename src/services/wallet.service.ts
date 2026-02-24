@@ -1,6 +1,6 @@
 import { getDb } from '../shared/database/drizzle';
 import { walletWallets } from '../shared/database/schema';
-import { eq, and, desc } from 'drizzle-orm';
+import { eq, and, desc, asc } from 'drizzle-orm';
 import { NotFoundError, ForbiddenError, BadRequestError } from '../shared/errors';
 import type { Wallet, CreateWalletInput, UpdateWalletInput } from '../types/services/wallet.types';
 
@@ -13,7 +13,7 @@ export const walletService = {
 
     const wallets = await db.query.walletWallets.findMany({
       where: eq(walletWallets.userId, userId),
-      orderBy: [desc(walletWallets.isMain), walletWallets.createdAt], // ASC by default (oldest first)
+      orderBy: [desc(walletWallets.isMain), asc(walletWallets.id)], // Main first, then newest first (UUID v7)
     });
 
     // Convert decimal strings to numbers

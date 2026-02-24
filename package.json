@@ -58,6 +58,7 @@
     "pino": "^8.16.2",
     "pino-pretty": "^10.2.3",
     "uuid": "^9.0.1",
+    "uuidv7": "^1.1.0",
     "zod": "^3.22.4"
   },
   "devDependencies": {

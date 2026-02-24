@@ -1,5 +1,5 @@
 export interface ExpenseCategory {
-  id: number;
+  id: string;
   userId: number;
   name: string;
   type: 'income' | 'expense';

@@ -2,7 +2,7 @@ export interface Expense {
   id: string;
   userId: number;
   walletId: string;
-  categoryId?: number | null;
+  categoryId?: string | null;
   budgetId?: string | null;
   debit: number;
   credit: number;
@@ -14,7 +14,7 @@ export interface Expense {
 
 export interface CreateExpenseInput {
   walletId: string;
-  categoryId?: number;
+  categoryId?: string;
   budgetId?: string;
   debit?: number;
   credit?: number;
@@ -24,7 +24,7 @@ export interface CreateExpenseInput {
 
 export interface UpdateExpenseInput {
   walletId?: string;
-  categoryId?: number;
+  categoryId?: string;
   budgetId?: string;
   debit?: number;
   credit?: number;
@@ -34,7 +34,7 @@ export interface UpdateExpenseInput {
 
 export interface GetExpensesFilter {
   walletId?: string;
-  categoryId?: number;
+  categoryId?: string;
   budgetId?: string;
   startDate?: string;
   endDate?: string;

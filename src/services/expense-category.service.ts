@@ -30,7 +30,7 @@ export const expenseCategoryService = {
   /**
    * Get a category by ID
    */
-  async getCategoryById(id: number, userId: number): Promise<ExpenseCategory> {
+  async getCategoryById(id: string, userId: number): Promise<ExpenseCategory> {
     const db = getDb();
 
     const category = await db.query.walletExpenseCategories.findFirst({
@@ -75,7 +75,7 @@ export const expenseCategoryService = {
    * Update a category
    */,
   async updateCategory(
-    id: number,
+    id: string,
     userId: number,
     input: UpdateExpenseCategoryInput
   ): Promise<ExpenseCategory> {
@@ -113,7 +113,7 @@ export const expenseCategoryService = {
   } /**
    * Delete a category
    */,
-  async deleteCategory(id: number, userId: number): Promise<boolean> {
+  async deleteCategory(id: string, userId: number): Promise<boolean> {
     const db = getDb();
 
     // Verify ownership

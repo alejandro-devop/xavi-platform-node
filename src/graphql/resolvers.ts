@@ -52,7 +52,7 @@ export const resolvers = {
       }
 
       try {
-        return await expenseCategoryService.getCategoryById(parseInt(id, 10), context.user.id);
+        return await expenseCategoryService.getCategoryById(id, context.user.id);
       } catch (error: any) {
         throw new GraphQLError(error.message, {
           extensions: { code: error.name },
@@ -213,11 +213,7 @@ export const resolvers = {
       }
 
       try {
-        return await expenseCategoryService.updateCategory(
-          parseInt(id, 10),
-          context.user.id,
-          input
-        );
+        return await expenseCategoryService.updateCategory(id, context.user.id, input);
       } catch (error: any) {
         throw new GraphQLError(error.message, {
           extensions: { code: error.name },
@@ -233,7 +229,7 @@ export const resolvers = {
       }
 
       try {
-        return await expenseCategoryService.deleteCategory(parseInt(id, 10), context.user.id);
+        return await expenseCategoryService.deleteCategory(id, context.user.id);
       } catch (error: any) {
         throw new GraphQLError(error.message, {
           extensions: { code: error.name },

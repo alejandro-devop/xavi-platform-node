@@ -45,7 +45,7 @@ export const expenseService = {
 
     const expenses = await db.query.walletExpenses.findMany({
       where: and(...conditions),
-      orderBy: [desc(walletExpenses.date), desc(walletExpenses.createdAt)],
+      orderBy: [desc(walletExpenses.date), desc(walletExpenses.id)], // Date first, then newest first (UUID v7)
     });
 
     return expenses.map((expense) => ({

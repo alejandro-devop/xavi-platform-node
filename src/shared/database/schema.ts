@@ -11,6 +11,7 @@ import {
   serial,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
+import { generateUuidV7 } from './uuid';
 
 // ============================================
 // USERS TABLE (reference)
@@ -28,7 +29,9 @@ export const users = pgTable('users', {
 // WALLET WALLETS
 // ============================================
 export const walletWallets = pgTable('wallet_wallets', {
-  id: uuid('id').primaryKey().defaultRandom(),
+  id: uuid('id')
+    .primaryKey()
+    .$defaultFn(() => generateUuidV7()),
   userId: integer('user_id')
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
@@ -45,7 +48,9 @@ export const walletWallets = pgTable('wallet_wallets', {
 // WALLET EXPENSE CATEGORIES
 // ============================================
 export const walletExpenseCategories = pgTable('wallet_expense_categories', {
-  id: serial('id').primaryKey(),
+  id: uuid('id')
+    .primaryKey()
+    .$defaultFn(() => generateUuidV7()),
   userId: integer('user_id')
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
@@ -64,7 +69,9 @@ export const walletExpenseCategories = pgTable('wallet_expense_categories', {
 // WALLET FREQUENCIES
 // ============================================
 export const walletFrequencies = pgTable('wallet_frequencies', {
-  id: uuid('id').primaryKey().defaultRandom(),
+  id: uuid('id')
+    .primaryKey()
+    .$defaultFn(() => generateUuidV7()),
   userId: integer('user_id')
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
@@ -79,7 +86,9 @@ export const walletFrequencies = pgTable('wallet_frequencies', {
 // WALLET PERIODS
 // ============================================
 export const walletPeriods = pgTable('wallet_periods', {
-  id: uuid('id').primaryKey().defaultRandom(),
+  id: uuid('id')
+    .primaryKey()
+    .$defaultFn(() => generateUuidV7()),
   userId: integer('user_id')
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
@@ -95,7 +104,9 @@ export const walletPeriods = pgTable('wallet_periods', {
 // WALLET BUDGETS
 // ============================================
 export const walletBudgets = pgTable('wallet_budgets', {
-  id: uuid('id').primaryKey().defaultRandom(),
+  id: uuid('id')
+    .primaryKey()
+    .$defaultFn(() => generateUuidV7()),
   userId: integer('user_id')
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
@@ -119,14 +130,16 @@ export const walletBudgets = pgTable('wallet_budgets', {
 // WALLET EXPENSES
 // ============================================
 export const walletExpenses = pgTable('wallet_expenses', {
-  id: uuid('id').primaryKey().defaultRandom(),
+  id: uuid('id')
+    .primaryKey()
+    .$defaultFn(() => generateUuidV7()),
   userId: integer('user_id')
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
   walletId: uuid('wallet_id')
     .notNull()
     .references(() => walletWallets.id, { onDelete: 'cascade' }),
-  categoryId: integer('category_id').references(() => walletExpenseCategories.id, {
+  categoryId: uuid('category_id').references(() => walletExpenseCategories.id, {
     onDelete: 'set null',
   }),
   budgetId: uuid('budget_id').references(() => walletBudgets.id, { onDelete: 'set null' }),
