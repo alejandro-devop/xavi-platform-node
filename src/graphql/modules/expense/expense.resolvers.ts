@@ -1,88 +1,33 @@
-import { GraphQLError } from 'graphql';
 import { expenseService } from '../../../services/expense.service';
+import { withErrorHandling, requireAuth } from '../../utils/error-handler';
 
 export const expenseResolvers = {
   Query: {
-    walletExpense: async (_: any, { id }: { id: string }, context: any) => {
-      if (!context.user) {
-        throw new GraphQLError('Not authenticated', {
-          extensions: { code: 'UNAUTHENTICATED' },
-        });
-      }
+    walletExpense: withErrorHandling(async (_: any, { id }: { id: string }, context: any) => {
+      requireAuth(context, 'walletExpense');
+      return await expenseService.getExpenseById(id, context.user.id);
+    }, 'walletExpense'),
 
-      try {
-        return await expenseService.getExpenseById(id, context.user.id);
-      } catch (error: any) {
-        throw new GraphQLError(error.message, {
-          extensions: { code: error.name },
-        });
-      }
-    },
-
-    walletExpenses: async (_: any, args: any, context: any) => {
-      if (!context.user) {
-        throw new GraphQLError('Not authenticated', {
-          extensions: { code: 'UNAUTHENTICATED' },
-        });
-      }
-
-      try {
-        return await expenseService.getExpenses(context.user.id, args);
-      } catch (error: any) {
-        throw new GraphQLError(error.message, {
-          extensions: { code: error.name },
-        });
-      }
-    },
+    walletExpenses: withErrorHandling(async (_: any, args: any, context: any) => {
+      requireAuth(context, 'walletExpenses');
+      return await expenseService.getExpenses(context.user.id, args);
+    }, 'walletExpenses'),
   },
 
   Mutation: {
-    walletExpenseAdd: async (_: any, { input }: any, context: any) => {
-      if (!context.user) {
-        throw new GraphQLError('Not authenticated', {
-          extensions: { code: 'UNAUTHENTICATED' },
-        });
-      }
+    walletExpenseAdd: withErrorHandling(async (_: any, { input }: any, context: any) => {
+      requireAuth(context, 'walletExpenseAdd');
+      return await expenseService.createExpense(context.user.id, input);
+    }, 'walletExpenseAdd'),
 
-      try {
-        return await expenseService.createExpense(context.user.id, input);
-      } catch (error: any) {
-        throw new GraphQLError(error.message, {
-          extensions: { code: error.name },
-        });
-      }
-    },
+    walletExpenseUpdate: withErrorHandling(async (_: any, { id, input }: any, context: any) => {
+      requireAuth(context, 'walletExpenseUpdate');
+      return await expenseService.updateExpense(id, context.user.id, input);
+    }, 'walletExpenseUpdate'),
 
-    walletExpenseUpdate: async (_: any, { id, input }: any, context: any) => {
-      if (!context.user) {
-        throw new GraphQLError('Not authenticated', {
-          extensions: { code: 'UNAUTHENTICATED' },
-        });
-      }
-
-      try {
-        return await expenseService.updateExpense(id, context.user.id, input);
-      } catch (error: any) {
-        throw new GraphQLError(error.message, {
-          extensions: { code: error.name },
-        });
-      }
-    },
-
-    walletExpenseRemove: async (_: any, { id }: any, context: any) => {
-      if (!context.user) {
-        throw new GraphQLError('Not authenticated', {
-          extensions: { code: 'UNAUTHENTICATED' },
-        });
-      }
-
-      try {
-        return await expenseService.deleteExpense(id, context.user.id);
-      } catch (error: any) {
-        throw new GraphQLError(error.message, {
-          extensions: { code: error.name },
-        });
-      }
-    },
+    walletExpenseRemove: withErrorHandling(async (_: any, { id }: any, context: any) => {
+      requireAuth(context, 'walletExpenseRemove');
+      return await expenseService.deleteExpense(id, context.user.id);
+    }, 'walletExpenseRemove'),
   },
 };

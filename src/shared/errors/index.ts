@@ -44,3 +44,12 @@ export class BadRequestError extends AppError {
     super(message, 400);
   }
 }
+
+// Export centralized error handler
+export {
+  errorHandler,
+  ErrorHandler,
+  LogLevel,
+  type ErrorMetadata,
+  type MonitoringAdapter,
+} from './error-handler';

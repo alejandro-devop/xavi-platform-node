@@ -1,104 +1,38 @@
-import { GraphQLError } from 'graphql';
 import { walletService } from '../../../services/wallet.service';
+import { withErrorHandling, requireAuth } from '../../utils/error-handler';
 
 export const walletResolvers = {
   Query: {
-    wallet: async (_: any, { id }: { id: string }, context: any) => {
-      if (!context.user) {
-        throw new GraphQLError('Not authenticated', {
-          extensions: { code: 'UNAUTHENTICATED' },
-        });
-      }
+    wallet: withErrorHandling(async (_: any, { id }: { id: string }, context: any) => {
+      requireAuth(context, 'wallet');
+      return await walletService.getWalletById(id, context.user.id);
+    }, 'wallet'),
 
-      try {
-        return await walletService.getWalletById(id, context.user.id);
-      } catch (error: any) {
-        throw new GraphQLError(error.message, {
-          extensions: { code: error.name },
-        });
-      }
-    },
-
-    wallets: async (_: any, __: any, context: any) => {
-      if (!context.user) {
-        throw new GraphQLError('Not authenticated', {
-          extensions: { code: 'UNAUTHENTICATED' },
-        });
-      }
-
-      try {
-        return await walletService.getWallets(context.user.id);
-      } catch (error: any) {
-        throw new GraphQLError(error.message, {
-          extensions: { code: error.name },
-        });
-      }
-    },
+    wallets: withErrorHandling(async (_: any, __: any, context: any) => {
+      requireAuth(context, 'wallets');
+      return await walletService.getWallets(context.user.id);
+    }, 'wallets'),
   },
 
   Mutation: {
-    walletAdd: async (_: any, { input }: any, context: any) => {
-      if (!context.user) {
-        throw new GraphQLError('Not authenticated', {
-          extensions: { code: 'UNAUTHENTICATED' },
-        });
-      }
+    walletAdd: withErrorHandling(async (_: any, { input }: any, context: any) => {
+      requireAuth(context, 'walletAdd');
+      return await walletService.createWallet(context.user.id, input);
+    }, 'walletAdd'),
 
-      try {
-        return await walletService.createWallet(context.user.id, input);
-      } catch (error: any) {
-        throw new GraphQLError(error.message, {
-          extensions: { code: error.name },
-        });
-      }
-    },
+    walletUpdate: withErrorHandling(async (_: any, { id, input }: any, context: any) => {
+      requireAuth(context, 'walletUpdate');
+      return await walletService.updateWallet(id, context.user.id, input);
+    }, 'walletUpdate'),
 
-    walletUpdate: async (_: any, { id, input }: any, context: any) => {
-      if (!context.user) {
-        throw new GraphQLError('Not authenticated', {
-          extensions: { code: 'UNAUTHENTICATED' },
-        });
-      }
+    walletRemove: withErrorHandling(async (_: any, { id }: any, context: any) => {
+      requireAuth(context, 'walletRemove');
+      return await walletService.deleteWallet(id, context.user.id);
+    }, 'walletRemove'),
 
-      try {
-        return await walletService.updateWallet(id, context.user.id, input);
-      } catch (error: any) {
-        throw new GraphQLError(error.message, {
-          extensions: { code: error.name },
-        });
-      }
-    },
-
-    walletRemove: async (_: any, { id }: any, context: any) => {
-      if (!context.user) {
-        throw new GraphQLError('Not authenticated', {
-          extensions: { code: 'UNAUTHENTICATED' },
-        });
-      }
-
-      try {
-        return await walletService.deleteWallet(id, context.user.id);
-      } catch (error: any) {
-        throw new GraphQLError(error.message, {
-          extensions: { code: error.name },
-        });
-      }
-    },
-
-    walletCleanSlate: async (_: any, __: any, context: any) => {
-      if (!context.user) {
-        throw new GraphQLError('Not authenticated', {
-          extensions: { code: 'UNAUTHENTICATED' },
-        });
-      }
-
-      try {
-        return await walletService.cleanSlate(context.user.id);
-      } catch (error: any) {
-        throw new GraphQLError(error.message, {
-          extensions: { code: error.name },
-        });
-      }
-    },
+    walletCleanSlate: withErrorHandling(async (_: any, __: any, context: any) => {
+      requireAuth(context, 'walletCleanSlate');
+      return await walletService.cleanSlate(context.user.id);
+    }, 'walletCleanSlate'),
   },
 };
