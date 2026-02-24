@@ -42,12 +42,12 @@ describe('Auth Controller - Login', () => {
 
   beforeEach(() => {
     resetAllMocks();
-    
+
     // Re-establish mocks after reset
     mockGetDbPool.mockReturnValue(mockDbPool as any);
     (generateAccessToken as jest.Mock).mockReturnValue('mock-access-token');
     (generateRefreshToken as jest.Mock).mockReturnValue('mock-refresh-token');
-    
+
     jsonMock = jest.fn();
     statusMock = jest.fn().mockReturnValue({ json: jsonMock });
 

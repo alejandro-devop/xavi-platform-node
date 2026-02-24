@@ -113,7 +113,11 @@ describe('WalletService', () => {
     });
 
     it('should set default values when not provided', async () => {
-      const newWallet = createMockWallet({ initialBalance: '0.00', balance: '0.00', isMain: false });
+      const newWallet = createMockWallet({
+        initialBalance: '0.00',
+        balance: '0.00',
+        isMain: false,
+      });
       const minimalData = { name: 'Minimal Wallet' };
 
       const mockInsert = jest.fn().mockReturnValue({
@@ -137,7 +141,7 @@ describe('WalletService', () => {
       const updateData = { name: 'Updated Wallet' };
 
       mockDb.query.walletWallets.findFirst.mockResolvedValue(existingWallet);
-      
+
       const mockUpdate = jest.fn().mockReturnValue({
         set: jest.fn().mockReturnValue({
           where: jest.fn().mockReturnValue({
@@ -197,11 +201,7 @@ describe('WalletService', () => {
     it('should delete all data for a user', async () => {
       const mockDelete = jest.fn().mockReturnValue({
         where: jest.fn().mockReturnValue({
-          returning: jest.fn().mockResolvedValue([
-            { id: '1' },
-            { id: '2' },
-            { id: '3' },
-          ]),
+          returning: jest.fn().mockResolvedValue([{ id: '1' }, { id: '2' }, { id: '3' }]),
         }),
       });
       mockDb.delete = mockDelete;

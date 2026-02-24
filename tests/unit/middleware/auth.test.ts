@@ -24,11 +24,11 @@ describe('Auth Middleware', () => {
 
   beforeEach(() => {
     resetAllMocks();
-    
+
     // Re-establish mocks after reset
     (getDbPool as jest.Mock).mockReturnValue(mockDbPool);
     (getRedisClient as jest.Mock).mockReturnValue(mockRedisClient);
-    
+
     mockRequest = {
       headers: {},
     };

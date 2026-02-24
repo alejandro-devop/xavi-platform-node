@@ -1,5 +1,11 @@
 import { expenseService } from '../../../src/services/expense.service';
-import { mockDb, createMockExpense, createMockWallet, createMockCategory, resetAllMocks } from '../../helpers/mocks';
+import {
+  mockDb,
+  createMockExpense,
+  createMockWallet,
+  createMockCategory,
+  resetAllMocks,
+} from '../../helpers/mocks';
 
 // Mock Drizzle
 jest.mock('../../../src/shared/database/drizzle', () => ({
