@@ -62,7 +62,9 @@ describe('Balance Strategies', () => {
         };
 
         await expect(strategy.execute(params)).rejects.toThrow(BadRequestError);
-        await expect(strategy.execute(params)).rejects.toThrow('Debit must be a non-negative number');
+        await expect(strategy.execute(params)).rejects.toThrow(
+          'Debit must be a non-negative number'
+        );
       });
 
       it('should throw error if both credit and debit are zero', async () => {
@@ -252,7 +254,9 @@ describe('Balance Strategies', () => {
         };
 
         await expect(strategy.execute(params)).rejects.toThrow(BadRequestError);
-        await expect(strategy.execute(params)).rejects.toThrow('Debit must be a non-negative number');
+        await expect(strategy.execute(params)).rejects.toThrow(
+          'Debit must be a non-negative number'
+        );
       });
     });
 
