@@ -21,6 +21,7 @@ export const createExpenseCategoryInputSchema = (userId: number) =>
     type: z.enum(['income', 'expense'], {
       errorMap: () => ({ message: "Type must be 'income' or 'expense'" }),
     }),
+    description: z.string().max(500, 'Description must be less than 500 characters').optional(),
     color: z
       .string()
       .regex(
@@ -33,6 +34,7 @@ export const createExpenseCategoryInputSchema = (userId: number) =>
       .min(3, 'Icon must be at least 3 characters')
       .max(20, 'Icon must be less than 20 characters')
       .optional(),
+    isTransaction: z.boolean().optional(),
   });
 
 /**
@@ -46,6 +48,7 @@ export const expenseCategoryInputSchema = z.object({
   type: z.enum(['income', 'expense'], {
     errorMap: () => ({ message: "Type must be 'income' or 'expense'" }),
   }),
+  description: z.string().max(500, 'Description must be less than 500 characters').optional(),
   color: z
     .string()
     .regex(
@@ -58,6 +61,7 @@ export const expenseCategoryInputSchema = z.object({
     .min(3, 'Icon must be at least 3 characters')
     .max(20, 'Icon must be less than 20 characters')
     .optional(),
+  isTransaction: z.boolean().optional(),
 });
 
 /**
@@ -82,6 +86,7 @@ export const createExpenseCategoryUpdateSchema = (userId: number, categoryId?: s
         errorMap: () => ({ message: "Type must be 'income' or 'expense'" }),
       })
       .optional(),
+    description: z.string().max(500, 'Description must be less than 500 characters').optional(),
     color: z
       .string()
       .regex(
@@ -94,6 +99,7 @@ export const createExpenseCategoryUpdateSchema = (userId: number, categoryId?: s
       .min(3, 'Icon must be at least 3 characters')
       .max(20, 'Icon must be less than 20 characters')
       .optional(),
+    isTransaction: z.boolean().optional(),
   });
 
 /**
@@ -110,6 +116,7 @@ export const expenseCategoryUpdateSchema = z.object({
       errorMap: () => ({ message: "Type must be 'income' or 'expense'" }),
     })
     .optional(),
+  description: z.string().max(500, 'Description must be less than 500 characters').optional(),
   color: z
     .string()
     .regex(
@@ -122,6 +129,7 @@ export const expenseCategoryUpdateSchema = z.object({
     .min(3, 'Icon must be at least 3 characters')
     .max(20, 'Icon must be less than 20 characters')
     .optional(),
+  isTransaction: z.boolean().optional(),
 });
 
 /**

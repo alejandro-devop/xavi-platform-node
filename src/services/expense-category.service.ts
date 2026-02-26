@@ -64,9 +64,11 @@ export const expenseCategoryService = {
         userId,
         name: input.name,
         type: input.type,
+        description: input.description || null,
         color: input.color || null,
         icon: input.icon || null,
         isSystem: false,
+        isTransaction: input.isTransaction ?? false,
       })
       .returning();
 
@@ -93,8 +95,10 @@ export const expenseCategoryService = {
 
     if (input.name !== undefined) updateData.name = input.name;
     if (input.type !== undefined) updateData.type = input.type;
+    if (input.description !== undefined) updateData.description = input.description;
     if (input.color !== undefined) updateData.color = input.color;
     if (input.icon !== undefined) updateData.icon = input.icon;
+    if (input.isTransaction !== undefined) updateData.isTransaction = input.isTransaction;
 
     if (Object.keys(updateData).length === 0) {
       throw new BadRequestError('No fields to update');
