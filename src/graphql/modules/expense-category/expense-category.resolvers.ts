@@ -44,10 +44,11 @@ export const expenseCategoryResolvers = {
       'walletExpenseCategoryAdd'
     ),
 
-    walletExpenseCategoryUpdate: withAsyncValidatedResolver(
-      categoryIdSchema,
+    walletExpenseCategoryUpdate: withErrorHandling(
       async (_: any, { id, input }: any, context: any) => {
         requireAuth(context, 'walletExpenseCategoryUpdate');
+        // Validate ID format
+        categoryIdSchema.parse({ id });
         // Validate with user-specific schema that excludes current category
         const schema = createExpenseCategoryUpdateSchema(context.user.id, id);
         const validatedInput = await schema.parseAsync(input);

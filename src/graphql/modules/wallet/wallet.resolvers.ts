@@ -39,17 +39,15 @@ export const walletResolvers = {
       'walletAdd'
     ),
 
-    walletUpdate: withAsyncValidatedResolver(
-      walletIdSchema,
-      async (_: any, { id, input }: any, context: any) => {
-        requireAuth(context, 'walletUpdate');
-        // Validate with user-specific schema that excludes current wallet
-        const schema = createWalletUpdateSchema(context.user.id, id);
-        const validatedInput = await schema.parseAsync(input);
-        return await walletService.updateWallet(id, context.user.id, validatedInput);
-      },
-      'walletUpdate'
-    ),
+    walletUpdate: withErrorHandling(async (_: any, { id, input }: any, context: any) => {
+      requireAuth(context, 'walletUpdate');
+      // Validate ID format
+      walletIdSchema.parse({ id });
+      // Validate with user-specific schema that excludes current wallet
+      const schema = createWalletUpdateSchema(context.user.id, id);
+      const validatedInput = await schema.parseAsync(input);
+      return await walletService.updateWallet(id, context.user.id, validatedInput);
+    }, 'walletUpdate'),
 
     walletRemove: withValidatedResolver(
       walletIdSchema,
