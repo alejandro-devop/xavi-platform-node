@@ -79,6 +79,77 @@ export function withValidation<TSchema extends z.ZodType>(
 }
 
 /**
+ * Wrapper function that adds Zod validation with async support to a GraphQL resolver
+ * Use this for validations that require database checks or other async operations
+ * Validates args.input or args directly before executing the resolver
+ *
+ * @example
+ * ```typescript
+ * createUser: withAsyncValidation(
+ *   z.object({
+ *     email: z.string().email().refine(async (email) => {
+ *       const exists = await userService.emailExists(email);
+ *       return !exists;
+ *     }, { message: 'Email already exists' })
+ *   }),
+ *   async (_, { input }, context) => {
+ *     return await userService.createUser(input);
+ *   }
+ * )
+ * ```
+ */
+export function withAsyncValidation<TSchema extends z.ZodType>(
+  schema: TSchema,
+  resolver: (parent: any, args: any, context: GraphQLContext) => Promise<any>
+) {
+  return async (parent: any, args: any, context: GraphQLContext): Promise<any> => {
+    try {
+      // Determine what to validate: args.input for mutations, args for queries
+      const dataToValidate = args.input !== undefined ? args.input : args;
+
+      // Validate with Zod (async)
+      const validated = await schema.parseAsync(dataToValidate);
+
+      // Replace args with validated data
+      const validatedArgs = args.input !== undefined ? { ...args, input: validated } : validated;
+
+      // Execute resolver with validated data
+      return await resolver(parent, validatedArgs, context);
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        // Format Zod errors for GraphQL
+        const validationErrors: ValidationErrorDetail[] = error.errors.map((err) => ({
+          path: err.path,
+          message: err.message,
+          code: err.code,
+        }));
+
+        // Log validation failure
+        errorHandler.logWarning('GraphQL validation failed', {
+          userId: context.user?.id,
+          context: {
+            graphql: true,
+            validationErrors,
+            args: sanitizeArgs(args),
+          },
+        });
+
+        // Throw GraphQL error with validation details
+        throw new GraphQLError('Validation failed', {
+          extensions: {
+            code: 'BAD_USER_INPUT',
+            validationErrors,
+          },
+        });
+      }
+
+      // Re-throw other errors
+      throw error;
+    }
+  };
+}
+
+/**
  * Combined wrapper that adds both validation and error handling
  * This is the recommended way to use validation in resolvers
  *
@@ -100,6 +171,30 @@ export function withValidatedResolver<TSchema extends z.ZodType>(
   operationName: string
 ) {
   return withErrorHandling(withValidation(schema, resolver), operationName);
+}
+
+/**
+ * Combined wrapper that adds both async validation and error handling
+ * Use this when your validation includes async checks (e.g., database queries)
+ *
+ * @example
+ * ```typescript
+ * createUser: withAsyncValidatedResolver(
+ *   userCreateSchema, // schema with async refine() checks
+ *   async (_, { input }, context) => {
+ *     requireAuth(context, 'createUser');
+ *     return await userService.createUser(input);
+ *   },
+ *   'createUser'
+ * )
+ * ```
+ */
+export function withAsyncValidatedResolver<TSchema extends z.ZodType>(
+  schema: TSchema,
+  resolver: (parent: any, args: any, context: GraphQLContext) => Promise<any>,
+  operationName: string
+) {
+  return withErrorHandling(withAsyncValidation(schema, resolver), operationName);
 }
 
 /**

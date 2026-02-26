@@ -1,6 +1,6 @@
 import { getDb } from '../shared/database/drizzle';
 import { walletExpenseCategories } from '../shared/database/schema';
-import { eq, and, desc, asc } from 'drizzle-orm';
+import { eq, and, desc, asc, ne } from 'drizzle-orm';
 import { NotFoundError, ForbiddenError, BadRequestError } from '../shared/errors';
 import type {
   ExpenseCategory,
@@ -110,9 +110,32 @@ export const expenseCategoryService = {
       .returning();
 
     return updatedCategory;
-  } /**
+  },
+
+  /**
+   * Check if a category name is unique for a user
+   */
+  async isNameUnique(userId: number, name: string, excludeId?: string): Promise<boolean> {
+    const db = getDb();
+
+    const conditions = excludeId
+      ? and(
+          eq(walletExpenseCategories.userId, userId),
+          eq(walletExpenseCategories.name, name),
+          ne(walletExpenseCategories.id, excludeId)
+        )
+      : and(eq(walletExpenseCategories.userId, userId), eq(walletExpenseCategories.name, name));
+
+    const existingCategory = await db.query.walletExpenseCategories.findFirst({
+      where: conditions,
+    });
+
+    return !existingCategory;
+  },
+
+  /**
    * Delete a category
-   */,
+   */
   async deleteCategory(id: string, userId: number): Promise<boolean> {
     const db = getDb();
 

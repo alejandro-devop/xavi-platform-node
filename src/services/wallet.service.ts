@@ -1,6 +1,6 @@
 import { getDb } from '../shared/database/drizzle';
 import { walletWallets } from '../shared/database/schema';
-import { eq, and, desc, asc } from 'drizzle-orm';
+import { eq, and, desc, asc, ne } from 'drizzle-orm';
 import { NotFoundError, ForbiddenError, BadRequestError } from '../shared/errors';
 import type { Wallet, CreateWalletInput, UpdateWalletInput } from '../types/services/wallet.types';
 
@@ -147,6 +147,23 @@ export const walletService = {
     await db.delete(walletWallets).where(eq(walletWallets.id, id));
 
     return true;
+  },
+
+  /**
+   * Check if a wallet name is unique for a user
+   */
+  async isNameUnique(userId: number, name: string, excludeId?: string): Promise<boolean> {
+    const db = getDb();
+
+    const conditions = excludeId
+      ? and(eq(walletWallets.userId, userId), eq(walletWallets.name, name), ne(walletWallets.id, excludeId))
+      : and(eq(walletWallets.userId, userId), eq(walletWallets.name, name));
+
+    const existingWallet = await db.query.walletWallets.findFirst({
+      where: conditions,
+    });
+
+    return !existingWallet;
   },
 
   /**

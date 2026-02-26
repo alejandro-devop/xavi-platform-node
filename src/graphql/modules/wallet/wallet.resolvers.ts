@@ -1,10 +1,12 @@
 import { walletService } from '../../../services/wallet.service';
 import { withErrorHandling, requireAuth } from '../../utils/error-handler';
-import { withValidatedResolver } from '../../utils/validation';
+import { withValidatedResolver, withAsyncValidatedResolver } from '../../utils/validation';
 import {
   walletInputSchema,
   walletUpdateSchema,
   walletIdSchema,
+  createWalletInputSchema,
+  createWalletUpdateSchema,
 } from '../../../validators/schemas/wallet.schemas';
 
 export const walletResolvers = {
@@ -25,20 +27,26 @@ export const walletResolvers = {
   },
 
   Mutation: {
-    walletAdd: withValidatedResolver(
-      walletInputSchema,
+    walletAdd: withAsyncValidatedResolver(
+      createWalletInputSchema(0), // Placeholder - will be replaced with actual userId
       async (_: any, { input }: any, context: any) => {
         requireAuth(context, 'walletAdd');
-        return await walletService.createWallet(context.user.id, input);
+        // Validate with user-specific schema
+        const schema = createWalletInputSchema(context.user.id);
+        const validatedInput = await schema.parseAsync(input);
+        return await walletService.createWallet(context.user.id, validatedInput);
       },
       'walletAdd'
     ),
 
-    walletUpdate: withValidatedResolver(
-      walletUpdateSchema,
+    walletUpdate: withAsyncValidatedResolver(
+      walletIdSchema,
       async (_: any, { id, input }: any, context: any) => {
         requireAuth(context, 'walletUpdate');
-        return await walletService.updateWallet(id, context.user.id, input);
+        // Validate with user-specific schema that excludes current wallet
+        const schema = createWalletUpdateSchema(context.user.id, id);
+        const validatedInput = await schema.parseAsync(input);
+        return await walletService.updateWallet(id, context.user.id, validatedInput);
       },
       'walletUpdate'
     ),

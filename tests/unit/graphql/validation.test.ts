@@ -3,6 +3,8 @@ import { z } from 'zod';
 import {
   withValidation,
   withValidatedResolver,
+  withAsyncValidation,
+  withAsyncValidatedResolver,
   type ValidationErrorDetail,
 } from '../../../src/graphql/utils/validation';
 import { errorHandler } from '../../../src/shared/errors';
@@ -255,6 +257,247 @@ describe('GraphQL Validation Utils', () => {
     });
   });
 
+  describe('withAsyncValidation', () => {
+    it('should validate with async refinements', async () => {
+      const mockDbCheck = jest.fn().mockResolvedValue(true);
+
+      const asyncSchema = z.object({
+        email: z
+          .string()
+          .email()
+          .refine(
+            async (email) => {
+              return await mockDbCheck(email);
+            },
+            { message: 'Email already exists' }
+          ),
+      });
+
+      const resolver = jest.fn().mockResolvedValue({ success: true });
+      const wrappedResolver = withAsyncValidation(asyncSchema, resolver);
+
+      const input = { email: 'new@example.com' };
+      const result = await wrappedResolver(null, { input }, mockContext);
+
+      expect(result).toEqual({ success: true });
+      expect(mockDbCheck).toHaveBeenCalledWith('new@example.com');
+      expect(resolver).toHaveBeenCalledWith(null, { input }, mockContext);
+    });
+
+    it('should fail when async validation fails', async () => {
+      const mockDbCheck = jest.fn().mockResolvedValue(false);
+
+      const asyncSchema = z.object({
+        email: z
+          .string()
+          .email()
+          .refine(async (email) => await mockDbCheck(email), { message: 'Email already exists' }),
+      });
+
+      const resolver = jest.fn();
+      const wrappedResolver = withAsyncValidation(asyncSchema, resolver);
+
+      const input = { email: 'taken@example.com' };
+
+      await expect(wrappedResolver(null, { input }, mockContext)).rejects.toThrow(GraphQLError);
+
+      expect(mockDbCheck).toHaveBeenCalledWith('taken@example.com');
+      expect(resolver).not.toHaveBeenCalled();
+    });
+
+    it('should handle multiple async validations', async () => {
+      const mockEmailCheck = jest.fn().mockResolvedValue(true);
+      const mockUsernameCheck = jest.fn().mockResolvedValue(true);
+
+      const asyncSchema = z.object({
+        email: z
+          .string()
+          .email()
+          .refine(async (email) => await mockEmailCheck(email), {
+            message: 'Email already exists',
+          }),
+        username: z
+          .string()
+          .min(3)
+          .refine(async (username) => await mockUsernameCheck(username), {
+            message: 'Username already exists',
+          }),
+      });
+
+      const resolver = jest.fn().mockResolvedValue({ success: true });
+      const wrappedResolver = withAsyncValidation(asyncSchema, resolver);
+
+      const input = { email: 'new@example.com', username: 'newuser' };
+      await wrappedResolver(null, { input }, mockContext);
+
+      expect(mockEmailCheck).toHaveBeenCalledWith('new@example.com');
+      expect(mockUsernameCheck).toHaveBeenCalledWith('newuser');
+      expect(resolver).toHaveBeenCalled();
+    });
+
+    it('should work with query args (not just input)', async () => {
+      const mockCheck = jest.fn().mockResolvedValue(true);
+
+      const querySchema = z.object({
+        id: z
+          .string()
+          .refine(async (id) => await mockCheck(id), { message: 'Entity does not exist' }),
+      });
+
+      const resolver = jest.fn().mockResolvedValue({ id: 'test', name: 'Test' });
+      const wrappedResolver = withAsyncValidation(querySchema, resolver);
+
+      await wrappedResolver(null, { id: 'valid-id' }, mockContext);
+
+      expect(mockCheck).toHaveBeenCalledWith('valid-id');
+      expect(resolver).toHaveBeenCalledWith(null, { id: 'valid-id' }, mockContext);
+    });
+
+    it('should log validation failures', async () => {
+      const asyncSchema = z.object({
+        email: z
+          .string()
+          .email()
+          .refine(async () => false, { message: 'Email already exists' }),
+      });
+
+      const resolver = jest.fn();
+      const wrappedResolver = withAsyncValidation(asyncSchema, resolver);
+
+      const input = { email: 'taken@example.com' };
+
+      try {
+        await wrappedResolver(null, { input }, mockContext);
+      } catch (error) {
+        // Expected
+      }
+
+      expect(mockErrorHandler.logWarning).toHaveBeenCalledWith(
+        'GraphQL validation failed',
+        expect.objectContaining({
+          userId: 'user-1',
+          context: expect.objectContaining({
+            graphql: true,
+            validationErrors: expect.any(Array),
+          }),
+        })
+      );
+    });
+
+    it('should include async validation errors in GraphQL error extensions', async () => {
+      const asyncSchema = z.object({
+        email: z
+          .string()
+          .email()
+          .refine(async () => false, { message: 'Email already exists' }),
+      });
+
+      const resolver = jest.fn();
+      const wrappedResolver = withAsyncValidation(asyncSchema, resolver);
+
+      const input = { email: 'taken@example.com' };
+
+      try {
+        await wrappedResolver(null, { input }, mockContext);
+        fail('Should have thrown');
+      } catch (error: any) {
+        expect(error).toBeInstanceOf(GraphQLError);
+        expect(error.message).toBe('Validation failed');
+        expect(error.extensions.code).toBe('BAD_USER_INPUT');
+        expect(error.extensions.validationErrors).toBeDefined();
+        const errors = error.extensions.validationErrors as ValidationErrorDetail[];
+        expect(errors.some((e) => e.message === 'Email already exists')).toBe(true);
+      }
+    });
+
+    it('should handle async validation errors gracefully', async () => {
+      const asyncSchema = z.object({
+        email: z
+          .string()
+          .email()
+          .refine(
+            async () => {
+              throw new Error('Database connection failed');
+            },
+            { message: 'Could not validate email' }
+          ),
+      });
+
+      const resolver = jest.fn();
+      const wrappedResolver = withAsyncValidation(asyncSchema, resolver);
+
+      const input = { email: 'test@example.com' };
+
+      await expect(wrappedResolver(null, { input }, mockContext)).rejects.toThrow();
+      expect(resolver).not.toHaveBeenCalled();
+    });
+
+    it('should combine sync and async validations', async () => {
+      const mockCheck = jest.fn().mockResolvedValue(true);
+
+      const combinedSchema = z.object({
+        email: z
+          .string()
+          .email('Invalid email format') // sync
+          .refine(
+            async (email) => await mockCheck(email),
+            { message: 'Email already exists' } // async
+          ),
+        age: z.number().min(18, 'Must be at least 18'), // sync
+      });
+
+      const resolver = jest.fn().mockResolvedValue({ success: true });
+      const wrappedResolver = withAsyncValidation(combinedSchema, resolver);
+
+      // Should pass all validations
+      const validInput = { email: 'valid@example.com', age: 25 };
+      await wrappedResolver(null, { input: validInput }, mockContext);
+      expect(resolver).toHaveBeenCalled();
+
+      // Should fail sync validation
+      // Note: Zod's parseAsync will still evaluate async validators even if sync ones fail
+      resolver.mockClear();
+      mockCheck.mockClear();
+      const invalidEmail = { email: 'invalid', age: 25 };
+      await expect(wrappedResolver(null, { input: invalidEmail }, mockContext)).rejects.toThrow();
+      expect(resolver).not.toHaveBeenCalled();
+    });
+
+    it('should sanitize sensitive fields in async validation logs', async () => {
+      const asyncSchema = z.object({
+        email: z.string().email(),
+        password: z
+          .string()
+          .min(8)
+          .refine(async () => false, { message: 'Invalid credentials' }),
+      });
+
+      const resolver = jest.fn();
+      const wrappedResolver = withAsyncValidation(asyncSchema, resolver);
+
+      const input = { email: 'test@example.com', password: 'secret123' };
+
+      try {
+        await wrappedResolver(null, { input }, mockContext);
+      } catch (error) {
+        // Expected
+      }
+
+      expect(mockErrorHandler.logWarning).toHaveBeenCalledWith(
+        'GraphQL validation failed',
+        expect.objectContaining({
+          context: expect.objectContaining({
+            args: expect.objectContaining({
+              input: expect.objectContaining({
+                password: '[REDACTED]',
+              }),
+            }),
+          }),
+        })
+      );
+    });
+  });
+
   describe('withValidatedResolver', () => {
     const testSchema = z.object({
       name: z.string().min(1),
@@ -297,6 +540,74 @@ describe('GraphQL Validation Utils', () => {
 
       // Resolver should not be called if validation fails
       expect(resolver).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('withAsyncValidatedResolver', () => {
+    const asyncSchema = z.object({
+      email: z
+        .string()
+        .email()
+        .refine(
+          async (email) => {
+            // Simulate DB check
+            return email !== 'taken@example.com';
+          },
+          { message: 'Email already exists' }
+        ),
+    });
+
+    beforeEach(() => {
+      (withErrorHandling as jest.Mock).mockImplementation((resolver) => resolver);
+    });
+
+    it('should combine async validation and error handling', async () => {
+      const resolver = jest.fn().mockResolvedValue({ success: true });
+      const wrappedResolver = withAsyncValidatedResolver(asyncSchema, resolver, 'createUser');
+
+      const input = { email: 'new@example.com' };
+      const result = await wrappedResolver(null, { input }, mockContext);
+
+      expect(result).toEqual({ success: true });
+      expect(withErrorHandling).toHaveBeenCalled();
+      expect(resolver).toHaveBeenCalled();
+    });
+
+    it('should pass operation name to withErrorHandling', () => {
+      const resolver = jest.fn();
+      withAsyncValidatedResolver(asyncSchema, resolver, 'createUser');
+
+      expect(withErrorHandling).toHaveBeenCalledWith(expect.any(Function), 'createUser');
+    });
+
+    it('should validate before error handling', async () => {
+      (withErrorHandling as jest.Mock).mockImplementation((resolver) => resolver);
+
+      const resolver = jest.fn().mockResolvedValue({ success: true });
+      const wrappedResolver = withAsyncValidatedResolver(asyncSchema, resolver, 'createUser');
+
+      const invalidInput = { email: 'taken@example.com' };
+
+      await expect(wrappedResolver(null, { input: invalidInput }, mockContext)).rejects.toThrow(
+        GraphQLError
+      );
+
+      expect(resolver).not.toHaveBeenCalled();
+    });
+
+    it('should handle async validation failures properly', async () => {
+      (withErrorHandling as jest.Mock).mockImplementation((resolver) => resolver);
+
+      const resolver = jest.fn();
+      const wrappedResolver = withAsyncValidatedResolver(asyncSchema, resolver, 'testOp');
+
+      try {
+        await wrappedResolver(null, { input: { email: 'taken@example.com' } }, mockContext);
+        fail('Should have thrown');
+      } catch (error: any) {
+        expect(error).toBeInstanceOf(GraphQLError);
+        expect(error.extensions.validationErrors).toBeDefined();
+      }
     });
   });
 });

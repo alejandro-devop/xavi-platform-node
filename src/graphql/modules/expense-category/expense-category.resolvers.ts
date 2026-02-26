@@ -1,11 +1,13 @@
 import { expenseCategoryService } from '../../../services/expense-category.service';
 import { withErrorHandling, requireAuth } from '../../utils/error-handler';
-import { withValidatedResolver } from '../../utils/validation';
+import { withValidatedResolver, withAsyncValidatedResolver } from '../../utils/validation';
 import {
   expenseCategoryInputSchema,
   expenseCategoryUpdateSchema,
   categoryIdSchema,
   categoryTypeFilterSchema,
+  createExpenseCategoryInputSchema,
+  createExpenseCategoryUpdateSchema,
 } from '../../../validators/schemas/expense-category.schemas';
 
 export const expenseCategoryResolvers = {
@@ -30,20 +32,26 @@ export const expenseCategoryResolvers = {
   },
 
   Mutation: {
-    walletExpenseCategoryAdd: withValidatedResolver(
-      expenseCategoryInputSchema,
+    walletExpenseCategoryAdd: withAsyncValidatedResolver(
+      createExpenseCategoryInputSchema(0), // Placeholder - will be replaced with actual userId
       async (_: any, { input }: any, context: any) => {
         requireAuth(context, 'walletExpenseCategoryAdd');
-        return await expenseCategoryService.createCategory(context.user.id, input);
+        // Validate with user-specific schema
+        const schema = createExpenseCategoryInputSchema(context.user.id);
+        const validatedInput = await schema.parseAsync(input);
+        return await expenseCategoryService.createCategory(context.user.id, validatedInput);
       },
       'walletExpenseCategoryAdd'
     ),
 
-    walletExpenseCategoryUpdate: withValidatedResolver(
-      expenseCategoryUpdateSchema,
+    walletExpenseCategoryUpdate: withAsyncValidatedResolver(
+      categoryIdSchema,
       async (_: any, { id, input }: any, context: any) => {
         requireAuth(context, 'walletExpenseCategoryUpdate');
-        return await expenseCategoryService.updateCategory(id, context.user.id, input);
+        // Validate with user-specific schema that excludes current category
+        const schema = createExpenseCategoryUpdateSchema(context.user.id, id);
+        const validatedInput = await schema.parseAsync(input);
+        return await expenseCategoryService.updateCategory(id, context.user.id, validatedInput);
       },
       'walletExpenseCategoryUpdate'
     ),

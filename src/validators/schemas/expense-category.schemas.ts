@@ -1,7 +1,42 @@
 import { z } from 'zod';
+import { createUniqueValidator } from '../../shared/utils/custom-validators';
+import { expenseCategoryService } from '../../services/expense-category.service';
 
 /**
  * Expense Category Input Schema - For creating categories
+ * Factory function to create schema with user context for async validation
+ */
+export const createExpenseCategoryInputSchema = (userId: number) =>
+  z.object({
+    name: z
+      .string()
+      .min(3, 'Name must be at least 3 characters')
+      .max(100, 'Name must be less than 100 characters')
+      .refine(
+        createUniqueValidator(async (name: string) => {
+          return await expenseCategoryService.isNameUnique(userId, name);
+        }),
+        { message: 'A category with this name already exists' }
+      ),
+    type: z.enum(['income', 'expense'], {
+      errorMap: () => ({ message: "Type must be 'income' or 'expense'" }),
+    }),
+    color: z
+      .string()
+      .regex(
+        /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/,
+        'Color must be a valid hex color (e.g., #FFF or #FF5733)'
+      )
+      .optional(),
+    icon: z
+      .string()
+      .min(4, 'Icon must be at least 4 characters')
+      .max(20, 'Icon must be less than 20 characters')
+      .optional(),
+  });
+
+/**
+ * Expense Category Input Schema - For creating categories (without async validation)
  */
 export const expenseCategoryInputSchema = z.object({
   name: z
@@ -27,6 +62,42 @@ export const expenseCategoryInputSchema = z.object({
 
 /**
  * Expense Category Update Schema - For updating categories
+ * Factory function to create schema with user context for async validation
+ */
+export const createExpenseCategoryUpdateSchema = (userId: number, categoryId?: string) =>
+  z.object({
+    name: z
+      .string()
+      .min(3, 'Name must be at least 3 characters')
+      .max(100, 'Name must be less than 100 characters')
+      .refine(
+        createUniqueValidator(async (name: string) => {
+          return await expenseCategoryService.isNameUnique(userId, name, categoryId);
+        }),
+        { message: 'A category with this name already exists' }
+      )
+      .optional(),
+    type: z
+      .enum(['income', 'expense'], {
+        errorMap: () => ({ message: "Type must be 'income' or 'expense'" }),
+      })
+      .optional(),
+    color: z
+      .string()
+      .regex(
+        /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/,
+        'Color must be a valid hex color (e.g., #FFF or #FF5733)'
+      )
+      .optional(),
+    icon: z
+      .string()
+      .min(4, 'Icon must be at least 4 characters')
+      .max(20, 'Icon must be less than 20 characters')
+      .optional(),
+  });
+
+/**
+ * Expense Category Update Schema - For updating categories (without async validation)
  */
 export const expenseCategoryUpdateSchema = z.object({
   name: z
