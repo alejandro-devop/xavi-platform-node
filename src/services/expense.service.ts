@@ -6,8 +6,9 @@ import {
   walletBudgets,
 } from '../shared/database/schema';
 import { eq, and, gte, lte, desc, sql } from 'drizzle-orm';
-import { NotFoundError, ForbiddenError, BadRequestError } from '../shared/errors';
+import { BadRequestError } from '../shared/errors';
 import { checkRecordExists } from '../shared/utils/db-validators';
+import { balanceStrategies, updateBalances } from '../shared/utils/balance-strategies';
 import type {
   Expense,
   CreateExpenseInput,
@@ -136,21 +137,14 @@ export const expenseService = {
         })
         .returning();
 
-      // Update wallet balance: balance += credit - debit
-      const balanceChange = parseFloat(expense.credit) - parseFloat(expense.debit);
-      await tx
-        .update(walletWallets)
-        .set({ balance: sql`balance + ${balanceChange}` })
-        .where(eq(walletWallets.id, input.walletId));
-
-      // Update budget balance if linked: balance += debit - credit
-      if (input.budgetId) {
-        const budgetBalanceChange = parseFloat(expense.debit) - parseFloat(expense.credit);
-        await tx
-          .update(walletBudgets)
-          .set({ balance: sql`balance + ${budgetBalanceChange}` })
-          .where(eq(walletBudgets.id, input.budgetId));
-      }
+      // Apply balance changes using strategy pattern
+      await updateBalances(balanceStrategies.apply, {
+        tx,
+        walletId: input.walletId,
+        budgetId: input.budgetId,
+        credit: parseFloat(expense.credit),
+        debit: parseFloat(expense.debit),
+      });
 
       return expense;
     });
@@ -173,20 +167,14 @@ export const expenseService = {
 
     // Use Drizzle transaction
     const result = await db.transaction(async (tx) => {
-      // Reverse old balance changes
-      const oldBalanceChange = existingExpense.credit - existingExpense.debit;
-      await tx
-        .update(walletWallets)
-        .set({ balance: sql`balance - ${oldBalanceChange}` })
-        .where(eq(walletWallets.id, existingExpense.walletId));
-
-      if (existingExpense.budgetId) {
-        const oldBudgetChange = existingExpense.debit - existingExpense.credit;
-        await tx
-          .update(walletBudgets)
-          .set({ balance: sql`balance - ${oldBudgetChange}` })
-          .where(eq(walletBudgets.id, existingExpense.budgetId));
-      }
+      // Reverse old balance changes using strategy pattern
+      await updateBalances(balanceStrategies.reverse, {
+        tx,
+        walletId: existingExpense.walletId,
+        budgetId: existingExpense.budgetId,
+        credit: existingExpense.credit,
+        debit: existingExpense.debit,
+      });
 
       // Build update object
       const updateData: Partial<typeof walletExpenses.$inferInsert> = {};
@@ -213,23 +201,18 @@ export const expenseService = {
         .where(eq(walletExpenses.id, id))
         .returning();
 
-      // Apply new balance changes
-      const newBalanceChange = parseFloat(expense.credit) - parseFloat(expense.debit);
+      // Apply new balance changes using strategy pattern
       const targetWalletId = input.walletId || existingExpense.walletId;
-      await tx
-        .update(walletWallets)
-        .set({ balance: sql`balance + ${newBalanceChange}` })
-        .where(eq(walletWallets.id, targetWalletId));
-
       const targetBudgetId =
         input.budgetId !== undefined ? input.budgetId : existingExpense.budgetId;
-      if (targetBudgetId) {
-        const newBudgetChange = parseFloat(expense.debit) - parseFloat(expense.credit);
-        await tx
-          .update(walletBudgets)
-          .set({ balance: sql`balance + ${newBudgetChange}` })
-          .where(eq(walletBudgets.id, targetBudgetId));
-      }
+
+      await updateBalances(balanceStrategies.apply, {
+        tx,
+        walletId: targetWalletId,
+        budgetId: targetBudgetId,
+        credit: parseFloat(expense.credit),
+        debit: parseFloat(expense.debit),
+      });
 
       return expense;
     });
@@ -252,20 +235,14 @@ export const expenseService = {
 
     // Use Drizzle transaction
     await db.transaction(async (tx) => {
-      // Reverse balance changes
-      const balanceChange = expense.credit - expense.debit;
-      await tx
-        .update(walletWallets)
-        .set({ balance: sql`balance - ${balanceChange}` })
-        .where(eq(walletWallets.id, expense.walletId));
-
-      if (expense.budgetId) {
-        const budgetChange = expense.debit - expense.credit;
-        await tx
-          .update(walletBudgets)
-          .set({ balance: sql`balance - ${budgetChange}` })
-          .where(eq(walletBudgets.id, expense.budgetId));
-      }
+      // Reverse balance changes using strategy pattern
+      await updateBalances(balanceStrategies.reverse, {
+        tx,
+        walletId: expense.walletId,
+        budgetId: expense.budgetId,
+        credit: expense.credit,
+        debit: expense.debit,
+      });
 
       // Delete expense
       await tx.delete(walletExpenses).where(eq(walletExpenses.id, id));
