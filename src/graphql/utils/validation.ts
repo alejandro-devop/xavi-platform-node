@@ -1,0 +1,131 @@
+import { GraphQLError } from 'graphql';
+import { z } from 'zod';
+import { errorHandler } from '../../shared/errors';
+import { withErrorHandling, type GraphQLContext } from './error-handler';
+
+/**
+ * Validation error details for GraphQL
+ */
+export interface ValidationErrorDetail {
+  path: (string | number)[];
+  message: string;
+  code?: string;
+}
+
+/**
+ * Wrapper function that adds Zod validation to a GraphQL resolver
+ * Validates args.input or args directly before executing the resolver
+ *
+ * @example
+ * ```typescript
+ * walletAdd: withValidation(
+ *   walletInputSchema,
+ *   async (_, { input }, context) => {
+ *     // input is validated and type-safe here
+ *     return await walletService.createWallet(context.user.id, input);
+ *   }
+ * )
+ * ```
+ */
+export function withValidation<TSchema extends z.ZodType>(
+  schema: TSchema,
+  resolver: (parent: any, args: any, context: GraphQLContext) => Promise<any>
+) {
+  return async (parent: any, args: any, context: GraphQLContext): Promise<any> => {
+    try {
+      // Determine what to validate: args.input for mutations, args for queries
+      const dataToValidate = args.input !== undefined ? args.input : args;
+
+      // Validate with Zod
+      const validated = schema.parse(dataToValidate);
+
+      // Replace args with validated data
+      const validatedArgs = args.input !== undefined ? { ...args, input: validated } : validated;
+
+      // Execute resolver with validated data
+      return await resolver(parent, validatedArgs, context);
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        // Format Zod errors for GraphQL
+        const validationErrors: ValidationErrorDetail[] = error.errors.map((err) => ({
+          path: err.path,
+          message: err.message,
+          code: err.code,
+        }));
+
+        // Log validation failure
+        errorHandler.logWarning('GraphQL validation failed', {
+          userId: context.user?.id,
+          context: {
+            graphql: true,
+            validationErrors,
+            args: sanitizeArgs(args),
+          },
+        });
+
+        // Throw GraphQL error with validation details
+        throw new GraphQLError('Validation failed', {
+          extensions: {
+            code: 'BAD_USER_INPUT',
+            validationErrors,
+          },
+        });
+      }
+
+      // Re-throw other errors
+      throw error;
+    }
+  };
+}
+
+/**
+ * Combined wrapper that adds both validation and error handling
+ * This is the recommended way to use validation in resolvers
+ *
+ * @example
+ * ```typescript
+ * walletAdd: withValidatedResolver(
+ *   walletInputSchema,
+ *   async (_, { input }, context) => {
+ *     requireAuth(context, 'walletAdd');
+ *     return await walletService.createWallet(context.user.id, input);
+ *   },
+ *   'walletAdd'
+ * )
+ * ```
+ */
+export function withValidatedResolver<TSchema extends z.ZodType>(
+  schema: TSchema,
+  resolver: (parent: any, args: any, context: GraphQLContext) => Promise<any>,
+  operationName: string
+) {
+  return withErrorHandling(withValidation(schema, resolver), operationName);
+}
+
+/**
+ * Sanitize arguments to remove sensitive data from logs
+ */
+function sanitizeArgs(args: any): any {
+  if (!args) return {};
+
+  const sanitized = { ...args };
+  const sensitiveFields = ['password', 'token', 'refreshToken', 'secret'];
+
+  // Remove sensitive fields from top level
+  for (const field of sensitiveFields) {
+    if (field in sanitized) {
+      sanitized[field] = '[REDACTED]';
+    }
+  }
+
+  // Remove sensitive fields from input
+  if (sanitized.input && typeof sanitized.input === 'object') {
+    for (const field of sensitiveFields) {
+      if (field in sanitized.input) {
+        sanitized.input[field] = '[REDACTED]';
+      }
+    }
+  }
+
+  return sanitized;
+}

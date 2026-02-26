@@ -7,15 +7,21 @@ jest.mock('../../../../src/services/expense.service');
 const mockExpenseService = expenseService as jest.Mocked<typeof expenseService>;
 
 describe('Expense Resolvers', () => {
+  // Use valid UUIDs for validation
+  const TEST_USER_ID = '550e8400-e29b-41d4-a716-446655440000';
+  const TEST_EXPENSE_ID = '550e8400-e29b-41d4-a716-446655440001';
+  const TEST_WALLET_ID = '550e8400-e29b-41d4-a716-446655440002';
+  const TEST_CATEGORY_ID = '550e8400-e29b-41d4-a716-446655440003';
+
   const mockContext = {
-    user: { id: 'user-1', email: 'test@example.com' },
+    user: { id: TEST_USER_ID, email: 'test@example.com' },
   };
 
   const mockExpense = {
-    id: 'expense-1',
+    id: TEST_EXPENSE_ID,
     userId: 1,
-    walletId: 'wallet-1',
-    categoryId: 'category-1',
+    walletId: TEST_WALLET_ID,
+    categoryId: TEST_CATEGORY_ID,
     debit: 100.5,
     credit: 0,
     description: 'Test expense',
@@ -34,17 +40,17 @@ describe('Expense Resolvers', () => {
 
       const result = await expenseResolvers.Query.walletExpense(
         null,
-        { id: 'expense-1' },
+        { id: TEST_EXPENSE_ID },
         mockContext
       );
 
       expect(result).toEqual(mockExpense);
-      expect(mockExpenseService.getExpenseById).toHaveBeenCalledWith('expense-1', 'user-1');
+      expect(mockExpenseService.getExpenseById).toHaveBeenCalledWith(TEST_EXPENSE_ID, TEST_USER_ID);
     });
 
     it('should throw error if not authenticated', async () => {
       await expect(
-        expenseResolvers.Query.walletExpense(null, { id: 'expense-1' }, { user: null })
+        expenseResolvers.Query.walletExpense(null, { id: TEST_EXPENSE_ID }, { user: null })
       ).rejects.toThrow(GraphQLError);
     });
 
@@ -52,7 +58,7 @@ describe('Expense Resolvers', () => {
       mockExpenseService.getExpenseById.mockRejectedValue(new Error('Expense not found'));
 
       await expect(
-        expenseResolvers.Query.walletExpense(null, { id: 'expense-1' }, mockContext)
+        expenseResolvers.Query.walletExpense(null, { id: TEST_EXPENSE_ID }, mockContext)
       ).rejects.toThrow(GraphQLError);
     });
   });
@@ -64,13 +70,13 @@ describe('Expense Resolvers', () => {
 
       const result = await expenseResolvers.Query.walletExpenses(
         null,
-        { walletId: 'wallet-1' },
+        { walletId: TEST_WALLET_ID },
         mockContext
       );
 
       expect(result).toEqual(mockExpenses);
-      expect(mockExpenseService.getExpenses).toHaveBeenCalledWith('user-1', {
-        walletId: 'wallet-1',
+      expect(mockExpenseService.getExpenses).toHaveBeenCalledWith(TEST_USER_ID, {
+        walletId: TEST_WALLET_ID,
       });
     });
 
@@ -92,12 +98,12 @@ describe('Expense Resolvers', () => {
   describe('Mutation: walletExpenseAdd', () => {
     it('should create a new expense', async () => {
       const input = {
-        walletId: 'wallet-1',
-        categoryId: 'category-1',
+        walletId: TEST_WALLET_ID,
+        categoryId: TEST_CATEGORY_ID,
         debit: 100.5,
         credit: 0,
         description: 'Test expense',
-        date: '2024-01-01',
+        date: '2024-01-01T00:00:00.000Z',
       };
 
       mockExpenseService.createExpense.mockResolvedValue(mockExpense);
@@ -105,7 +111,7 @@ describe('Expense Resolvers', () => {
       const result = await expenseResolvers.Mutation.walletExpenseAdd(null, { input }, mockContext);
 
       expect(result).toEqual(mockExpense);
-      expect(mockExpenseService.createExpense).toHaveBeenCalledWith('user-1', input);
+      expect(mockExpenseService.createExpense).toHaveBeenCalledWith(TEST_USER_ID, input);
     });
 
     it('should throw error if not authenticated', async () => {
@@ -135,19 +141,23 @@ describe('Expense Resolvers', () => {
 
       const result = await expenseResolvers.Mutation.walletExpenseUpdate(
         null,
-        { id: 'expense-1', input },
+        { id: TEST_EXPENSE_ID, input },
         mockContext
       );
 
       expect(result).toEqual(updatedExpense);
-      expect(mockExpenseService.updateExpense).toHaveBeenCalledWith('expense-1', 'user-1', input);
+      expect(mockExpenseService.updateExpense).toHaveBeenCalledWith(
+        TEST_EXPENSE_ID,
+        TEST_USER_ID,
+        input
+      );
     });
 
     it('should throw error if not authenticated', async () => {
       await expect(
         expenseResolvers.Mutation.walletExpenseUpdate(
           null,
-          { id: 'expense-1', input: {} },
+          { id: TEST_EXPENSE_ID, input: {} },
           { user: null }
         )
       ).rejects.toThrow(GraphQLError);
@@ -159,7 +169,7 @@ describe('Expense Resolvers', () => {
       await expect(
         expenseResolvers.Mutation.walletExpenseUpdate(
           null,
-          { id: 'expense-1', input: {} },
+          { id: TEST_EXPENSE_ID, input: {} },
           mockContext
         )
       ).rejects.toThrow(GraphQLError);
@@ -172,17 +182,17 @@ describe('Expense Resolvers', () => {
 
       const result = await expenseResolvers.Mutation.walletExpenseRemove(
         null,
-        { id: 'expense-1' },
+        { id: TEST_EXPENSE_ID },
         mockContext
       );
 
       expect(result).toEqual(true);
-      expect(mockExpenseService.deleteExpense).toHaveBeenCalledWith('expense-1', 'user-1');
+      expect(mockExpenseService.deleteExpense).toHaveBeenCalledWith(TEST_EXPENSE_ID, TEST_USER_ID);
     });
 
     it('should throw error if not authenticated', async () => {
       await expect(
-        expenseResolvers.Mutation.walletExpenseRemove(null, { id: 'expense-1' }, { user: null })
+        expenseResolvers.Mutation.walletExpenseRemove(null, { id: TEST_EXPENSE_ID }, { user: null })
       ).rejects.toThrow(GraphQLError);
     });
 
@@ -190,7 +200,7 @@ describe('Expense Resolvers', () => {
       mockExpenseService.deleteExpense.mockRejectedValue(new Error('Expense not found'));
 
       await expect(
-        expenseResolvers.Mutation.walletExpenseRemove(null, { id: 'expense-1' }, mockContext)
+        expenseResolvers.Mutation.walletExpenseRemove(null, { id: TEST_EXPENSE_ID }, mockContext)
       ).rejects.toThrow(GraphQLError);
     });
   });

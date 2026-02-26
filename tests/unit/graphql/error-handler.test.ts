@@ -187,6 +187,40 @@ describe('GraphQL Error Handler Utils', () => {
 
       expect(mockErrorHandler.setUserContext).toHaveBeenCalledWith(123);
     });
+
+    it('should preserve GraphQLError extensions (like validation errors)', async () => {
+      const validationErrors = [
+        { path: ['name'], message: 'Name is required', code: 'invalid_type' },
+        { path: ['email'], message: 'Invalid email format', code: 'invalid_string' },
+      ];
+
+      const graphqlError = new GraphQLError('Validation failed', {
+        extensions: {
+          code: 'BAD_USER_INPUT',
+          validationErrors,
+        },
+      });
+
+      const resolver = jest.fn().mockRejectedValue(graphqlError);
+      const wrappedResolver = withErrorHandling(resolver, 'createUser');
+
+      try {
+        await wrappedResolver(null, { input: {} }, mockContext);
+        fail('Should have thrown');
+      } catch (err: any) {
+        expect(err).toBeInstanceOf(GraphQLError);
+        expect(err.message).toBe('Validation failed');
+        expect(err.extensions.code).toBe('BAD_USER_INPUT');
+        expect(err.extensions.validationErrors).toEqual(validationErrors);
+      }
+
+      // Should log but not call handleError for GraphQLErrors
+      expect(mockErrorHandler.logInfo).toHaveBeenCalledWith(
+        'GraphQL operation createUser failed: Validation failed',
+        expect.any(Object)
+      );
+      expect(mockErrorHandler.handleError).not.toHaveBeenCalled();
+    });
   });
 
   describe('requireAuth', () => {

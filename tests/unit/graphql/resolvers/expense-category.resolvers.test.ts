@@ -9,16 +9,20 @@ const mockExpenseCategoryService = expenseCategoryService as jest.Mocked<
 >;
 
 describe('Expense Category Resolvers', () => {
+  // Use valid UUIDs for validation
+  const TEST_USER_ID = '550e8400-e29b-41d4-a716-446655440000';
+  const TEST_CATEGORY_ID = '550e8400-e29b-41d4-a716-446655440001';
+
   const mockContext = {
-    user: { id: 'user-1', email: 'test@example.com' },
+    user: { id: TEST_USER_ID, email: 'test@example.com' },
   };
 
   const mockCategory = {
-    id: 'category-1',
+    id: TEST_CATEGORY_ID,
     userId: 1,
     name: 'Food',
     type: 'expense' as const,
-    icon: '🍔',
+    icon: '🍔🍟🥤',
     color: '#FF5733',
     isDefault: false,
     isSystem: false,
@@ -36,14 +40,14 @@ describe('Expense Category Resolvers', () => {
 
       const result = await expenseCategoryResolvers.Query.walletExpenseCategory(
         null,
-        { id: 'category-1' },
+        { id: TEST_CATEGORY_ID },
         mockContext
       );
 
       expect(result).toEqual(mockCategory);
       expect(mockExpenseCategoryService.getCategoryById).toHaveBeenCalledWith(
-        'category-1',
-        'user-1'
+        TEST_CATEGORY_ID,
+        TEST_USER_ID
       );
     });
 
@@ -51,7 +55,7 @@ describe('Expense Category Resolvers', () => {
       await expect(
         expenseCategoryResolvers.Query.walletExpenseCategory(
           null,
-          { id: 'category-1' },
+          { id: TEST_CATEGORY_ID },
           { user: null }
         )
       ).rejects.toThrow(GraphQLError);
@@ -63,7 +67,7 @@ describe('Expense Category Resolvers', () => {
       await expect(
         expenseCategoryResolvers.Query.walletExpenseCategory(
           null,
-          { id: 'category-1' },
+          { id: TEST_CATEGORY_ID },
           mockContext
         )
       ).rejects.toThrow(GraphQLError);
@@ -82,7 +86,10 @@ describe('Expense Category Resolvers', () => {
       );
 
       expect(result).toEqual(mockCategories);
-      expect(mockExpenseCategoryService.getCategories).toHaveBeenCalledWith('user-1', undefined);
+      expect(mockExpenseCategoryService.getCategories).toHaveBeenCalledWith(
+        TEST_USER_ID,
+        undefined
+      );
     });
 
     it('should return filtered categories by type', async () => {
@@ -96,7 +103,10 @@ describe('Expense Category Resolvers', () => {
       );
 
       expect(result).toEqual(mockCategories);
-      expect(mockExpenseCategoryService.getCategories).toHaveBeenCalledWith('user-1', 'expense');
+      expect(mockExpenseCategoryService.getCategories).toHaveBeenCalledWith(
+        TEST_USER_ID,
+        'expense'
+      );
     });
 
     it('should throw error if not authenticated', async () => {
@@ -119,7 +129,7 @@ describe('Expense Category Resolvers', () => {
       const input = {
         name: 'Food',
         type: 'expense' as const,
-        icon: '🍔',
+        icon: '🍔🍟🥤',
         color: '#FF5733',
       };
 
@@ -132,7 +142,7 @@ describe('Expense Category Resolvers', () => {
       );
 
       expect(result).toEqual(mockCategory);
-      expect(mockExpenseCategoryService.createCategory).toHaveBeenCalledWith('user-1', input);
+      expect(mockExpenseCategoryService.createCategory).toHaveBeenCalledWith(TEST_USER_ID, input);
     });
 
     it('should throw error if not authenticated', async () => {
@@ -158,7 +168,7 @@ describe('Expense Category Resolvers', () => {
     it('should update a category', async () => {
       const input = {
         name: 'Updated Food',
-        icon: '🍕',
+        icon: '🍕🧀🥗',
       };
 
       const updatedCategory = { ...mockCategory, ...input };
@@ -166,14 +176,14 @@ describe('Expense Category Resolvers', () => {
 
       const result = await expenseCategoryResolvers.Mutation.walletExpenseCategoryUpdate(
         null,
-        { id: 'category-1', input },
+        { id: TEST_CATEGORY_ID, input },
         mockContext
       );
 
       expect(result).toEqual(updatedCategory);
       expect(mockExpenseCategoryService.updateCategory).toHaveBeenCalledWith(
-        'category-1',
-        'user-1',
+        TEST_CATEGORY_ID,
+        TEST_USER_ID,
         input
       );
     });
@@ -182,7 +192,7 @@ describe('Expense Category Resolvers', () => {
       await expect(
         expenseCategoryResolvers.Mutation.walletExpenseCategoryUpdate(
           null,
-          { id: 'category-1', input: {} },
+          { id: TEST_CATEGORY_ID, input: {} },
           { user: null }
         )
       ).rejects.toThrow(GraphQLError);
@@ -194,7 +204,7 @@ describe('Expense Category Resolvers', () => {
       await expect(
         expenseCategoryResolvers.Mutation.walletExpenseCategoryUpdate(
           null,
-          { id: 'category-1', input: {} },
+          { id: TEST_CATEGORY_ID, input: {} },
           mockContext
         )
       ).rejects.toThrow(GraphQLError);
@@ -207,14 +217,14 @@ describe('Expense Category Resolvers', () => {
 
       const result = await expenseCategoryResolvers.Mutation.walletExpenseCategoryRemove(
         null,
-        { id: 'category-1' },
+        { id: TEST_CATEGORY_ID },
         mockContext
       );
 
       expect(result).toEqual(true);
       expect(mockExpenseCategoryService.deleteCategory).toHaveBeenCalledWith(
-        'category-1',
-        'user-1'
+        TEST_CATEGORY_ID,
+        TEST_USER_ID
       );
     });
 
@@ -222,7 +232,7 @@ describe('Expense Category Resolvers', () => {
       await expect(
         expenseCategoryResolvers.Mutation.walletExpenseCategoryRemove(
           null,
-          { id: 'category-1' },
+          { id: TEST_CATEGORY_ID },
           { user: null }
         )
       ).rejects.toThrow(GraphQLError);
@@ -234,7 +244,7 @@ describe('Expense Category Resolvers', () => {
       await expect(
         expenseCategoryResolvers.Mutation.walletExpenseCategoryRemove(
           null,
-          { id: 'category-1' },
+          { id: TEST_CATEGORY_ID },
           mockContext
         )
       ).rejects.toThrow(GraphQLError);

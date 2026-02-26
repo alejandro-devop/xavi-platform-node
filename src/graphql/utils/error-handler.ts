@@ -46,7 +46,20 @@ export function withErrorHandling<TArgs = any, TResult = any>(
         },
       };
 
-      // Handle and log error
+      // If it's already a GraphQLError with extensions (like validation errors),
+      // preserve those extensions
+      if (error instanceof GraphQLError) {
+        // Log for monitoring but don't double-handle
+        errorHandler.logInfo(
+          `GraphQL operation ${operationName} failed: ${error.message}`,
+          metadata
+        );
+
+        // Re-throw with preserved extensions
+        throw error;
+      }
+
+      // Handle and log non-GraphQL errors
       errorHandler.handleError(error, metadata);
 
       // Convert to GraphQL error

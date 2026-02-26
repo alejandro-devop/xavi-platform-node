@@ -62,7 +62,7 @@ export const createMockWallet = (overrides = {}) => ({
   id: '019c7d42-15dc-7000-8000-000000000001',
   userId: 1,
   name: 'Test Wallet',
-  icon: '💰',
+  icon: '💰💵💳',
   initialBalance: '1000.00',
   balance: '1000.00',
   isMain: true,

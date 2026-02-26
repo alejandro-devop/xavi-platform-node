@@ -65,7 +65,7 @@ describe('Wallet Resolvers', () => {
       const mockWallet = createMockWallet();
       const input = {
         name: 'Test Wallet',
-        icon: '💰',
+        icon: '💰💵💳',
         initialBalance: 1000,
         isMain: true,
       };
@@ -113,18 +113,24 @@ describe('Wallet Resolvers', () => {
 
   describe('Mutation.walletRemove', () => {
     it('should delete a wallet', async () => {
+      const mockWallet = createMockWallet();
       (walletService.deleteWallet as jest.Mock).mockResolvedValue(true);
 
-      const result = await walletResolvers.Mutation.walletRemove(null, { id: '1' }, mockContext);
+      const result = await walletResolvers.Mutation.walletRemove(
+        null,
+        { id: mockWallet.id },
+        mockContext
+      );
 
       expect(result).toBe(true);
-      expect(walletService.deleteWallet).toHaveBeenCalledWith('1', mockContext.user.id);
+      expect(walletService.deleteWallet).toHaveBeenCalledWith(mockWallet.id, mockContext.user.id);
     });
 
     it('should throw error when not authenticated', async () => {
-      await expect(walletResolvers.Mutation.walletRemove(null, { id: '1' }, {})).rejects.toThrow(
-        GraphQLError
-      );
+      const mockWallet = createMockWallet();
+      await expect(
+        walletResolvers.Mutation.walletRemove(null, { id: mockWallet.id }, {})
+      ).rejects.toThrow(GraphQLError);
     });
   });
 
