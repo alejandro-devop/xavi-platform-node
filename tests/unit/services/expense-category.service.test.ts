@@ -1,5 +1,7 @@
 import { expenseCategoryService } from '../../../src/services/expense-category.service';
 import { mockDb, createMockCategory, resetAllMocks } from '../../helpers/mocks';
+import * as dbValidators from '../../../src/shared/utils/db-validators';
+import { NotFoundError } from '../../../src/shared/errors';
 
 // Mock Drizzle
 jest.mock('../../../src/shared/database/drizzle', () => ({
@@ -14,6 +16,20 @@ describe('ExpenseCategoryService', () => {
   beforeEach(() => {
     resetAllMocks();
     mockGetDb.mockReturnValue(mockDb as any);
+    // Mock checkRecordExists to return valid category by default
+    jest.spyOn(dbValidators, 'checkRecordExists').mockResolvedValue({
+      id: '1',
+      userId: 1,
+      name: 'Test Category',
+      type: 'expense',
+      description: null,
+      color: '#FF0000',
+      icon: '🍔',
+      isSystem: false,
+      isTransaction: false,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as any);
   });
 
   describe('getCategories', () => {
@@ -53,7 +69,8 @@ describe('ExpenseCategoryService', () => {
   describe('getCategoryById', () => {
     it('should return a category by id', async () => {
       const mockCategory = createMockCategory();
-      mockDb.query.walletExpenseCategories.findFirst.mockResolvedValue(mockCategory);
+      // Mock checkRecordExists to return the category
+      jest.spyOn(dbValidators, 'checkRecordExists').mockResolvedValue(mockCategory as any);
 
       const result = await expenseCategoryService.getCategoryById(mockCategory.id, 1);
 
@@ -61,7 +78,10 @@ describe('ExpenseCategoryService', () => {
     });
 
     it('should return null when category not found', async () => {
-      mockDb.query.walletExpenseCategories.findFirst.mockResolvedValue(undefined);
+      // Mock checkRecordExists to throw NotFoundError
+      jest
+        .spyOn(dbValidators, 'checkRecordExists')
+        .mockRejectedValue(new NotFoundError('Category not found'));
 
       try {
         await expenseCategoryService.getCategoryById('non-existent-id', 1);
@@ -122,7 +142,8 @@ describe('ExpenseCategoryService', () => {
       const updatedCategory = { ...existingCategory, name: 'Updated Category' };
       const updateData = { name: 'Updated Category' };
 
-      mockDb.query.walletExpenseCategories.findFirst.mockResolvedValue(existingCategory);
+      // Mock checkRecordExists to return the category
+      jest.spyOn(dbValidators, 'checkRecordExists').mockResolvedValue(existingCategory as any);
 
       const mockUpdate = jest.fn().mockReturnValue({
         set: jest.fn().mockReturnValue({
@@ -144,7 +165,10 @@ describe('ExpenseCategoryService', () => {
     });
 
     it('should return null when category not found', async () => {
-      mockDb.query.walletExpenseCategories.findFirst.mockResolvedValue(undefined);
+      // Mock checkRecordExists to throw NotFoundError
+      jest
+        .spyOn(dbValidators, 'checkRecordExists')
+        .mockRejectedValue(new NotFoundError('Category not found'));
 
       try {
         await expenseCategoryService.updateCategory('non-existent-id', 1, {
@@ -160,7 +184,8 @@ describe('ExpenseCategoryService', () => {
   describe('deleteCategory', () => {
     it('should delete a category', async () => {
       const existingCategory = createMockCategory();
-      mockDb.query.walletExpenseCategories.findFirst.mockResolvedValue(existingCategory);
+      // Mock checkRecordExists to return the category
+      jest.spyOn(dbValidators, 'checkRecordExists').mockResolvedValue(existingCategory as any);
 
       const mockDelete = jest.fn().mockReturnValue({
         where: jest.fn().mockResolvedValue(undefined),
@@ -174,7 +199,10 @@ describe('ExpenseCategoryService', () => {
     });
 
     it('should return false when category not found', async () => {
-      mockDb.query.walletExpenseCategories.findFirst.mockResolvedValue(undefined);
+      // Mock checkRecordExists to throw NotFoundError
+      jest
+        .spyOn(dbValidators, 'checkRecordExists')
+        .mockRejectedValue(new NotFoundError('Category not found'));
 
       try {
         await expenseCategoryService.deleteCategory('non-existent-id', 1);

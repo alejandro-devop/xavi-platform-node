@@ -103,7 +103,7 @@ describe('Expense Resolvers', () => {
         debit: 100.5,
         credit: 0,
         description: 'Test expense',
-        date: '2024-01-01T00:00:00.000Z',
+        date: '2024-01-01',
       };
 
       mockExpenseService.createExpense.mockResolvedValue(mockExpense);

@@ -2,6 +2,7 @@ import { getDb } from '../shared/database/drizzle';
 import { walletWallets } from '../shared/database/schema';
 import { eq, and, desc, asc, ne } from 'drizzle-orm';
 import { NotFoundError, ForbiddenError, BadRequestError } from '../shared/errors';
+import { checkRecordExists } from '../shared/utils/db-validators';
 import type { Wallet, CreateWalletInput, UpdateWalletInput } from '../types/services/wallet.types';
 
 export const walletService = {
@@ -30,20 +31,14 @@ export const walletService = {
    * Get a wallet by ID
    */
   async getWalletById(id: string, userId: number): Promise<Wallet> {
-    const db = getDb();
-
-    const wallet = await db.query.walletWallets.findFirst({
-      where: eq(walletWallets.id, id),
+    const wallet = await checkRecordExists({
+      table: walletWallets,
+      idValue: id,
+      scopeField: walletWallets.userId,
+      scopeValue: userId,
+      notFoundMessage: 'Wallet not found',
+      forbiddenMessage: 'You do not have permission to access this wallet',
     });
-
-    if (!wallet) {
-      throw new NotFoundError('Wallet not found');
-    }
-
-    // Verify ownership
-    if (wallet.userId.toString() !== userId.toString()) {
-      throw new ForbiddenError('You do not have permission to access this wallet');
-    }
 
     return {
       ...wallet,

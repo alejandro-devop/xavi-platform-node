@@ -1,5 +1,6 @@
 import { getDb } from '../database/drizzle';
 import { eq, and, ne, sql } from 'drizzle-orm';
+import { NotFoundError, ForbiddenError } from '../errors';
 
 /**
  * Parameters for checking field uniqueness in the database
@@ -132,4 +133,123 @@ export function normalizeName(name: string): string {
  */
 export function normalizeNameForComparison(name: string): string {
   return normalizeName(name).toLowerCase();
+}
+
+/**
+ * Parameters for checking record existence and ownership
+ */
+export interface CheckRecordExistsParams {
+  /** Drizzle table reference */
+  table: any;
+  /** ID field to query by (default: table.id) */
+  idField?: any;
+  /** Value of the ID to search for */
+  idValue: string | number;
+  /** Optional scope field for ownership validation (e.g., table.userId) */
+  scopeField?: any;
+  /** Value for the scope field (e.g., userId) */
+  scopeValue?: number | string;
+  /** Custom error message for not found (default: 'Record not found') */
+  notFoundMessage?: string;
+  /** Custom error message for forbidden (default: 'You do not have permission to access this record') */
+  forbiddenMessage?: string;
+}
+
+/**
+ * Generic function to check if a record exists and optionally validate ownership
+ *
+ * Features:
+ * - Finds a record by ID (or custom field)
+ * - Optionally validates ownership (e.g., belongs to userId)
+ * - Returns the found record (avoids duplicate queries)
+ * - Throws NotFoundError if record doesn't exist
+ * - Throws ForbiddenError if ownership validation fails
+ * - Smart defaults: idField=table.id
+ *
+ * @example
+ * // Simple: Check if category exists (no ownership check)
+ * const category = await checkRecordExists({
+ *   table: walletExpenseCategories,
+ *   idValue: 'category-uuid-123',
+ * });
+ *
+ * @example
+ * // With ownership: Check if wallet exists and belongs to user
+ * const wallet = await checkRecordExists({
+ *   table: walletWallets,
+ *   idValue: 'wallet-uuid-123',
+ *   scopeField: walletWallets.userId,
+ *   scopeValue: userId,
+ * });
+ *
+ * @example
+ * // Custom field: Find by email instead of ID
+ * const user = await checkRecordExists({
+ *   table: users,
+ *   idField: users.email,
+ *   idValue: 'user@example.com',
+ * });
+ *
+ * @example
+ * // Custom messages
+ * const budget = await checkRecordExists({
+ *   table: walletBudgets,
+ *   idValue: budgetId,
+ *   scopeField: walletBudgets.userId,
+ *   scopeValue: userId,
+ *   notFoundMessage: 'Budget not found',
+ *   forbiddenMessage: 'You do not have permission to use this budget',
+ * });
+ *
+ * @returns Promise<T> - The found record
+ * @throws {NotFoundError} - If record doesn't exist
+ * @throws {ForbiddenError} - If ownership validation fails
+ */
+export async function checkRecordExists<T = any>(params: CheckRecordExistsParams): Promise<T> {
+  const {
+    table,
+    idField = table.id,
+    idValue,
+    scopeField,
+    scopeValue,
+    notFoundMessage = 'Record not found',
+    forbiddenMessage = 'You do not have permission to access this record',
+  } = params;
+
+  const db = getDb();
+
+  // First, find the record by ID only (to provide accurate error messages)
+  const results = await db.select().from(table).where(eq(idField, idValue)).limit(1);
+
+  // Check if record exists
+  if (results.length === 0) {
+    throw new NotFoundError(notFoundMessage);
+  }
+
+  const record = results[0];
+
+  // Validate ownership if scope is provided
+  if (scopeValue !== undefined && scopeField !== undefined) {
+    // Get the column name from Drizzle column object
+    // Drizzle returns results in camelCase, but field.name is the DB column name (snake_case)
+    // Convert snake_case to camelCase: user_id -> userId
+    const columnName = scopeField.name.replace(/_([a-z])/g, (_: string, letter: string) =>
+      letter.toUpperCase()
+    );
+    const recordScopeValue = (record as any)[columnName];
+
+    // Handle both string and number comparisons (UUID vs numeric IDs)
+    if (recordScopeValue === undefined) {
+      // Column doesn't exist in result - this shouldn't happen but handle gracefully
+      throw new Error(
+        `Column ${columnName} not found in query result. Available keys: ${Object.keys(record).join(', ')}`
+      );
+    }
+
+    if (recordScopeValue.toString() !== scopeValue.toString()) {
+      throw new ForbiddenError(forbiddenMessage);
+    }
+  }
+
+  return record as T;
 }

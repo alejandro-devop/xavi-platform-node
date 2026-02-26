@@ -14,7 +14,7 @@ export const expenseInputSchema = z
       .string()
       .min(5, 'Description must be at least 5 characters')
       .max(255, 'Description must be less than 255 characters'),
-    date: z.string().datetime('Invalid date format').optional(),
+    date: z.string().date('Invalid date format (use YYYY-MM-DD)').optional(),
   })
   .refine((data) => data.debit > 0 || data.credit > 0, {
     message: 'Either debit or credit must be greater than 0',
@@ -35,7 +35,7 @@ export const expenseUpdateSchema = z.object({
     .min(5, 'Description must be at least 5 characters')
     .max(255, 'Description must be less than 255 characters')
     .optional(),
-  date: z.string().datetime('Invalid date format').optional(),
+  date: z.string().date('Invalid date format (use YYYY-MM-DD)').optional(),
 });
 
 /**
@@ -52,8 +52,8 @@ export const expenseFilterSchema = z.object({
   walletId: z.string().uuid('Invalid wallet ID format').optional(),
   categoryId: z.string().uuid('Invalid category ID format').optional(),
   budgetId: z.string().uuid('Invalid budget ID format').optional(),
-  startDate: z.string().datetime('Invalid start date format').optional(),
-  endDate: z.string().datetime('Invalid end date format').optional(),
+  startDate: z.string().date('Invalid start date format (use YYYY-MM-DD)').optional(),
+  endDate: z.string().date('Invalid end date format (use YYYY-MM-DD)').optional(),
 });
 
 // Export types inferred from schemas

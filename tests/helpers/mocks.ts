@@ -12,7 +12,13 @@ export const mockDb = {
     walletExpenseCategories: createMockQueryBuilder(),
     walletExpenses: createMockQueryBuilder(),
   },
-  select: jest.fn().mockReturnThis(),
+  select: jest.fn().mockReturnValue({
+    from: jest.fn().mockReturnValue({
+      where: jest.fn().mockReturnValue({
+        limit: jest.fn().mockResolvedValue([]),
+      }),
+    }),
+  }),
   from: jest.fn().mockReturnThis(),
   where: jest.fn().mockReturnThis(),
   orderBy: jest.fn().mockReturnThis(),
@@ -48,6 +54,20 @@ export const mockRedisClient = {
   setex: jest.fn(),
   del: jest.fn(),
   ping: jest.fn(),
+};
+
+/**
+ * Convert camelCase keys to snake_case for db.select() mocks
+ * db.select() returns data as it is in the database (snake_case)
+ * while db.query returns data in camelCase as defined in schema
+ */
+export const toSnakeCase = (obj: any) => {
+  const snakeCase: any = {};
+  for (const [key, value] of Object.entries(obj)) {
+    const snakeKey = key.replace(/([A-Z])/g, '_$1').toLowerCase();
+    snakeCase[snakeKey] = value;
+  }
+  return snakeCase;
 };
 
 export const createMockUser = (overrides = {}) => ({

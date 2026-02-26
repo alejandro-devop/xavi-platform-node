@@ -6,6 +6,8 @@ import {
   createMockCategory,
   resetAllMocks,
 } from '../../helpers/mocks';
+import * as dbValidators from '../../../src/shared/utils/db-validators';
+import { NotFoundError } from '../../../src/shared/errors';
 
 // Mock Drizzle
 jest.mock('../../../src/shared/database/drizzle', () => ({
@@ -20,6 +22,8 @@ describe('ExpenseService', () => {
   beforeEach(() => {
     resetAllMocks();
     mockGetDb.mockReturnValue(mockDb as any);
+    // Mock checkRecordExists to return valid records by default
+    jest.spyOn(dbValidators, 'checkRecordExists').mockResolvedValue(createMockWallet() as any);
   });
 
   describe('getExpenses', () => {
@@ -82,7 +86,8 @@ describe('ExpenseService', () => {
   describe('getExpenseById', () => {
     it('should return an expense by id', async () => {
       const mockExpense = createMockExpense();
-      mockDb.query.walletExpenses.findFirst.mockResolvedValue(mockExpense);
+      // Mock checkRecordExists to return the expense
+      jest.spyOn(dbValidators, 'checkRecordExists').mockResolvedValue(mockExpense as any);
 
       const result = await expenseService.getExpenseById(mockExpense.id, 1);
 
@@ -93,7 +98,10 @@ describe('ExpenseService', () => {
     });
 
     it('should return null when expense not found', async () => {
-      mockDb.query.walletExpenses.findFirst.mockResolvedValue(undefined);
+      // Mock checkRecordExists to throw NotFoundError
+      jest
+        .spyOn(dbValidators, 'checkRecordExists')
+        .mockRejectedValue(new NotFoundError('Expense not found'));
 
       try {
         await expenseService.getExpenseById('non-existent-id', 1);
@@ -207,8 +215,8 @@ describe('ExpenseService', () => {
       const updatedExpense = { ...existingExpense, description: 'Updated Expense' };
       const updateData = { description: 'Updated Expense' };
 
-      // Mock getExpenseById call
-      mockDb.query.walletExpenses.findFirst.mockResolvedValue(existingExpense);
+      // Mock checkRecordExists to return the expense (called by getExpenseById)
+      jest.spyOn(dbValidators, 'checkRecordExists').mockResolvedValue(existingExpense as any);
 
       mockDb.transaction.mockImplementation(async (callback) => {
         const tx = {
@@ -230,8 +238,10 @@ describe('ExpenseService', () => {
     });
 
     it('should return null when expense not found', async () => {
-      // Mock getExpenseById to throw error
-      mockDb.query.walletExpenses.findFirst.mockResolvedValue(undefined);
+      // Mock checkRecordExists to throw NotFoundError
+      jest
+        .spyOn(dbValidators, 'checkRecordExists')
+        .mockRejectedValue(new NotFoundError('Expense not found'));
 
       try {
         await expenseService.updateExpense('non-existent-id', 1, {
@@ -248,8 +258,8 @@ describe('ExpenseService', () => {
     it('should delete an expense with transaction', async () => {
       const existingExpense = createMockExpense();
 
-      // Mock getExpenseById call
-      mockDb.query.walletExpenses.findFirst.mockResolvedValue(existingExpense);
+      // Mock checkRecordExists to return the expense (called by getExpenseById)
+      jest.spyOn(dbValidators, 'checkRecordExists').mockResolvedValue(existingExpense as any);
 
       mockDb.transaction.mockImplementation(async (callback) => {
         const tx = {
@@ -270,8 +280,10 @@ describe('ExpenseService', () => {
     });
 
     it('should return false when expense not found', async () => {
-      // Mock getExpenseById to throw error
-      mockDb.query.walletExpenses.findFirst.mockResolvedValue(undefined);
+      // Mock checkRecordExists to throw NotFoundError
+      jest
+        .spyOn(dbValidators, 'checkRecordExists')
+        .mockRejectedValue(new NotFoundError('Expense not found'));
 
       try {
         await expenseService.deleteExpense('non-existent-id', 1);

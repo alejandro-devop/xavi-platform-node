@@ -2,6 +2,7 @@ import { getDb } from '../shared/database/drizzle';
 import { walletExpenseCategories } from '../shared/database/schema';
 import { eq, and, desc, asc, ne } from 'drizzle-orm';
 import { NotFoundError, ForbiddenError, BadRequestError } from '../shared/errors';
+import { checkRecordExists } from '../shared/utils/db-validators';
 import type {
   ExpenseCategory,
   CreateExpenseCategoryInput,
@@ -31,20 +32,14 @@ export const expenseCategoryService = {
    * Get a category by ID
    */
   async getCategoryById(id: string, userId: number): Promise<ExpenseCategory> {
-    const db = getDb();
-
-    const category = await db.query.walletExpenseCategories.findFirst({
-      where: eq(walletExpenseCategories.id, id),
+    const category = await checkRecordExists({
+      table: walletExpenseCategories,
+      idValue: id,
+      scopeField: walletExpenseCategories.userId,
+      scopeValue: userId,
+      notFoundMessage: 'Category not found',
+      forbiddenMessage: 'You do not have permission to access this category',
     });
-
-    if (!category) {
-      throw new NotFoundError('Category not found');
-    }
-
-    // Verify ownership
-    if (category.userId.toString() !== userId.toString()) {
-      throw new ForbiddenError('You do not have permission to access this category');
-    }
 
     return category;
   },

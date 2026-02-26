@@ -1,5 +1,5 @@
 import { walletService } from '../../../src/services/wallet.service';
-import { mockDb, createMockWallet, resetAllMocks } from '../../helpers/mocks';
+import { mockDb, createMockWallet, resetAllMocks, toSnakeCase } from '../../helpers/mocks';
 
 // Mock Drizzle
 jest.mock('../../../src/shared/database/drizzle', () => ({
@@ -46,7 +46,14 @@ describe('WalletService', () => {
   describe('getWalletById', () => {
     it('should return a wallet by id', async () => {
       const mockWallet = createMockWallet();
-      mockDb.query.walletWallets.findFirst.mockResolvedValue(mockWallet);
+
+      // Mock db.select().from().where().limit() chain
+      // Create hybrid object with both snake_case (for scope validation)  and camelCase (for service logic)
+      const dbRecord = { ...toSnakeCase(mockWallet), ...mockWallet };
+      const mockLimit = jest.fn().mockResolvedValue([dbRecord]);
+      const mockWhere = jest.fn().mockReturnValue({ limit: mockLimit });
+      const mockFrom = jest.fn().mockReturnValue({ where: mockWhere });
+      mockDb.select = jest.fn().mockReturnValue({ from: mockFrom });
 
       const result = await walletService.getWalletById(mockWallet.id, 1);
 
@@ -57,7 +64,11 @@ describe('WalletService', () => {
     });
 
     it('should return null when wallet not found', async () => {
-      mockDb.query.walletWallets.findFirst.mockResolvedValue(undefined);
+      // Mock db.select().from().where().limit() to return empty array
+      const mockLimit = jest.fn().mockResolvedValue([]);
+      const mockWhere = jest.fn().mockReturnValue({ limit: mockLimit });
+      const mockFrom = jest.fn().mockReturnValue({ where: mockWhere });
+      mockDb.select = jest.fn().mockReturnValue({ from: mockFrom });
 
       try {
         await walletService.getWalletById('non-existent-id', 1);
@@ -69,7 +80,14 @@ describe('WalletService', () => {
 
     it('should return null when wallet belongs to different user', async () => {
       const walletOfOtherUser = createMockWallet({ userId: 999 });
-      mockDb.query.walletWallets.findFirst.mockResolvedValue(walletOfOtherUser);
+
+      // Mock db.select().from().where().limit() to return wallet with different userId
+      // Create hybrid object with both sn ake_case and camelCase
+      const dbRecord = { ...toSnakeCase(walletOfOtherUser), ...walletOfOtherUser };
+      const mockLimit = jest.fn().mockResolvedValue([dbRecord]);
+      const mockWhere = jest.fn().mockReturnValue({ limit: mockLimit });
+      const mockFrom = jest.fn().mockReturnValue({ where: mockWhere });
+      mockDb.select = jest.fn().mockReturnValue({ from: mockFrom });
 
       try {
         await walletService.getWalletById('some-id', 1);
@@ -140,12 +158,18 @@ describe('WalletService', () => {
       const updatedWallet = { ...existingWallet, name: 'Updated Wallet' };
       const updateData = { name: 'Updated Wallet' };
 
-      mockDb.query.walletWallets.findFirst.mockResolvedValue(existingWallet);
+      // Mock db.select().from().where().limit() for getWalletById
+      // Create hybrid object with both snake_case and camelCase
+      const dbRecord = { ...toSnakeCase(existingWallet), ...existingWallet };
+      const mockLimit = jest.fn().mockResolvedValue([dbRecord]);
+      const mockWhere = jest.fn().mockReturnValue({ limit: mockLimit });
+      const mockFrom = jest.fn().mockReturnValue({ where: mockWhere });
+      mockDb.select = jest.fn().mockReturnValue({ from: mockFrom });
 
       const mockUpdate = jest.fn().mockReturnValue({
         set: jest.fn().mockReturnValue({
           where: jest.fn().mockReturnValue({
-            returning: jest.fn().mockResolvedValue([updatedWallet]),
+            returning: jest.fn().mockResolvedValue([toSnakeCase(updatedWallet)]),
           }),
         }),
       });
@@ -159,7 +183,11 @@ describe('WalletService', () => {
     });
 
     it('should return null when wallet not found', async () => {
-      mockDb.query.walletWallets.findFirst.mockResolvedValue(undefined);
+      // Mock db.select().from().where().limit() to return empty array
+      const mockLimit = jest.fn().mockResolvedValue([]);
+      const mockWhere = jest.fn().mockReturnValue({ limit: mockLimit });
+      const mockFrom = jest.fn().mockReturnValue({ where: mockWhere });
+      mockDb.select = jest.fn().mockReturnValue({ from: mockFrom });
 
       try {
         await walletService.updateWallet('non-existent-id', 1, { name: 'Test' });
@@ -172,7 +200,15 @@ describe('WalletService', () => {
 
   describe('deleteWallet', () => {
     it('should delete a wallet', async () => {
-      mockDb.query.walletWallets.findFirst.mockResolvedValue(createMockWallet());
+      // Mock db.select().from().where().limit() for getWalletById
+      // Create hybrid object with both snake_case and camelCase
+      const mockWallet = createMockWallet();
+      const dbRecord = { ...toSnakeCase(mockWallet), ...mockWallet };
+      const mockLimit = jest.fn().mockResolvedValue([dbRecord]);
+      const mockWhere = jest.fn().mockReturnValue({ limit: mockLimit });
+      const mockFrom = jest.fn().mockReturnValue({ where: mockWhere });
+      mockDb.select = jest.fn().mockReturnValue({ from: mockFrom });
+
       const mockDelete = jest.fn().mockReturnValue({
         where: jest.fn().mockReturnValue({
           returning: jest.fn().mockResolvedValue([{ id: '1' }]),
@@ -186,7 +222,11 @@ describe('WalletService', () => {
     });
 
     it('should return false when wallet not found', async () => {
-      mockDb.query.walletWallets.findFirst.mockResolvedValue(undefined);
+      // Mock db.select().from().where().limit() to return empty array
+      const mockLimit = jest.fn().mockResolvedValue([]);
+      const mockWhere = jest.fn().mockReturnValue({ limit: mockLimit });
+      const mockFrom = jest.fn().mockReturnValue({ where: mockWhere });
+      mockDb.select = jest.fn().mockReturnValue({ from: mockFrom });
 
       try {
         await walletService.deleteWallet('non-existent-id', 1);

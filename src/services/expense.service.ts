@@ -7,6 +7,7 @@ import {
 } from '../shared/database/schema';
 import { eq, and, gte, lte, desc, sql } from 'drizzle-orm';
 import { NotFoundError, ForbiddenError, BadRequestError } from '../shared/errors';
+import { checkRecordExists } from '../shared/utils/db-validators';
 import type {
   Expense,
   CreateExpenseInput,
@@ -59,20 +60,14 @@ export const expenseService = {
    * Get an expense by ID
    */
   async getExpenseById(id: string, userId: number): Promise<Expense> {
-    const db = getDb();
-
-    const expense = await db.query.walletExpenses.findFirst({
-      where: eq(walletExpenses.id, id),
+    const expense = await checkRecordExists({
+      table: walletExpenses,
+      idValue: id,
+      scopeField: walletExpenses.userId,
+      scopeValue: userId,
+      notFoundMessage: 'Expense not found',
+      forbiddenMessage: 'You do not have permission to access this expense',
     });
-
-    if (!expense) {
-      throw new NotFoundError('Expense not found');
-    }
-
-    // Verify ownership
-    if (expense.userId.toString() !== userId.toString()) {
-      throw new ForbiddenError('You do not have permission to access this expense');
-    }
 
     return {
       ...expense,
@@ -88,42 +83,37 @@ export const expenseService = {
     const db = getDb();
 
     // Verify wallet ownership
-    const wallet = await db.query.walletWallets.findFirst({
-      where: eq(walletWallets.id, input.walletId),
+    await checkRecordExists({
+      table: walletWallets,
+      idValue: input.walletId,
+      scopeField: walletWallets.userId,
+      scopeValue: userId,
+      notFoundMessage: 'Wallet not found',
+      forbiddenMessage: 'You do not have permission to add expenses to this wallet',
     });
-
-    if (!wallet) {
-      throw new NotFoundError('Wallet not found');
-    }
-
-    if (wallet.userId.toString() !== userId.toString()) {
-      throw new ForbiddenError('You do not have permission to add expenses to this wallet');
-    }
 
     // Verify category if provided
     if (input.categoryId) {
-      const category = await db.query.walletExpenseCategories.findFirst({
-        where: eq(walletExpenseCategories.id, input.categoryId),
+      await checkRecordExists({
+        table: walletExpenseCategories,
+        idValue: input.categoryId,
+        scopeField: walletExpenseCategories.userId,
+        scopeValue: userId,
+        notFoundMessage: 'Category not found',
+        forbiddenMessage: 'You do not have permission to use this category',
       });
-      if (!category) {
-        throw new NotFoundError('Category not found');
-      }
-      if (category.userId.toString() !== userId.toString()) {
-        throw new ForbiddenError('You do not have permission to use this category');
-      }
     }
 
     // Verify budget if provided
     if (input.budgetId) {
-      const budget = await db.query.walletBudgets.findFirst({
-        where: eq(walletBudgets.id, input.budgetId),
+      await checkRecordExists({
+        table: walletBudgets,
+        idValue: input.budgetId,
+        scopeField: walletBudgets.userId,
+        scopeValue: userId,
+        notFoundMessage: 'Budget not found',
+        forbiddenMessage: 'You do not have permission to use this budget',
       });
-      if (!budget) {
-        throw new NotFoundError('Budget not found');
-      }
-      if (budget.userId.toString() !== userId.toString()) {
-        throw new ForbiddenError('You do not have permission to use this budget');
-      }
     }
 
     // Use Drizzle transaction
