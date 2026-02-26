@@ -11,6 +11,7 @@ Infraestructura reutilizable para implementar el patrón Strategy sin repetir c�
 ## 🎯 Conceptos Básicos
 
 ### 1. Interface Genérica
+
 ```typescript
 interface Strategy<TParams, TResult = void> {
   execute(params: TParams): Promise<TResult>;
@@ -18,20 +19,23 @@ interface Strategy<TParams, TResult = void> {
 ```
 
 ### 2. Executor Genérico
+
 ```typescript
 async function executeStrategy<TParams, TResult>(
   strategy: Strategy<TParams, TResult>,
   params: TParams
-): Promise<TResult>
+): Promise<TResult>;
 ```
 
 ### 3. Helpers
+
 - `StrategyCollection<TParams, TResult>` - Type para colecciones
 - `BaseStrategy<TParams, TResult>` - Clase base con hooks opcionales
 
 ## 🚀 Cómo Crear Una Nueva Estrategia
 
 ### Paso 1: Define tus tipos
+
 ```typescript
 interface MyParams {
   userId: string;
@@ -45,6 +49,7 @@ interface MyResult {
 ```
 
 ### Paso 2: Crea clases concretas
+
 ```typescript
 import { Strategy } from '../patterns/strategy';
 
@@ -64,6 +69,7 @@ class StrategyB implements Strategy<MyParams, MyResult> {
 ```
 
 ### Paso 3: Crea una colección
+
 ```typescript
 import { StrategyCollection } from '../patterns/strategy';
 
@@ -74,6 +80,7 @@ export const myStrategies: StrategyCollection<MyParams, MyResult> = {
 ```
 
 ### Paso 4: Úsalo
+
 ```typescript
 import { executeStrategy } from '../patterns/strategy';
 import { myStrategies } from './my-strategies';
@@ -89,6 +96,7 @@ console.log(result.transactionId); // '123'
 ## 📚 Ejemplos de Uso
 
 ### Estrategia Simple (sin retorno)
+
 ```typescript
 interface EmailParams {
   to: string;
@@ -114,6 +122,7 @@ await executeStrategy(emailStrategies.sendgrid, {
 ```
 
 ### Estrategia con Retorno
+
 ```typescript
 interface PaymentParams {
   amount: number;
@@ -146,6 +155,7 @@ const result = await executeStrategy(paymentStrategies.stripe, {
 ```
 
 ### Estrategia con Hooks (usando BaseStrategy)
+
 ```typescript
 import { BaseStrategy } from '../patterns/strategy';
 
@@ -161,10 +171,10 @@ class MyStrategy extends BaseStrategy<MyParams, MyResult> {
   async execute(params: MyParams): Promise<MyResult> {
     this.validate(params);
     await this.before(params);
-    
+
     // Tu lógica
     const result = { success: true, transactionId: '123' };
-    
+
     await this.after(params, result);
     return result;
   }
@@ -229,6 +239,7 @@ await sendEmail(emailStrategies.sendgrid, 'user@example.com', 'Hi', 'Hello World
 Ver `shared/utils/balance-strategies.ts` para un ejemplo completo de implementación.
 
 **Características:**
+
 - ✅ Interface específica con métodos adicionales
 - ✅ Dos estrategias: `apply` y `reverse`
 - ✅ Executor personalizado: `updateBalances()`

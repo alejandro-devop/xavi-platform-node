@@ -1,6 +1,6 @@
 /**
  * EXAMPLE: How to create new strategies using the generic infrastructure
- * 
+ *
  * This file demonstrates the pattern for creating reusable strategies.
  * Copy this pattern for your own use cases (emails, notifications, payments, etc.)
  */
@@ -58,7 +58,7 @@ interface PaymentResult {
 class StripePaymentStrategy implements Strategy<PaymentParams, PaymentResult> {
   async execute(params: PaymentParams): Promise<PaymentResult> {
     console.log(`[Stripe] Processing payment of ${params.amount} ${params.currency}`);
-    
+
     // Stripe API call here
     return {
       transactionId: 'stripe_' + Date.now(),
@@ -70,7 +70,7 @@ class StripePaymentStrategy implements Strategy<PaymentParams, PaymentResult> {
 class PayPalPaymentStrategy implements Strategy<PaymentParams, PaymentResult> {
   async execute(params: PaymentParams): Promise<PaymentResult> {
     console.log(`[PayPal] Processing payment of ${params.amount} ${params.currency}`);
-    
+
     // PayPal API call here
     return {
       transactionId: 'paypal_' + Date.now(),
@@ -111,10 +111,10 @@ class PushNotificationStrategy extends BaseStrategy<NotificationParams, void> {
   async execute(params: NotificationParams): Promise<void> {
     this.validate(params);
     await this.before(params);
-    
+
     console.log(`[Push] Sending notification: ${params.message}`);
     // Push notification API call here
-    
+
     await this.after(params, undefined);
   }
 
@@ -188,27 +188,27 @@ export async function setCache(
 
 /**
  * To create a new strategy pattern:
- * 
+ *
  * 1. Define your params interface
  *    interface MyParams { ... }
- * 
+ *
  * 2. Define your result type (optional, use void if no return)
  *    interface MyResult { ... }
- * 
+ *
  * 3. Create concrete strategy classes
  *    class StrategyA implements Strategy<MyParams, MyResult> {
  *      async execute(params: MyParams): Promise<MyResult> { ... }
  *    }
- * 
+ *
  * 4. Create a typed collection
  *    export const myStrategies: StrategyCollection<MyParams, MyResult> = {
  *      strategyA: new StrategyA(),
  *      strategyB: new StrategyB(),
  *    };
- * 
+ *
  * 5. Use it
  *    await executeStrategy(myStrategies.strategyA, params);
- *    
+ *
  *    OR create a custom executor function:
  *    export async function doSomething(strategy: Strategy<MyParams, MyResult>, params: MyParams) {
  *      return await executeStrategy(strategy, params);
