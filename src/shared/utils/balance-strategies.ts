@@ -1,6 +1,7 @@
 import { sql, eq } from 'drizzle-orm';
 import { walletWallets, walletBudgets } from '../database/schema';
-import { Strategy, executeStrategy } from '../patterns/strategy';
+import { Strategy, executeStrategy, BaseStrategy } from '../patterns/strategy';
+import { BadRequestError } from '../errors';
 
 /**
  * Parameters for balance update operations
@@ -35,6 +36,51 @@ export interface BalanceUpdateStrategy extends Strategy<BalanceUpdateParams, voi
 }
 
 /**
+ * Base class for balance strategies with common validation
+ */
+abstract class BaseBalanceStrategy implements BalanceUpdateStrategy {
+  /**
+   * Validate params before executing strategy
+   */
+  protected validate(params: BalanceUpdateParams): void {
+    // Validate wallet ID
+    if (!params.walletId || typeof params.walletId !== 'string') {
+      throw new BadRequestError('Valid walletId is required');
+    }
+
+    // Validate credit and debit are non-negative numbers
+    if (typeof params.credit !== 'number' || params.credit < 0) {
+      throw new BadRequestError('Credit must be a non-negative number');
+    }
+
+    if (typeof params.debit !== 'number' || params.debit < 0) {
+      throw new BadRequestError('Debit must be a non-negative number');
+    }
+
+    // Validate at least one of credit or debit is non-zero
+    if (params.credit === 0 && params.debit === 0) {
+      throw new BadRequestError('At least one of credit or debit must be non-zero');
+    }
+
+    // Validate transaction object exists
+    if (!params.tx) {
+      throw new BadRequestError('Transaction object is required');
+    }
+
+    // Validate budgetId if provided
+    if (params.budgetId !== null && params.budgetId !== undefined) {
+      if (typeof params.budgetId !== 'string') {
+        throw new BadRequestError('BudgetId must be a string when provided');
+      }
+    }
+  }
+
+  abstract execute(params: BalanceUpdateParams): Promise<void>;
+  abstract updateWalletBalance(params: BalanceUpdateParams): Promise<void>;
+  abstract updateBudgetBalance(params: BalanceUpdateParams): Promise<void>;
+}
+
+/**
  * Strategy to apply balance changes (add expense/income)
  *
  * Wallet: balance += credit - debit
@@ -45,11 +91,12 @@ export interface BalanceUpdateStrategy extends Strategy<BalanceUpdateParams, voi
  * - Applying updated expense values
  * - Recording a bill payment
  */
-export class ApplyBalanceStrategy implements BalanceUpdateStrategy {
+export class ApplyBalanceStrategy extends BaseBalanceStrategy {
   /**
    * Execute the strategy (required by Strategy interface)
    */
   async execute(params: BalanceUpdateParams): Promise<void> {
+    this.validate(params);
     await this.updateWalletBalance(params);
     await this.updateBudgetBalance(params);
   }
@@ -88,11 +135,12 @@ export class ApplyBalanceStrategy implements BalanceUpdateStrategy {
  * - Reverting old values before applying new ones in update
  * - Canceling a transaction
  */
-export class ReverseBalanceStrategy implements BalanceUpdateStrategy {
+export class ReverseBalanceStrategy extends BaseBalanceStrategy {
   /**
    * Execute the strategy (required by Strategy interface)
    */
   async execute(params: BalanceUpdateParams): Promise<void> {
+    this.validate(params);
     await this.updateWalletBalance(params);
     await this.updateBudgetBalance(params);
   }
