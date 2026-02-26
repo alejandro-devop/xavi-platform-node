@@ -57,16 +57,13 @@ export function withErrorHandling<TArgs = any, TResult = any>(
         }));
 
         // Log validation failure for monitoring
-        errorHandler.logWarning(
-          `GraphQL validation failed in ${operationName}`,
-          {
-            ...metadata,
-            context: {
-              ...metadata.context,
-              validationErrors,
-            },
-          }
-        );
+        errorHandler.logWarning(`GraphQL validation failed in ${operationName}`, {
+          ...metadata,
+          context: {
+            ...metadata.context,
+            validationErrors,
+          },
+        });
 
         // Throw structured GraphQL error
         throw new GraphQLError('Validation failed', {

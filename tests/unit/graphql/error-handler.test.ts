@@ -244,15 +244,15 @@ describe('GraphQL Error Handler Utils', () => {
         // Should be converted to GraphQLError
         expect(err).toBeInstanceOf(GraphQLError);
         expect(err.message).toBe('Validation failed');
-        
+
         // Should have proper extension code
         expect(err.extensions.code).toBe('BAD_USER_INPUT');
-        
+
         // Should have structured validation errors
         expect(err.extensions.validationErrors).toBeDefined();
         expect(Array.isArray(err.extensions.validationErrors)).toBe(true);
         expect(err.extensions.validationErrors.length).toBeGreaterThan(0);
-        
+
         // Check structure of validation errors
         const firstError = err.extensions.validationErrors[0];
         expect(firstError).toHaveProperty('path');
