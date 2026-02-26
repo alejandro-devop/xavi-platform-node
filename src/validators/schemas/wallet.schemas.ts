@@ -20,7 +20,7 @@ export const createWalletInputSchema = (userId: number) =>
       ),
     icon: z
       .string()
-      .min(4, 'Icon must be at least 4 characters')
+      .min(3, 'Icon must be at least 3 characters')
       .max(20, 'Icon must be less than 20 characters')
       .optional(),
     initialBalance: z.number().min(0, 'Initial balance must be positive').optional().default(0),
@@ -38,7 +38,7 @@ export const walletInputSchema = z.object({
     .max(100, 'Name must be less than 100 characters'),
   icon: z
     .string()
-    .min(4, 'Icon must be at least 4 characters')
+    .min(3, 'Icon must be at least 3 characters')
     .max(20, 'Icon must be less than 20 characters')
     .optional(),
   initialBalance: z.number().min(0, 'Initial balance must be positive').optional().default(0),
@@ -64,7 +64,7 @@ export const createWalletUpdateSchema = (userId: number, walletId?: string) =>
       .optional(),
     icon: z
       .string()
-      .min(4, 'Icon must be at least 4 characters')
+      .min(3, 'Icon must be at least 3 characters')
       .max(20, 'Icon must be less than 20 characters')
       .optional(),
     balance: z.number().min(0, 'Balance must be positive').optional(),
@@ -83,7 +83,7 @@ export const walletUpdateSchema = z.object({
     .optional(),
   icon: z
     .string()
-    .min(4, 'Icon must be at least 4 characters')
+    .min(3, 'Icon must be at least 3 characters')
     .max(20, 'Icon must be less than 20 characters')
     .optional(),
   balance: z.number().min(0, 'Balance must be positive').optional(),

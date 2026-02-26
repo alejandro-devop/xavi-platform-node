@@ -30,7 +30,7 @@ export const createExpenseCategoryInputSchema = (userId: number) =>
       .optional(),
     icon: z
       .string()
-      .min(4, 'Icon must be at least 4 characters')
+      .min(3, 'Icon must be at least 3 characters')
       .max(20, 'Icon must be less than 20 characters')
       .optional(),
   });
@@ -55,7 +55,7 @@ export const expenseCategoryInputSchema = z.object({
     .optional(),
   icon: z
     .string()
-    .min(4, 'Icon must be at least 4 characters')
+    .min(3, 'Icon must be at least 3 characters')
     .max(20, 'Icon must be less than 20 characters')
     .optional(),
 });
@@ -91,7 +91,7 @@ export const createExpenseCategoryUpdateSchema = (userId: number, categoryId?: s
       .optional(),
     icon: z
       .string()
-      .min(4, 'Icon must be at least 4 characters')
+      .min(3, 'Icon must be at least 3 characters')
       .max(20, 'Icon must be less than 20 characters')
       .optional(),
   });
@@ -119,7 +119,7 @@ export const expenseCategoryUpdateSchema = z.object({
     .optional(),
   icon: z
     .string()
-    .min(4, 'Icon must be at least 4 characters')
+    .min(3, 'Icon must be at least 3 characters')
     .max(20, 'Icon must be less than 20 characters')
     .optional(),
 });
