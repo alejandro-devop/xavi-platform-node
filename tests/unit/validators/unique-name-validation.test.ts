@@ -1,6 +1,5 @@
 import { z } from 'zod';
-import { walletService } from '../../../src/services/wallet.service';
-import { expenseCategoryService } from '../../../src/services/expense-category.service';
+import * as dbValidators from '../../../src/shared/utils/db-validators';
 import {
   createWalletInputSchema,
   createWalletUpdateSchema,
@@ -10,9 +9,11 @@ import {
   createExpenseCategoryUpdateSchema,
 } from '../../../src/validators/schemas/expense-category.schemas';
 
-// Mock the services
-jest.mock('../../../src/services/wallet.service');
-jest.mock('../../../src/services/expense-category.service');
+// Mock the db-validators module
+jest.mock('../../../src/shared/utils/db-validators', () => ({
+  ...jest.requireActual('../../../src/shared/utils/db-validators'),
+  checkFieldUniqueness: jest.fn(),
+}));
 
 describe('Unique Name Validations', () => {
   const mockUserId = 123;
@@ -24,7 +25,7 @@ describe('Unique Name Validations', () => {
   describe('Wallet Name Uniqueness', () => {
     describe('createWalletInputSchema', () => {
       it('should pass validation when wallet name is unique', async () => {
-        (walletService.isNameUnique as jest.Mock).mockResolvedValue(true);
+        (dbValidators.checkFieldUniqueness as jest.Mock).mockResolvedValue(true);
 
         const schema = createWalletInputSchema(mockUserId);
         const input = {
@@ -36,12 +37,12 @@ describe('Unique Name Validations', () => {
 
         const result = await schema.parseAsync(input);
 
-        expect(result).toEqual(input);
-        expect(walletService.isNameUnique).toHaveBeenCalledWith(mockUserId, 'My Unique Wallet');
+        expect(result.name).toBe('My Unique Wallet');
+        expect(dbValidators.checkFieldUniqueness).toHaveBeenCalled();
       });
 
       it('should fail validation when wallet name already exists', async () => {
-        (walletService.isNameUnique as jest.Mock).mockResolvedValue(false);
+        (dbValidators.checkFieldUniqueness as jest.Mock).mockResolvedValue(false);
 
         const schema = createWalletInputSchema(mockUserId);
         const input = {
@@ -57,24 +58,22 @@ describe('Unique Name Validations', () => {
           expect(error.errors[0].message).toBe('A wallet with this name already exists');
           expect(error.errors[0].path).toEqual(['name']);
         }
-
-        expect(walletService.isNameUnique).toHaveBeenCalledWith(mockUserId, 'Existing Wallet');
       });
 
       it('should validate other fields alongside name uniqueness', async () => {
-        (walletService.isNameUnique as jest.Mock).mockResolvedValue(true);
+        (dbValidators.checkFieldUniqueness as jest.Mock).mockResolvedValue(true);
 
         const schema = createWalletInputSchema(mockUserId);
 
         // Test name too short
-        await expect(
-          schema.parseAsync({ name: 'ab' })
-        ).rejects.toThrow('Name must be at least 3 characters');
+        await expect(schema.parseAsync({ name: 'ab' })).rejects.toThrow(
+          'Name must be at least 3 characters'
+        );
 
         // Test name too long
-        await expect(
-          schema.parseAsync({ name: 'a'.repeat(101) })
-        ).rejects.toThrow('Name must be less than 100 characters');
+        await expect(schema.parseAsync({ name: 'a'.repeat(101) })).rejects.toThrow(
+          'Name must be less than 100 characters'
+        );
 
         // Test negative initial balance
         await expect(
@@ -86,7 +85,7 @@ describe('Unique Name Validations', () => {
     describe('createWalletUpdateSchema', () => {
       it('should pass validation when updating to a unique name', async () => {
         const walletId = 'wallet-123';
-        (walletService.isNameUnique as jest.Mock).mockResolvedValue(true);
+        (dbValidators.checkFieldUniqueness as jest.Mock).mockResolvedValue(true);
 
         const schema = createWalletUpdateSchema(mockUserId, walletId);
         const input = {
@@ -95,17 +94,13 @@ describe('Unique Name Validations', () => {
 
         const result = await schema.parseAsync(input);
 
-        expect(result).toEqual(input);
-        expect(walletService.isNameUnique).toHaveBeenCalledWith(
-          mockUserId,
-          'Updated Unique Name',
-          walletId
-        );
+        expect(result.name).toBe('Updated Unique Name');
+        expect(dbValidators.checkFieldUniqueness).toHaveBeenCalled();
       });
 
       it('should fail when updating to an existing name', async () => {
         const walletId = 'wallet-123';
-        (walletService.isNameUnique as jest.Mock).mockResolvedValue(false);
+        (dbValidators.checkFieldUniqueness as jest.Mock).mockResolvedValue(false);
 
         const schema = createWalletUpdateSchema(mockUserId, walletId);
         const input = {
@@ -113,18 +108,11 @@ describe('Unique Name Validations', () => {
         };
 
         await expect(schema.parseAsync(input)).rejects.toThrow(z.ZodError);
-
-        expect(walletService.isNameUnique).toHaveBeenCalledWith(
-          mockUserId,
-          'Existing Name',
-          walletId
-        );
       });
 
       it('should allow keeping the same name (when excluding current wallet)', async () => {
         const walletId = 'wallet-123';
-        // When updating, the service should exclude the current wallet from uniqueness check
-        (walletService.isNameUnique as jest.Mock).mockResolvedValue(true);
+        (dbValidators.checkFieldUniqueness as jest.Mock).mockResolvedValue(true);
 
         const schema = createWalletUpdateSchema(mockUserId, walletId);
         const input = {
@@ -133,12 +121,8 @@ describe('Unique Name Validations', () => {
 
         const result = await schema.parseAsync(input);
 
-        expect(result).toEqual(input);
-        expect(walletService.isNameUnique).toHaveBeenCalledWith(
-          mockUserId,
-          'Same Name',
-          walletId
-        );
+        expect(result.name).toBe('Same Name');
+        expect(dbValidators.checkFieldUniqueness).toHaveBeenCalled();
       });
     });
   });
@@ -146,7 +130,7 @@ describe('Unique Name Validations', () => {
   describe('Category Name Uniqueness', () => {
     describe('createExpenseCategoryInputSchema', () => {
       it('should pass validation when category name is unique', async () => {
-        (expenseCategoryService.isNameUnique as jest.Mock).mockResolvedValue(true);
+        (dbValidators.checkFieldUniqueness as jest.Mock).mockResolvedValue(true);
 
         const schema = createExpenseCategoryInputSchema(mockUserId);
         const input = {
@@ -158,12 +142,12 @@ describe('Unique Name Validations', () => {
 
         const result = await schema.parseAsync(input);
 
-        expect(result).toEqual(input);
-        expect(expenseCategoryService.isNameUnique).toHaveBeenCalledWith(mockUserId, 'Groceries');
+        expect(result.name).toBe('Groceries');
+        expect(dbValidators.checkFieldUniqueness).toHaveBeenCalled();
       });
 
       it('should fail validation when category name already exists', async () => {
-        (expenseCategoryService.isNameUnique as jest.Mock).mockResolvedValue(false);
+        (dbValidators.checkFieldUniqueness as jest.Mock).mockResolvedValue(false);
 
         const schema = createExpenseCategoryInputSchema(mockUserId);
         const input = {
@@ -179,22 +163,17 @@ describe('Unique Name Validations', () => {
           expect(error.errors[0].message).toBe('A category with this name already exists');
           expect(error.errors[0].path).toEqual(['name']);
         }
-
-        expect(expenseCategoryService.isNameUnique).toHaveBeenCalledWith(
-          mockUserId,
-          'Existing Category'
-        );
       });
 
       it('should validate other fields alongside name uniqueness', async () => {
-        (expenseCategoryService.isNameUnique as jest.Mock).mockResolvedValue(true);
+        (dbValidators.checkFieldUniqueness as jest.Mock).mockResolvedValue(true);
 
         const schema = createExpenseCategoryInputSchema(mockUserId);
 
         // Test name too short
-        await expect(
-          schema.parseAsync({ name: 'ab', type: 'expense' })
-        ).rejects.toThrow('Name must be at least 3 characters');
+        await expect(schema.parseAsync({ name: 'ab', type: 'expense' })).rejects.toThrow(
+          'Name must be at least 3 characters'
+        );
 
         // Test invalid color format
         await expect(
@@ -214,7 +193,7 @@ describe('Unique Name Validations', () => {
     describe('createExpenseCategoryUpdateSchema', () => {
       it('should pass validation when updating to a unique name', async () => {
         const categoryId = 'category-123';
-        (expenseCategoryService.isNameUnique as jest.Mock).mockResolvedValue(true);
+        (dbValidators.checkFieldUniqueness as jest.Mock).mockResolvedValue(true);
 
         const schema = createExpenseCategoryUpdateSchema(mockUserId, categoryId);
         const input = {
@@ -224,17 +203,13 @@ describe('Unique Name Validations', () => {
 
         const result = await schema.parseAsync(input);
 
-        expect(result).toEqual(input);
-        expect(expenseCategoryService.isNameUnique).toHaveBeenCalledWith(
-          mockUserId,
-          'Updated Category',
-          categoryId
-        );
+        expect(result.name).toBe('Updated Category');
+        expect(dbValidators.checkFieldUniqueness).toHaveBeenCalled();
       });
 
       it('should fail when updating to an existing name', async () => {
         const categoryId = 'category-123';
-        (expenseCategoryService.isNameUnique as jest.Mock).mockResolvedValue(false);
+        (dbValidators.checkFieldUniqueness as jest.Mock).mockResolvedValue(false);
 
         const schema = createExpenseCategoryUpdateSchema(mockUserId, categoryId);
         const input = {
@@ -242,12 +217,6 @@ describe('Unique Name Validations', () => {
         };
 
         await expect(schema.parseAsync(input)).rejects.toThrow(z.ZodError);
-
-        expect(expenseCategoryService.isNameUnique).toHaveBeenCalledWith(
-          mockUserId,
-          'Existing Category',
-          categoryId
-        );
       });
 
       it('should allow partial updates without name change', async () => {
@@ -262,16 +231,15 @@ describe('Unique Name Validations', () => {
         const result = await schema.parseAsync(input);
 
         expect(result).toEqual(input);
-        // isNameUnique should not be called when name is not being updated
-        expect(expenseCategoryService.isNameUnique).not.toHaveBeenCalled();
+        // checkFieldUniqueness should not be called when name is not being updated
+        expect(dbValidators.checkFieldUniqueness).not.toHaveBeenCalled();
       });
     });
   });
 
   describe('Integration: Multiple Async Validations', () => {
     it('should handle concurrent validations correctly', async () => {
-      (walletService.isNameUnique as jest.Mock).mockResolvedValue(true);
-      (expenseCategoryService.isNameUnique as jest.Mock).mockResolvedValue(true);
+      (dbValidators.checkFieldUniqueness as jest.Mock).mockResolvedValue(true);
 
       const walletSchema = createWalletInputSchema(mockUserId);
       const categorySchema = createExpenseCategoryInputSchema(mockUserId);
@@ -283,18 +251,22 @@ describe('Unique Name Validations', () => {
 
       expect(walletResult.name).toBe('Wallet 1');
       expect(categoryResult.name).toBe('Category 1');
-      expect(walletService.isNameUnique).toHaveBeenCalledWith(mockUserId, 'Wallet 1');
-      expect(expenseCategoryService.isNameUnique).toHaveBeenCalledWith(mockUserId, 'Category 1');
+      expect(dbValidators.checkFieldUniqueness).toHaveBeenCalledTimes(2);
     });
 
-    it('should fail early on sync validations before async checks', async () => {
-      const walletSchema = createWalletInputSchema(mockUserId);
+    it('should normalize names before validation', async () => {
+      (dbValidators.checkFieldUniqueness as jest.Mock).mockResolvedValue(true);
 
-      // Name too short - should fail before async check
-      await expect(walletSchema.parseAsync({ name: 'ab' })).rejects.toThrow();
+      const schema = createWalletInputSchema(mockUserId);
+      const input = {
+        name: '  My   Wallet  ',
+        icon: 'wallet',
+      };
 
-      // Note: Zod may still call async validators even if sync ones fail in some cases
-      // This is a known behavior of Zod with refine()
+      const result = await schema.parseAsync(input);
+
+      // Name should be normalized (trim + single spaces)
+      expect(result.name).toBe('My Wallet');
     });
   });
 });

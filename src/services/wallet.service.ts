@@ -150,23 +150,6 @@ export const walletService = {
   },
 
   /**
-   * Check if a wallet name is unique for a user
-   */
-  async isNameUnique(userId: number, name: string, excludeId?: string): Promise<boolean> {
-    const db = getDb();
-
-    const conditions = excludeId
-      ? and(eq(walletWallets.userId, userId), eq(walletWallets.name, name), ne(walletWallets.id, excludeId))
-      : and(eq(walletWallets.userId, userId), eq(walletWallets.name, name));
-
-    const existingWallet = await db.query.walletWallets.findFirst({
-      where: conditions,
-    });
-
-    return !existingWallet;
-  },
-
-  /**
    * Clean slate - delete ALL wallet data for a user
    */
   async cleanSlate(userId: number): Promise<boolean> {

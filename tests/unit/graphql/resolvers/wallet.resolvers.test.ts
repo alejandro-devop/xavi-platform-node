@@ -2,6 +2,7 @@ import { walletResolvers } from '../../../../src/graphql/modules/wallet/wallet.r
 import { walletService } from '../../../../src/services/wallet.service';
 import { GraphQLError } from 'graphql';
 import { createMockUser, createMockWallet } from '../../../helpers/mocks';
+import * as dbValidators from '../../../../src/shared/utils/db-validators';
 
 // Mock wallet service
 jest.mock('../../../../src/services/wallet.service');
@@ -13,6 +14,8 @@ describe('Wallet Resolvers', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // Spy on checkFieldUniqueness to return true by default (name is unique)
+    jest.spyOn(dbValidators, 'checkFieldUniqueness').mockResolvedValue(true);
   });
 
   describe('Query.wallet', () => {

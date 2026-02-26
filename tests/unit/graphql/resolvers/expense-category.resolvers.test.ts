@@ -1,6 +1,7 @@
 import { GraphQLError } from 'graphql';
 import { expenseCategoryResolvers } from '../../../../src/graphql/modules/expense-category/expense-category.resolvers';
 import { expenseCategoryService } from '../../../../src/services/expense-category.service';
+import * as dbValidators from '../../../../src/shared/utils/db-validators';
 
 jest.mock('../../../../src/services/expense-category.service');
 
@@ -26,12 +27,15 @@ describe('Expense Category Resolvers', () => {
     color: '#FF5733',
     isDefault: false,
     isSystem: false,
+    isTransaction: false,
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date('2024-01-01'),
   };
 
   beforeEach(() => {
     jest.resetAllMocks();
+    // Spy on checkFieldUniqueness to return true by default (name is unique)
+    jest.spyOn(dbValidators, 'checkFieldUniqueness').mockResolvedValue(true);
   });
 
   describe('Query: walletExpenseCategory', () => {

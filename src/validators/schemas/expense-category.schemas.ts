@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { createUniqueValidator } from '../../shared/utils/custom-validators';
-import { expenseCategoryService } from '../../services/expense-category.service';
+import { checkFieldUniqueness, normalizeName } from '../../shared/utils/db-validators';
+import { walletExpenseCategories } from '../../shared/database/schema';
 
 /**
  * Expense Category Input Schema - For creating categories
@@ -10,13 +11,23 @@ export const createExpenseCategoryInputSchema = (userId: number) =>
   z.object({
     name: z
       .string()
-      .min(3, 'Name must be at least 3 characters')
-      .max(100, 'Name must be less than 100 characters')
-      .refine(
-        createUniqueValidator(async (name: string) => {
-          return await expenseCategoryService.isNameUnique(userId, name);
-        }),
-        { message: 'A category with this name already exists' }
+      .trim()
+      .transform(normalizeName)
+      .pipe(
+        z
+          .string()
+          .min(3, 'Name must be at least 3 characters')
+          .max(100, 'Name must be less than 100 characters')
+          .refine(
+            createUniqueValidator(async (name: string) => {
+              return await checkFieldUniqueness({
+                table: walletExpenseCategories,
+                value: name,
+                scopeValue: userId,
+              });
+            }),
+            { message: 'A category with this name already exists' }
+          )
       ),
     type: z.enum(['income', 'expense'], {
       errorMap: () => ({ message: "Type must be 'income' or 'expense'" }),
@@ -43,8 +54,14 @@ export const createExpenseCategoryInputSchema = (userId: number) =>
 export const expenseCategoryInputSchema = z.object({
   name: z
     .string()
-    .min(3, 'Name must be at least 3 characters')
-    .max(100, 'Name must be less than 100 characters'),
+    .trim()
+    .transform(normalizeName)
+    .pipe(
+      z
+        .string()
+        .min(3, 'Name must be at least 3 characters')
+        .max(100, 'Name must be less than 100 characters')
+    ),
   type: z.enum(['income', 'expense'], {
     errorMap: () => ({ message: "Type must be 'income' or 'expense'" }),
   }),
@@ -72,13 +89,24 @@ export const createExpenseCategoryUpdateSchema = (userId: number, categoryId?: s
   z.object({
     name: z
       .string()
-      .min(3, 'Name must be at least 3 characters')
-      .max(100, 'Name must be less than 100 characters')
-      .refine(
-        createUniqueValidator(async (name: string) => {
-          return await expenseCategoryService.isNameUnique(userId, name, categoryId);
-        }),
-        { message: 'A category with this name already exists' }
+      .trim()
+      .transform(normalizeName)
+      .pipe(
+        z
+          .string()
+          .min(3, 'Name must be at least 3 characters')
+          .max(100, 'Name must be less than 100 characters')
+          .refine(
+            createUniqueValidator(async (name: string) => {
+              return await checkFieldUniqueness({
+                table: walletExpenseCategories,
+                value: name,
+                scopeValue: userId,
+                excludeId: categoryId,
+              });
+            }),
+            { message: 'A category with this name already exists' }
+          )
       )
       .optional(),
     type: z
@@ -108,8 +136,14 @@ export const createExpenseCategoryUpdateSchema = (userId: number, categoryId?: s
 export const expenseCategoryUpdateSchema = z.object({
   name: z
     .string()
-    .min(3, 'Name must be at least 3 characters')
-    .max(100, 'Name must be less than 100 characters')
+    .trim()
+    .transform(normalizeName)
+    .pipe(
+      z
+        .string()
+        .min(3, 'Name must be at least 3 characters')
+        .max(100, 'Name must be less than 100 characters')
+    )
     .optional(),
   type: z
     .enum(['income', 'expense'], {

@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { createUniqueValidator } from '../../shared/utils/custom-validators';
-import { walletService } from '../../services/wallet.service';
+import { checkFieldUniqueness, normalizeName } from '../../shared/utils/db-validators';
+import { walletWallets } from '../../shared/database/schema';
 
 /**
  * Wallet Input Schema - For creating wallets
@@ -10,13 +11,23 @@ export const createWalletInputSchema = (userId: number) =>
   z.object({
     name: z
       .string()
-      .min(3, 'Name must be at least 3 characters')
-      .max(100, 'Name must be less than 100 characters')
-      .refine(
-        createUniqueValidator(async (name: string) => {
-          return await walletService.isNameUnique(userId, name);
-        }),
-        { message: 'A wallet with this name already exists' }
+      .trim()
+      .transform(normalizeName)
+      .pipe(
+        z
+          .string()
+          .min(3, 'Name must be at least 3 characters')
+          .max(100, 'Name must be less than 100 characters')
+          .refine(
+            createUniqueValidator(async (name: string) => {
+              return await checkFieldUniqueness({
+                table: walletWallets,
+                value: name,
+                scopeValue: userId,
+              });
+            }),
+            { message: 'A wallet with this name already exists' }
+          )
       ),
     icon: z
       .string()
@@ -34,8 +45,14 @@ export const createWalletInputSchema = (userId: number) =>
 export const walletInputSchema = z.object({
   name: z
     .string()
-    .min(3, 'Name must be at least 3 characters')
-    .max(100, 'Name must be less than 100 characters'),
+    .trim()
+    .transform(normalizeName)
+    .pipe(
+      z
+        .string()
+        .min(3, 'Name must be at least 3 characters')
+        .max(100, 'Name must be less than 100 characters')
+    ),
   icon: z
     .string()
     .min(3, 'Icon must be at least 3 characters')
@@ -53,13 +70,24 @@ export const createWalletUpdateSchema = (userId: number, walletId?: string) =>
   z.object({
     name: z
       .string()
-      .min(3, 'Name must be at least 3 characters')
-      .max(100, 'Name must be less than 100 characters')
-      .refine(
-        createUniqueValidator(async (name: string) => {
-          return await walletService.isNameUnique(userId, name, walletId);
-        }),
-        { message: 'A wallet with this name already exists' }
+      .trim()
+      .transform(normalizeName)
+      .pipe(
+        z
+          .string()
+          .min(3, 'Name must be at least 3 characters')
+          .max(100, 'Name must be less than 100 characters')
+          .refine(
+            createUniqueValidator(async (name: string) => {
+              return await checkFieldUniqueness({
+                table: walletWallets,
+                value: name,
+                scopeValue: userId,
+                excludeId: walletId,
+              });
+            }),
+            { message: 'A wallet with this name already exists' }
+          )
       )
       .optional(),
     icon: z
@@ -78,8 +106,14 @@ export const createWalletUpdateSchema = (userId: number, walletId?: string) =>
 export const walletUpdateSchema = z.object({
   name: z
     .string()
-    .min(3, 'Name must be at least 3 characters')
-    .max(100, 'Name must be less than 100 characters')
+    .trim()
+    .transform(normalizeName)
+    .pipe(
+      z
+        .string()
+        .min(3, 'Name must be at least 3 characters')
+        .max(100, 'Name must be less than 100 characters')
+    )
     .optional(),
   icon: z
     .string()

@@ -1,4 +1,5 @@
 import { GraphQLError } from 'graphql';
+import { z } from 'zod';
 import {
   withErrorHandling,
   requireAuth,
@@ -219,6 +220,60 @@ describe('GraphQL Error Handler Utils', () => {
         'GraphQL operation createUser failed: Validation failed',
         expect.any(Object)
       );
+      expect(mockErrorHandler.handleError).not.toHaveBeenCalled();
+    });
+
+    it('should handle ZodError and convert to structured GraphQL error', async () => {
+      // Create a Zod schema that will fail validation
+      const schema = z.object({
+        name: z.string().min(3, 'Name must be at least 3 characters'),
+        email: z.string().email('Invalid email format'),
+      });
+
+      // Create a resolver that throws a ZodError
+      const resolver = jest.fn().mockImplementation(async () => {
+        schema.parse({ name: 'ab', email: 'invalid' }); // Will throw ZodError
+      });
+
+      const wrappedResolver = withErrorHandling(resolver, 'createUser');
+
+      try {
+        await wrappedResolver(null, { input: { name: 'ab', email: 'invalid' } }, mockContext);
+        fail('Should have thrown');
+      } catch (err: any) {
+        // Should be converted to GraphQLError
+        expect(err).toBeInstanceOf(GraphQLError);
+        expect(err.message).toBe('Validation failed');
+        
+        // Should have proper extension code
+        expect(err.extensions.code).toBe('BAD_USER_INPUT');
+        
+        // Should have structured validation errors
+        expect(err.extensions.validationErrors).toBeDefined();
+        expect(Array.isArray(err.extensions.validationErrors)).toBe(true);
+        expect(err.extensions.validationErrors.length).toBeGreaterThan(0);
+        
+        // Check structure of validation errors
+        const firstError = err.extensions.validationErrors[0];
+        expect(firstError).toHaveProperty('path');
+        expect(firstError).toHaveProperty('message');
+        expect(firstError).toHaveProperty('code');
+      }
+
+      // Should log warning for validation failure
+      expect(mockErrorHandler.logWarning).toHaveBeenCalledWith(
+        'GraphQL validation failed in createUser',
+        expect.objectContaining({
+          userId: 'user-1',
+          operation: 'createUser',
+          context: expect.objectContaining({
+            graphql: true,
+            validationErrors: expect.any(Array),
+          }),
+        })
+      );
+
+      // Should NOT call handleError (validation errors are user errors, not system errors)
       expect(mockErrorHandler.handleError).not.toHaveBeenCalled();
     });
   });

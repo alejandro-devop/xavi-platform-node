@@ -117,27 +117,6 @@ export const expenseCategoryService = {
   },
 
   /**
-   * Check if a category name is unique for a user
-   */
-  async isNameUnique(userId: number, name: string, excludeId?: string): Promise<boolean> {
-    const db = getDb();
-
-    const conditions = excludeId
-      ? and(
-          eq(walletExpenseCategories.userId, userId),
-          eq(walletExpenseCategories.name, name),
-          ne(walletExpenseCategories.id, excludeId)
-        )
-      : and(eq(walletExpenseCategories.userId, userId), eq(walletExpenseCategories.name, name));
-
-    const existingCategory = await db.query.walletExpenseCategories.findFirst({
-      where: conditions,
-    });
-
-    return !existingCategory;
-  },
-
-  /**
    * Delete a category
    */
   async deleteCategory(id: string, userId: number): Promise<boolean> {

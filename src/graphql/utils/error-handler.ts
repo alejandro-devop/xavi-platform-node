@@ -1,4 +1,5 @@
 import { GraphQLError } from 'graphql';
+import { z } from 'zod';
 import { errorHandler, type ErrorMetadata } from '../../shared/errors';
 
 /**
@@ -45,6 +46,36 @@ export function withErrorHandling<TArgs = any, TResult = any>(
           graphql: true,
         },
       };
+
+      // Handle Zod validation errors with proper structure
+      if (error instanceof z.ZodError) {
+        // Format validation errors for GraphQL response
+        const validationErrors = error.errors.map((err) => ({
+          path: err.path,
+          message: err.message,
+          code: err.code,
+        }));
+
+        // Log validation failure for monitoring
+        errorHandler.logWarning(
+          `GraphQL validation failed in ${operationName}`,
+          {
+            ...metadata,
+            context: {
+              ...metadata.context,
+              validationErrors,
+            },
+          }
+        );
+
+        // Throw structured GraphQL error
+        throw new GraphQLError('Validation failed', {
+          extensions: {
+            code: 'BAD_USER_INPUT',
+            validationErrors,
+          },
+        });
+      }
 
       // If it's already a GraphQLError with extensions (like validation errors),
       // preserve those extensions
