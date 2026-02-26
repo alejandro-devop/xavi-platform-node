@@ -25,7 +25,7 @@ export function generateAccessToken(params: { sub: string; email: string; jti: s
   };
 
   return jwt.sign(payload, process.env.JWT_ACCESS_SECRET!, {
-    expiresIn: (process.env.JWT_ACCESS_EXPIRES_IN || '15m') as any,
+    expiresIn: (process.env.JWT_ACCESS_EXPIRES_IN || '24h') as any,
   });
 }
 
@@ -37,7 +37,7 @@ export function generateRefreshToken(params: { sub: string; jti: string }): stri
   };
 
   return jwt.sign(payload, process.env.JWT_REFRESH_SECRET!, {
-    expiresIn: (process.env.JWT_REFRESH_EXPIRES_IN || '7d') as any,
+    expiresIn: (process.env.JWT_REFRESH_EXPIRES_IN || '30d') as any,
   });
 }
 
