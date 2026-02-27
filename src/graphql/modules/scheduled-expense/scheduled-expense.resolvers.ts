@@ -1,5 +1,8 @@
 import { GraphQLError } from 'graphql';
 import { scheduledExpenseService } from '../../../services/scheduled-expense.service';
+import { walletService } from '../../../services/wallet.service';
+import { expenseCategoryService } from '../../../services/expense-category.service';
+import { expenseService } from '../../../services/expense.service';
 import {
   scheduledExpenseInputSchema,
   scheduledExpenseUpdateSchema,
@@ -9,7 +12,6 @@ import {
   bulkUpdateScheduledExpensesSchema,
   bulkDeleteScheduledExpensesSchema,
 } from '../../../validators/schemas/scheduled-expense.schemas';
-import type { AuthContext } from '../../../types/auth';
 import type {
   CreateScheduledExpenseInput,
   UpdateScheduledExpenseInput,
@@ -27,7 +29,7 @@ export const scheduledExpenseResolvers = {
     scheduledExpenses: async (
       _: unknown,
       { filter }: { filter?: GetScheduledExpensesFilter },
-      context: AuthContext
+      context: any
     ) => {
       if (!context.user) {
         throw new GraphQLError('You must be logged in', {
@@ -60,7 +62,7 @@ export const scheduledExpenseResolvers = {
     /**
      * Get a single scheduled expense by ID
      */
-    scheduledExpense: async (_: unknown, { id }: { id: string }, context: AuthContext) => {
+    scheduledExpense: async (_: unknown, { id }: { id: string }, context: any) => {
       if (!context.user) {
         throw new GraphQLError('You must be logged in', {
           extensions: { code: 'UNAUTHENTICATED' },
@@ -105,7 +107,7 @@ export const scheduledExpenseResolvers = {
     createScheduledExpense: async (
       _: unknown,
       { input }: { input: CreateScheduledExpenseInput },
-      context: AuthContext
+      context: any
     ) => {
       if (!context.user) {
         throw new GraphQLError('You must be logged in', {
@@ -149,7 +151,7 @@ export const scheduledExpenseResolvers = {
     updateScheduledExpense: async (
       _: unknown,
       { id, input }: { id: string; input: UpdateScheduledExpenseInput },
-      context: AuthContext
+      context: any
     ) => {
       if (!context.user) {
         throw new GraphQLError('You must be logged in', {
@@ -209,7 +211,7 @@ export const scheduledExpenseResolvers = {
     bulkUpdateScheduledExpenses: async (
       _: unknown,
       { input }: { input: BulkUpdateScheduledExpensesInput },
-      context: AuthContext
+      context: any
     ) => {
       if (!context.user) {
         throw new GraphQLError('You must be logged in', {
@@ -250,7 +252,7 @@ export const scheduledExpenseResolvers = {
     /**
      * Delete a scheduled expense
      */
-    deleteScheduledExpense: async (_: unknown, { id }: { id: string }, context: AuthContext) => {
+    deleteScheduledExpense: async (_: unknown, { id }: { id: string }, context: any) => {
       if (!context.user) {
         throw new GraphQLError('You must be logged in', {
           extensions: { code: 'UNAUTHENTICATED' },
@@ -293,7 +295,7 @@ export const scheduledExpenseResolvers = {
     bulkDeleteScheduledExpenses: async (
       _: unknown,
       { input }: { input: BulkDeleteScheduledExpensesInput },
-      context: AuthContext
+      context: any
     ) => {
       if (!context.user) {
         throw new GraphQLError('You must be logged in', {
@@ -337,7 +339,7 @@ export const scheduledExpenseResolvers = {
     payScheduledExpense: async (
       _: unknown,
       { input }: { input: PayScheduledExpenseInput },
-      context: AuthContext
+      context: any
     ) => {
       if (!context.user) {
         throw new GraphQLError('You must be logged in', {
@@ -378,11 +380,7 @@ export const scheduledExpenseResolvers = {
     /**
      * Revert payment of a scheduled expense
      */
-    revertScheduledExpensePayment: async (
-      _: unknown,
-      { id }: { id: string },
-      context: AuthContext
-    ) => {
+    revertScheduledExpensePayment: async (_: unknown, { id }: { id: string }, context: any) => {
       if (!context.user) {
         throw new GraphQLError('You must be logged in', {
           extensions: { code: 'UNAUTHENTICATED' },
@@ -422,7 +420,7 @@ export const scheduledExpenseResolvers = {
     /**
      * Clean slate - delete ALL scheduled expenses for the user
      */
-    cleanSlateScheduledExpenses: async (_: unknown, __: unknown, context: AuthContext) => {
+    cleanSlateScheduledExpenses: async (_: unknown, __: unknown, context: any) => {
       if (!context.user) {
         throw new GraphQLError('You must be logged in', {
           extensions: { code: 'UNAUTHENTICATED' },
@@ -435,6 +433,52 @@ export const scheduledExpenseResolvers = {
         throw new GraphQLError((error as Error).message, {
           extensions: { code: 'INTERNAL_SERVER_ERROR' },
         });
+      }
+    },
+  },
+
+  ScheduledExpense: {
+    wallet: async (parent: any, _: unknown, context: any) => {
+      if (!parent.walletId) return null;
+      try {
+        return await walletService.getWalletById(parent.walletId, context.user.id);
+      } catch (error) {
+        return null;
+      }
+    },
+
+    category: async (parent: any, _: unknown, context: any) => {
+      if (!parent.categoryId) return null;
+      try {
+        return await expenseCategoryService.getCategoryById(parent.categoryId, context.user.id);
+      } catch (error) {
+        return null;
+      }
+    },
+
+    budget: async (parent: any) => {
+      // Budget service not yet implemented
+      return null;
+    },
+
+    parent: async (parent: any, _: unknown, context: any) => {
+      if (!parent.parentId) return null;
+      try {
+        return await scheduledExpenseService.getScheduledExpenseById(
+          parent.parentId,
+          context.user.id
+        );
+      } catch (error) {
+        return null;
+      }
+    },
+
+    expense: async (parent: any, _: unknown, context: any) => {
+      if (!parent.expenseId) return null;
+      try {
+        return await expenseService.getExpenseById(parent.expenseId, context.user.id);
+      } catch (error) {
+        return null;
       }
     },
   },

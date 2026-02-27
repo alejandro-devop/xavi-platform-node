@@ -26,6 +26,13 @@ export const scheduledExpenseTypeDefs = gql`
     endDate: String
     createdAt: String!
     updatedAt: String!
+
+    # Relations
+    wallet: Wallet
+    category: WalletExpenseCategory
+    budget: WalletBudget
+    parent: ScheduledExpense
+    expense: WalletExpense
   }
 
   input CreateScheduledExpenseInput {

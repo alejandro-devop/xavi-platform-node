@@ -1,4 +1,6 @@
 import { expenseService } from '../../../services/expense.service';
+import { walletService } from '../../../services/wallet.service';
+import { expenseCategoryService } from '../../../services/expense-category.service';
 import { withErrorHandling, requireAuth } from '../../utils/error-handler';
 import { withValidatedResolver } from '../../utils/validation';
 import {
@@ -56,5 +58,30 @@ export const expenseResolvers = {
       },
       'walletExpenseRemove'
     ),
+  },
+
+  WalletExpense: {
+    wallet: async (parent: any, _: any, context: any) => {
+      if (!parent.walletId) return null;
+      try {
+        return await walletService.getWalletById(parent.walletId, context.user.id);
+      } catch (error) {
+        return null;
+      }
+    },
+
+    category: async (parent: any, _: any, context: any) => {
+      if (!parent.categoryId) return null;
+      try {
+        return await expenseCategoryService.getCategoryById(parent.categoryId, context.user.id);
+      } catch (error) {
+        return null;
+      }
+    },
+
+    budget: async (parent: any) => {
+      // Budget service not yet implemented
+      return null;
+    },
   },
 };
