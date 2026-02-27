@@ -62,6 +62,19 @@ async function runMigrations() {
       )
     `);
 
+    // Upgrade existing migrations table if needed (add batch column)
+    await pool.query(`
+      DO $$
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM information_schema.columns 
+          WHERE table_name = 'migrations' AND column_name = 'batch'
+        ) THEN
+          ALTER TABLE migrations ADD COLUMN batch INTEGER NOT NULL DEFAULT 1;
+        END IF;
+      END $$;
+    `);
+
     // Get current batch number
     const { rows: batchRows } = await pool.query(
       'SELECT COALESCE(MAX(batch), 0) as max_batch FROM migrations'

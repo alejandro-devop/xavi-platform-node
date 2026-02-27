@@ -49,11 +49,12 @@ gcloud run deploy "${SERVICE_NAME}" \
   --service-account="${SERVICE_ACCOUNT}" \
   --set-secrets="DATABASE_URL=database-url:latest,JWT_SECRET=jwt-secret:latest,REDIS_URL=redis-url:latest" \
   --set-env-vars="NODE_ENV=production" \
-  --memory=512Mi \
-  --cpu=1 \
-  --timeout=300 \
+  --memory=1Gi \
+  --cpu=2 \
+  --timeout=600 \
   --max-instances=10 \
-  --min-instances=0
+  --min-instances=0 \
+  --cpu-boost
 
 echo ""
 echo "=========================================="

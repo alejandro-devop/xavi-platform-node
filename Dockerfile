@@ -38,9 +38,11 @@ COPY --from=builder /app/dist ./dist
 
 # Copy migration scripts and files
 COPY migrations ./migrations
-COPY scripts/migrate.ts ./scripts/
-COPY scripts/docker-entrypoint.sh ./scripts/
-RUN chmod +x scripts/docker-entrypoint.sh
+COPY scripts/migrate.ts ./scripts/migrate.ts
+COPY scripts/docker-entrypoint.sh ./scripts/docker-entrypoint.sh
+
+# Make entrypoint executable
+RUN chmod +x ./scripts/docker-entrypoint.sh
 
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001

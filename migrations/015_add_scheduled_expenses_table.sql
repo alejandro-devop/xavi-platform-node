@@ -2,8 +2,11 @@
 -- Migration: add_scheduled_expenses_table
 -- Description: Creates wallet_scheduled_expenses table with support for recurring expenses
 
+-- Drop old table if it exists (to ensure correct schema)
+DROP TABLE IF EXISTS wallet_scheduled_expenses CASCADE;
+
 -- Create wallet_scheduled_expenses table
-CREATE TABLE IF NOT EXISTS wallet_scheduled_expenses (
+CREATE TABLE wallet_scheduled_expenses (
   id UUID PRIMARY KEY,
   user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   wallet_id UUID NOT NULL REFERENCES wallet_wallets(id) ON DELETE CASCADE,
