@@ -47,7 +47,7 @@ gcloud run deploy "${SERVICE_NAME}" \
   --region="${REGION}" \
   --allow-unauthenticated \
   --service-account="${SERVICE_ACCOUNT}" \
-  --set-secrets="DATABASE_URL=database-url:latest,JWT_SECRET=jwt-secret:latest,REDIS_URL=redis-url:latest" \
+  --set-secrets="DATABASE_URL=database-url:latest,JWT_ACCESS_SECRET=jwt-secret:latest,JWT_REFRESH_SECRET=jwt-secret:latest,REDIS_URL=redis-url:latest" \
   --set-env-vars="NODE_ENV=production" \
   --memory=1Gi \
   --cpu=2 \
