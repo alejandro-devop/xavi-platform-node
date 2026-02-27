@@ -14,7 +14,7 @@ export const walletTypeDefs = gql`
 
     # Relations
     expenses: [WalletExpense!]
-    scheduledExpenses: [WalletScheduledExpense!]
+    scheduledExpenses: [ScheduledExpense!]
     budgets: [WalletBudget!]
   }
 

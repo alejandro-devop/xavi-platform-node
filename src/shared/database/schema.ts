@@ -154,6 +154,42 @@ export const walletExpenses = pgTable('wallet_expenses', {
 });
 
 // ============================================
+// WALLET SCHEDULED EXPENSES
+// ============================================
+export const walletScheduledExpenses = pgTable('wallet_scheduled_expenses', {
+  id: uuid('id')
+    .primaryKey()
+    .$defaultFn(() => generateUuidV7()),
+  userId: integer('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  walletId: uuid('wallet_id')
+    .notNull()
+    .references(() => walletWallets.id, { onDelete: 'cascade' }),
+  categoryId: uuid('category_id').references(() => walletExpenseCategories.id, {
+    onDelete: 'set null',
+  }),
+  budgetId: uuid('budget_id').references(() => walletBudgets.id, { onDelete: 'set null' }),
+  parentId: uuid('parent_id').references((): any => walletScheduledExpenses.id, {
+    onDelete: 'cascade',
+  }),
+  expenseId: uuid('expense_id').references(() => walletExpenses.id, {
+    onDelete: 'set null',
+  }),
+  amount: decimal('amount', { precision: 15, scale: 2 }).notNull(),
+  description: varchar('description', { length: 255 }).notNull(),
+  dueDate: date('due_date').notNull(),
+  isPaid: boolean('is_paid').notNull().default(false),
+  paidDate: timestamp('paid_date'),
+  repeatType: varchar('repeat_type', { length: 20 }).$type<
+    'none' | 'daily' | 'weekly' | 'biweekly' | 'monthly'
+  >(),
+  endDate: date('end_date'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+// ============================================
 // RELATIONS (Optional - for query convenience)
 // ============================================
 export const walletWalletsRelations = relations(walletWallets, ({ one, many }) => ({
@@ -181,5 +217,33 @@ export const walletExpensesRelations = relations(walletExpenses, ({ one }) => ({
   budget: one(walletBudgets, {
     fields: [walletExpenses.budgetId],
     references: [walletBudgets.id],
+  }),
+}));
+
+export const walletScheduledExpensesRelations = relations(walletScheduledExpenses, ({ one }) => ({
+  user: one(users, {
+    fields: [walletScheduledExpenses.userId],
+    references: [users.id],
+  }),
+  wallet: one(walletWallets, {
+    fields: [walletScheduledExpenses.walletId],
+    references: [walletWallets.id],
+  }),
+  category: one(walletExpenseCategories, {
+    fields: [walletScheduledExpenses.categoryId],
+    references: [walletExpenseCategories.id],
+  }),
+  budget: one(walletBudgets, {
+    fields: [walletScheduledExpenses.budgetId],
+    references: [walletBudgets.id],
+  }),
+  parent: one(walletScheduledExpenses, {
+    fields: [walletScheduledExpenses.parentId],
+    references: [walletScheduledExpenses.id],
+    relationName: 'parentChild',
+  }),
+  expense: one(walletExpenses, {
+    fields: [walletScheduledExpenses.expenseId],
+    references: [walletExpenses.id],
   }),
 }));
