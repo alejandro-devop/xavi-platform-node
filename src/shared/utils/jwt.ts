@@ -25,7 +25,7 @@ export function generateAccessToken(params: { sub: string; email: string; jti: s
   };
 
   return jwt.sign(payload, process.env.JWT_ACCESS_SECRET!, {
-    expiresIn: (process.env.JWT_ACCESS_EXPIRES_IN || '24h') as any,
+    expiresIn: (process.env.JWT_ACCESS_EXPIRES_IN || '2d') as any,
   });
 }
 
