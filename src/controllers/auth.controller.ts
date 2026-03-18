@@ -185,17 +185,37 @@ export async function refreshAccessToken(req: Request, res: Response): Promise<v
     throw new UnauthorizedError('Refresh token has been revoked');
   }
 
+  // Revoke the old refresh token
+  await db.query(
+    `UPDATE refresh_tokens SET is_revoked = true WHERE id = $1`,
+    [tokenRecord.id]
+  );
+
   // Generate new access token
-  const newJti = uuidv4();
+  const newAccessJti = uuidv4();
   const accessToken = generateAccessToken({
     sub: tokenRecord.user_id.toString(),
     email: tokenRecord.email,
-    jti: newJti,
+    jti: newAccessJti,
   });
+
+  // Generate new refresh token (rotation)
+  const newRefreshJti = uuidv4();
+  const newRefreshToken = generateRefreshToken({
+    sub: tokenRecord.user_id.toString(),
+    jti: newRefreshJti,
+  });
+
+  const refreshExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+  await db.query(
+    `INSERT INTO refresh_tokens (user_id, token, jti, expires_at) VALUES ($1, $2, $3, $4)`,
+    [tokenRecord.user_id, newRefreshToken, newRefreshJti, refreshExpiresAt]
+  );
 
   res.json(
     successResponse({
       accessToken,
+      refreshToken: newRefreshToken,
       user: {
         id: tokenRecord.user_id,
         email: tokenRecord.email,
