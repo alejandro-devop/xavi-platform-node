@@ -15,6 +15,10 @@
 
 All comprehensive documentation is available in [`docs/architecture/`](./docs/architecture/):
 
+### 🚢 Deployment
+
+- **[DEPLOYMENT_GUIDE.md](./docs/DEPLOYMENT_GUIDE.md)** ⭐ - Guía completa para desplegar en Google Cloud Run (setup inicial + re-despliegue rápido)
+
 ### 🌟 Start Here (Cloud Run Implementation)
 
 - **[README.md](./docs/architecture/README.md)** - Navigation guide for all stakeholders

@@ -450,3 +450,54 @@ gcloud artifacts repositories delete xavi-api --location=us-central1
 - Cloud Run docs: https://cloud.google.com/run/docs
 - Logs: `gcloud run services logs read xavi-api`
 - Estado de servicios: https://status.cloud.google.com/
+
+---
+
+## Re-despliegue Rápido (actualizar código existente)
+
+Cuando el proyecto ya está configurado en GCP y solo necesitas publicar cambios de código, sigue estos pasos:
+
+### Prerrequisitos verificados
+
+- Docker Desktop corriendo localmente
+- `gcloud` autenticado (`gcloud auth login`)
+- Docker configurado para Artifact Registry (`gcloud auth configure-docker us-central1-docker.pkg.dev`)
+- Variables en `.env` con `GCP_PROJECT_ID`, `GCP_REGION`, `GCP_SERVICE_NAME`, `GCP_REPOSITORY`
+
+### Paso 1: Hacer commit y push de los cambios
+
+```bash
+git add .
+git commit -m "descripcion del cambio"
+git push
+```
+
+### Paso 2: Ejecutar el script de despliegue
+
+```bash
+bash scripts/deploy.sh
+```
+
+Este script hace automáticamente:
+
+1. Construye la imagen Docker (`docker build`)
+2. La sube a Artifact Registry (`docker push`)
+3. Despliega la nueva revisión en Cloud Run (`gcloud run deploy`)
+
+Al finalizar imprime la URL del servicio:
+
+```
+https://xavi-api-wqpmywszuq-uc.a.run.app
+```
+
+### Verificar el despliegue
+
+```bash
+curl https://xavi-api-wqpmywszuq-uc.a.run.app/api/health
+```
+
+### Notas para agentes de IA
+
+- Si Docker no está corriendo, inícialo con `open -a Docker` (macOS) y espera ~15s antes de correr el script
+- El script carga automáticamente las variables del archivo `.env` — no es necesario exportarlas manualmente
+- La revisión activa se puede ver con: `gcloud run services describe xavi-api --region=us-central1 --format="value(status.latestReadyRevisionName)"`

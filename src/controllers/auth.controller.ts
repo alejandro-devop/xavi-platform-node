@@ -3,9 +3,10 @@ import { getDbPool } from '../shared/database/pool';
 import { hashPassword, comparePassword } from '../shared/utils/password';
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../shared/utils/jwt';
 import { generateOTP, encodeOTP } from '../shared/utils/otp';
-import { successResponse, errorResponse } from '../shared/utils/response';
+import { successResponse } from '../shared/utils/response';
 import { UnauthorizedError, ConflictError, NotFoundError, BadRequestError } from '../shared/errors';
 import { v4 as uuidv4 } from 'uuid';
+import { decodeToken } from '../shared/utils/jwt';
 
 export async function register(req: Request, res: Response): Promise<void> {
   const { email, password, name } = req.body;
@@ -85,7 +86,8 @@ export async function login(req: Request, res: Response): Promise<void> {
     email: user.email,
     jti,
   });
-
+  const decodedToken = decodeToken(accessToken);
+  const accessExpiresAt = decodedToken?.exp ? decodedToken.exp * 1000 : null;
   const refreshJti = uuidv4();
   const refreshToken = generateRefreshToken({
     sub: user.id.toString(),
@@ -103,6 +105,7 @@ export async function login(req: Request, res: Response): Promise<void> {
   res.json(
     successResponse({
       accessToken,
+      accessExpiresAt,
       refreshToken,
       user: {
         id: user.id,
@@ -186,10 +189,7 @@ export async function refreshAccessToken(req: Request, res: Response): Promise<v
   }
 
   // Revoke the old refresh token
-  await db.query(
-    `UPDATE refresh_tokens SET is_revoked = true WHERE id = $1`,
-    [tokenRecord.id]
-  );
+  await db.query(`UPDATE refresh_tokens SET is_revoked = true WHERE id = $1`, [tokenRecord.id]);
 
   // Generate new access token
   const newAccessJti = uuidv4();
@@ -198,6 +198,8 @@ export async function refreshAccessToken(req: Request, res: Response): Promise<v
     email: tokenRecord.email,
     jti: newAccessJti,
   });
+  const decodedToken = decodeToken(accessToken);
+  const accessExpiresAt = decodedToken?.exp ? decodedToken.exp * 1000 : null;
 
   // Generate new refresh token (rotation)
   const newRefreshJti = uuidv4();
@@ -215,6 +217,7 @@ export async function refreshAccessToken(req: Request, res: Response): Promise<v
   res.json(
     successResponse({
       accessToken,
+      accessExpiresAt,
       refreshToken: newRefreshToken,
       user: {
         id: tokenRecord.user_id,
