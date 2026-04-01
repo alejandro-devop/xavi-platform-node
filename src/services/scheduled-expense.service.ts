@@ -555,7 +555,7 @@ export const scheduledExpenseService = {
   },
 
   /**
-   * Clean slate - delete ALL scheduled expenses for a user
+   * Clean slate - delete ALL scheduled expenses for a user, reverting paid ones
    */
   async cleanSlate(userId: number): Promise<boolean> {
     const db = getDb();
@@ -600,6 +600,18 @@ export const scheduledExpenseService = {
     }
 
     // Delete all scheduled expenses
+    await db.delete(walletScheduledExpenses).where(eq(walletScheduledExpenses.userId, userId));
+
+    return true;
+  },
+
+  /**
+   * Clean slate scheduled expenses only - deletes ALL scheduled expenses for a user.
+   * Does NOT affect actual expenses, balances, categories, or any other data.
+   */
+  async cleanSlateScheduledExpenses(userId: number): Promise<boolean> {
+    const db = getDb();
+
     await db.delete(walletScheduledExpenses).where(eq(walletScheduledExpenses.userId, userId));
 
     return true;

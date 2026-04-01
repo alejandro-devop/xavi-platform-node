@@ -165,6 +165,18 @@ export const expenseService = {
     // Get existing expense
     const existingExpense = await this.getExpenseById(id, userId);
 
+    // Verify new wallet ownership if walletId is being changed
+    if (input.walletId !== undefined && input.walletId !== existingExpense.walletId) {
+      await checkRecordExists({
+        table: walletWallets,
+        idValue: input.walletId,
+        scopeField: walletWallets.userId,
+        scopeValue: userId,
+        notFoundMessage: 'Wallet not found',
+        forbiddenMessage: 'You do not have permission to move expenses to this wallet',
+      });
+    }
+
     // Use Drizzle transaction
     const result = await db.transaction(async (tx) => {
       // Reverse old balance changes using strategy pattern

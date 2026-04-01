@@ -428,7 +428,7 @@ export const scheduledExpenseResolvers = {
       }
 
       try {
-        return await scheduledExpenseService.cleanSlate(context.user.id);
+        return await scheduledExpenseService.cleanSlateScheduledExpenses(context.user.id);
       } catch (error) {
         throw new GraphQLError((error as Error).message, {
           extensions: { code: 'INTERNAL_SERVER_ERROR' },
