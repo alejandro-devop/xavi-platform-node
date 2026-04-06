@@ -9,6 +9,7 @@ import { eq, and, gte, lte, desc, sql } from 'drizzle-orm';
 import { BadRequestError } from '../shared/errors';
 import { checkRecordExists } from '../shared/utils/db-validators';
 import { balanceStrategies, updateBalances } from '../shared/utils/balance-strategies';
+import { budgetClosureService } from './budget-closure.service';
 import type {
   Expense,
   CreateExpenseInput,
@@ -119,6 +120,15 @@ export const expenseService = {
 
     // Use Drizzle transaction
     const result = await db.transaction(async (tx) => {
+      const targetDate = input.date || new Date().toISOString().split('T')[0];
+      await budgetClosureService.assertBudgetDateOpen(
+        userId,
+        input.budgetId,
+        targetDate,
+        'create expense',
+        tx
+      );
+
       const debitValue = input.debit?.toString() || '0';
       const creditValue = input.credit?.toString() || '0';
 
@@ -201,6 +211,26 @@ export const expenseService = {
 
     // Use Drizzle transaction
     const result = await db.transaction(async (tx) => {
+      await budgetClosureService.assertBudgetDateOpen(
+        userId,
+        existingExpense.budgetId,
+        existingExpense.date,
+        'update expense from a closed period',
+        tx
+      );
+
+      const targetDate = input.date ?? existingExpense.date;
+      const targetBudgetId =
+        input.budgetId !== undefined ? input.budgetId : existingExpense.budgetId;
+
+      await budgetClosureService.assertBudgetDateOpen(
+        userId,
+        targetBudgetId,
+        targetDate,
+        'assign expense to a closed period',
+        tx
+      );
+
       // Reverse old balance changes using strategy pattern
       await updateBalances(balanceStrategies.reverse, {
         tx,
@@ -237,8 +267,6 @@ export const expenseService = {
 
       // Apply new balance changes using strategy pattern
       const targetWalletId = input.walletId || existingExpense.walletId;
-      const targetBudgetId =
-        input.budgetId !== undefined ? input.budgetId : existingExpense.budgetId;
 
       await updateBalances(balanceStrategies.apply, {
         tx,
@@ -269,6 +297,14 @@ export const expenseService = {
 
     // Use Drizzle transaction
     await db.transaction(async (tx) => {
+      await budgetClosureService.assertBudgetDateOpen(
+        userId,
+        expense.budgetId,
+        expense.date,
+        'delete expense from a closed period',
+        tx
+      );
+
       // Reverse balance changes using strategy pattern
       await updateBalances(balanceStrategies.reverse, {
         tx,

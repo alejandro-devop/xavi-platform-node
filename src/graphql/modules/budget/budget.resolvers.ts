@@ -9,10 +9,13 @@ import { requireAuth, withErrorHandling } from '../../utils/error-handler';
 import { withAsyncValidatedResolver, withValidatedResolver } from '../../utils/validation';
 import {
   applyBudgetToExpensesSchema,
+  bulkCloseBudgetPeriodsSchema,
+  budgetClosuresFilterSchema,
   budgetFilterSchema,
   budgetIdSchema,
   budgetInputSchema,
   budgetUpdateSchema,
+  closeBudgetPeriodSchema,
   createBudgetInputSchema,
   createBudgetUpdateSchema,
 } from '../../../validators/schemas/budget.schemas';
@@ -39,6 +42,15 @@ export const budgetResolvers = {
 
     walletBudgetFollowUp: () => null,
     walletBudgetFollowUps: () => [],
+
+    walletBudgetClosures: withValidatedResolver(
+      budgetClosuresFilterSchema,
+      async (_: any, { budgetId }: { budgetId: string }, context: any) => {
+        requireAuth(context, 'walletBudgetClosures');
+        return await budgetService.getBudgetClosures(context.user.id, budgetId);
+      },
+      'walletBudgetClosures'
+    ),
   },
 
   Mutation: {
@@ -81,6 +93,24 @@ export const budgetResolvers = {
         });
       },
       'applyBudgetToExpenses'
+    ),
+
+    closeBudgetPeriod: withValidatedResolver(
+      closeBudgetPeriodSchema,
+      async (_: any, { input }: any, context: any) => {
+        requireAuth(context, 'closeBudgetPeriod');
+        return await budgetService.closeBudgetPeriod(context.user.id, input);
+      },
+      'closeBudgetPeriod'
+    ),
+
+    closeBudgetPeriods: withValidatedResolver(
+      bulkCloseBudgetPeriodsSchema,
+      async (_: any, { inputs }: any, context: any) => {
+        requireAuth(context, 'closeBudgetPeriods');
+        return await budgetService.closeBudgetPeriods(context.user.id, { inputs });
+      },
+      'closeBudgetPeriods'
     ),
 
     walletBudgetFollowUpAdd: () => {
@@ -134,5 +164,15 @@ export const budgetResolvers = {
     },
 
     followUps: async () => [],
+  },
+
+  WalletBudgetClosure: {
+    budget: async (parent: any, _: any, context: any) => {
+      try {
+        return await budgetService.getBudgetById(parent.budgetId, context.user.id);
+      } catch (error) {
+        return null;
+      }
+    },
   },
 };

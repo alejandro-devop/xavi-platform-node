@@ -11,6 +11,7 @@ import { BadRequestError, NotFoundError, ForbiddenError } from '../shared/errors
 import { checkRecordExists } from '../shared/utils/db-validators';
 import { balanceStrategies, updateBalances } from '../shared/utils/balance-strategies';
 import { RecurrenceService } from '../shared/utils/recurrence.service';
+import { budgetClosureService } from './budget-closure.service';
 import type {
   ScheduledExpense,
   CreateScheduledExpenseInput,
@@ -371,6 +372,13 @@ export const scheduledExpenseService = {
 
     const paidDate = input.paidDate || new Date().toISOString().split('T')[0];
 
+    await budgetClosureService.assertBudgetDateOpen(
+      userId,
+      scheduledExpense.budgetId,
+      paidDate,
+      'pay scheduled expense in a closed period'
+    );
+
     // Create the actual expense in a transaction
     const result = await db.transaction(async (tx) => {
       // Create the expense
@@ -450,6 +458,14 @@ export const scheduledExpenseService = {
       if (!expense) {
         throw new NotFoundError('Associated expense not found');
       }
+
+      await budgetClosureService.assertBudgetDateOpen(
+        userId,
+        expense.budgetId,
+        expense.date,
+        'revert payment from a closed period',
+        tx
+      );
 
       // Reverse the balances
       await updateBalances(balanceStrategies.reverse, {

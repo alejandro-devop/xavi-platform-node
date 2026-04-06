@@ -1,7 +1,8 @@
-import { and, desc, eq, inArray, sql } from 'drizzle-orm';
+import { and, desc, eq, gte, inArray, lte, sql } from 'drizzle-orm';
 import { getDb } from '../shared/database/drizzle';
 import {
   walletBudgets,
+  walletBudgetClosures,
   walletExpenses,
   walletFrequencies,
   walletScheduledExpenses,
@@ -9,9 +10,13 @@ import {
 } from '../shared/database/schema';
 import { BadRequestError, NotFoundError } from '../shared/errors';
 import { checkRecordExists } from '../shared/utils/db-validators';
+import { budgetClosureService } from './budget-closure.service';
 import type {
   ApplyBudgetToExpensesInput,
+  BulkCloseBudgetPeriodsInput,
   Budget,
+  BudgetClosure,
+  CloseBudgetPeriodInput,
   CreateBudgetInput,
   GetBudgetsFilter,
   UpdateBudgetInput,
@@ -28,6 +33,16 @@ function toBudget(model: typeof walletBudgets.$inferSelect): Budget {
 function budgetEffect(credit: number, debit: number): number {
   // Available budget decreases with spending and increases on reversals.
   return credit - debit;
+}
+
+function toBudgetClosure(model: typeof walletBudgetClosures.$inferSelect): BudgetClosure {
+  return {
+    ...model,
+    plannedAmount: parseFloat(model.plannedAmount),
+    spentAmount: parseFloat(model.spentAmount),
+    remainingAmount: parseFloat(model.remainingAmount),
+    overspentAmount: parseFloat(model.overspentAmount),
+  };
 }
 
 export const budgetService = {
@@ -195,6 +210,98 @@ export const budgetService = {
     return true;
   },
 
+  async getBudgetClosures(userId: number, budgetId: string): Promise<BudgetClosure[]> {
+    const db = getDb();
+
+    await this.getBudgetById(budgetId, userId);
+
+    const closures = await db.query.walletBudgetClosures.findMany({
+      where: and(
+        eq(walletBudgetClosures.userId, userId),
+        eq(walletBudgetClosures.budgetId, budgetId)
+      ),
+      orderBy: [desc(walletBudgetClosures.periodEnd), desc(walletBudgetClosures.closedAt)],
+    });
+
+    return closures.map(toBudgetClosure);
+  },
+
+  async closeBudgetPeriod(
+    userId: number,
+    input: CloseBudgetPeriodInput,
+    tx?: any
+  ): Promise<BudgetClosure> {
+    const db = tx || getDb();
+
+    const budget = await this.getBudgetById(input.budgetId, userId);
+
+    const alreadyClosed = await db.query.walletBudgetClosures.findMany({
+      where: and(
+        eq(walletBudgetClosures.userId, userId),
+        eq(walletBudgetClosures.budgetId, input.budgetId),
+        eq(walletBudgetClosures.periodStart, budget.startDate),
+        eq(walletBudgetClosures.periodEnd, budget.endDate)
+      ),
+      limit: 1,
+    });
+
+    if (alreadyClosed.length > 0) {
+      throw new BadRequestError('This budget period is already closed');
+    }
+
+    const expenses = await db.query.walletExpenses.findMany({
+      where: and(
+        eq(walletExpenses.userId, userId),
+        eq(walletExpenses.budgetId, input.budgetId),
+        gte(walletExpenses.date, budget.startDate),
+        lte(walletExpenses.date, budget.endDate)
+      ),
+    });
+
+    const spentAmount = expenses.reduce((acc: number, expense: any) => {
+      return acc + (parseFloat(expense.debit) - parseFloat(expense.credit));
+    }, 0);
+    const plannedAmount = budget.amount;
+    const remainingAmount = plannedAmount - spentAmount;
+    const overspentAmount = Math.max(0, spentAmount - plannedAmount);
+
+    const [closure] = await db
+      .insert(walletBudgetClosures)
+      .values({
+        budgetId: input.budgetId,
+        userId,
+        periodStart: budget.startDate,
+        periodEnd: budget.endDate,
+        plannedAmount: plannedAmount.toString(),
+        spentAmount: spentAmount.toString(),
+        remainingAmount: remainingAmount.toString(),
+        overspentAmount: overspentAmount.toString(),
+        expensesCount: expenses.length,
+        notes: input.notes || null,
+      })
+      .returning();
+
+    return toBudgetClosure(closure);
+  },
+
+  async closeBudgetPeriods(
+    userId: number,
+    input: BulkCloseBudgetPeriodsInput
+  ): Promise<BudgetClosure[]> {
+    const db = getDb();
+
+    return await db.transaction(async (tx) => {
+      const closures: BudgetClosure[] = [];
+
+      for (const item of input.inputs) {
+        const closure = await this.closeBudgetPeriod(userId, item, tx);
+        closures.push(closure);
+      }
+
+      return closures;
+    });
+  },
+
   async applyBudgetToExpenses(userId: number, input: ApplyBudgetToExpensesInput): Promise<boolean> {
     const db = getDb();
 
@@ -229,6 +336,21 @@ export const budgetService = {
             if (!linkedExpense) {
               throw new NotFoundError('Linked expense not found for paid scheduled expense');
             }
+
+            await budgetClosureService.assertBudgetDateOpen(
+              userId,
+              previousBudgetId,
+              linkedExpense.date,
+              'reassign expense from a closed budget period',
+              tx
+            );
+            await budgetClosureService.assertBudgetDateOpen(
+              userId,
+              input.budgetId,
+              linkedExpense.date,
+              'assign expense into a closed budget period',
+              tx
+            );
 
             const effect = budgetEffect(
               parseFloat(linkedExpense.credit),
@@ -281,6 +403,21 @@ export const budgetService = {
         }
 
         const effect = budgetEffect(parseFloat(expense.credit), parseFloat(expense.debit));
+
+        await budgetClosureService.assertBudgetDateOpen(
+          userId,
+          previousBudgetId,
+          expense.date,
+          'reassign expense from a closed budget period',
+          tx
+        );
+        await budgetClosureService.assertBudgetDateOpen(
+          userId,
+          input.budgetId,
+          expense.date,
+          'assign expense into a closed budget period',
+          tx
+        );
 
         if (previousBudgetId) {
           await tx

@@ -50,3 +50,28 @@ export interface ApplyBudgetToExpensesInput {
   budgetId: string;
   scheduled?: boolean;
 }
+
+export interface BudgetClosure {
+  id: string;
+  budgetId: string;
+  userId: number;
+  periodStart: string;
+  periodEnd: string;
+  plannedAmount: number;
+  spentAmount: number;
+  remainingAmount: number;
+  overspentAmount: number;
+  expensesCount: number;
+  notes?: string | null;
+  closedAt: Date;
+  createdAt: Date;
+}
+
+export interface CloseBudgetPeriodInput {
+  budgetId: string;
+  notes?: string;
+}
+
+export interface BulkCloseBudgetPeriodsInput {
+  inputs: CloseBudgetPeriodInput[];
+}

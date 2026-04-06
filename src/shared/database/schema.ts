@@ -127,6 +127,31 @@ export const walletBudgets = pgTable('wallet_budgets', {
 });
 
 // ============================================
+// WALLET BUDGET CLOSURES
+// ============================================
+export const walletBudgetClosures = pgTable('wallet_budget_closures', {
+  id: uuid('id')
+    .primaryKey()
+    .$defaultFn(() => generateUuidV7()),
+  budgetId: uuid('budget_id')
+    .notNull()
+    .references(() => walletBudgets.id, { onDelete: 'cascade' }),
+  userId: integer('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  periodStart: date('period_start').notNull(),
+  periodEnd: date('period_end').notNull(),
+  plannedAmount: decimal('planned_amount', { precision: 15, scale: 2 }).notNull(),
+  spentAmount: decimal('spent_amount', { precision: 15, scale: 2 }).notNull(),
+  remainingAmount: decimal('remaining_amount', { precision: 15, scale: 2 }).notNull(),
+  overspentAmount: decimal('overspent_amount', { precision: 15, scale: 2 }).notNull().default('0'),
+  expensesCount: integer('expenses_count').notNull().default(0),
+  notes: text('notes'),
+  closedAt: timestamp('closed_at').notNull().defaultNow(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+});
+
+// ============================================
 // WALLET EXPENSES
 // ============================================
 export const walletExpenses = pgTable('wallet_expenses', {
@@ -245,5 +270,16 @@ export const walletScheduledExpensesRelations = relations(walletScheduledExpense
   expense: one(walletExpenses, {
     fields: [walletScheduledExpenses.expenseId],
     references: [walletExpenses.id],
+  }),
+}));
+
+export const walletBudgetClosuresRelations = relations(walletBudgetClosures, ({ one }) => ({
+  budget: one(walletBudgets, {
+    fields: [walletBudgetClosures.budgetId],
+    references: [walletBudgets.id],
+  }),
+  user: one(users, {
+    fields: [walletBudgetClosures.userId],
+    references: [users.id],
   }),
 }));

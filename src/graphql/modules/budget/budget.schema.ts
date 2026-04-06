@@ -37,11 +37,30 @@ export const budgetTypeDefs = gql`
     budget: WalletBudget
   }
 
+  type WalletBudgetClosure {
+    id: ID!
+    budgetId: ID!
+    userId: ID!
+    periodStart: Date!
+    periodEnd: Date!
+    plannedAmount: Decimal!
+    spentAmount: Decimal!
+    remainingAmount: Decimal!
+    overspentAmount: Decimal!
+    expensesCount: Int!
+    notes: String
+    closedAt: DateTime!
+    createdAt: DateTime!
+
+    budget: WalletBudget
+  }
+
   extend type Query {
     walletBudget(id: ID!): WalletBudget
     walletBudgets(walletId: ID, isActive: Boolean): [WalletBudget!]!
     walletBudgetFollowUp(id: ID!): WalletBudgetFollowUp
     walletBudgetFollowUps(budgetId: ID!): [WalletBudgetFollowUp!]!
+    walletBudgetClosures(budgetId: ID!): [WalletBudgetClosure!]!
   }
 
   extend type Mutation {
@@ -49,6 +68,8 @@ export const budgetTypeDefs = gql`
     walletBudgetUpdate(id: ID!, input: WalletBudgetUpdateInput!): WalletBudget!
     walletBudgetRemove(id: ID!): Boolean!
     applyBudgetToExpenses(expensesIds: [ID!]!, budgetId: ID!, scheduled: Boolean): Boolean!
+    closeBudgetPeriod(input: CloseBudgetPeriodInput!): WalletBudgetClosure!
+    closeBudgetPeriods(inputs: [CloseBudgetPeriodInput!]!): [WalletBudgetClosure!]!
     walletBudgetFollowUpAdd(input: WalletBudgetFollowUpInput!): WalletBudgetFollowUp!
     walletBudgetFollowUpUpdate(
       id: ID!
@@ -91,5 +112,10 @@ export const budgetTypeDefs = gql`
   input WalletBudgetFollowUpUpdateInput {
     notes: String
     closureDate: Date
+  }
+
+  input CloseBudgetPeriodInput {
+    budgetId: ID!
+    notes: String
   }
 `;
