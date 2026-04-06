@@ -177,6 +177,28 @@ export const expenseService = {
       });
     }
 
+    if (input.categoryId !== undefined && input.categoryId !== null) {
+      await checkRecordExists({
+        table: walletExpenseCategories,
+        idValue: input.categoryId,
+        scopeField: walletExpenseCategories.userId,
+        scopeValue: userId,
+        notFoundMessage: 'Category not found',
+        forbiddenMessage: 'You do not have permission to use this category',
+      });
+    }
+
+    if (input.budgetId !== undefined && input.budgetId !== null) {
+      await checkRecordExists({
+        table: walletBudgets,
+        idValue: input.budgetId,
+        scopeField: walletBudgets.userId,
+        scopeValue: userId,
+        notFoundMessage: 'Budget not found',
+        forbiddenMessage: 'You do not have permission to use this budget',
+      });
+    }
+
     // Use Drizzle transaction
     const result = await db.transaction(async (tx) => {
       // Reverse old balance changes using strategy pattern

@@ -1,4 +1,5 @@
 import { expenseService } from '../../../services/expense.service';
+import { budgetService } from '../../../services/budget.service';
 import { walletService } from '../../../services/wallet.service';
 import { expenseCategoryService } from '../../../services/expense-category.service';
 import { withErrorHandling, requireAuth } from '../../utils/error-handler';
@@ -79,9 +80,13 @@ export const expenseResolvers = {
       }
     },
 
-    budget: async (parent: any) => {
-      // Budget service not yet implemented
-      return null;
+    budget: async (parent: any, _: any, context: any) => {
+      if (!parent.budgetId) return null;
+      try {
+        return await budgetService.getBudgetById(parent.budgetId, context.user.id);
+      } catch (error) {
+        return null;
+      }
     },
   },
 };

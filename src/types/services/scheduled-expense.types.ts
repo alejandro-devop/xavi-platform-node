@@ -21,8 +21,8 @@ export interface ScheduledExpense {
 
 export interface CreateScheduledExpenseInput {
   walletId: string;
-  categoryId?: string;
-  budgetId?: string;
+  categoryId?: string | null;
+  budgetId?: string | null;
   amount: number;
   description: string;
   dueDate: string;
@@ -32,8 +32,8 @@ export interface CreateScheduledExpenseInput {
 
 export interface UpdateScheduledExpenseInput {
   walletId?: string;
-  categoryId?: string;
-  budgetId?: string;
+  categoryId?: string | null;
+  budgetId?: string | null;
   amount?: number;
   description?: string;
   // Note: dueDate, repeatType, and endDate cannot be updated
@@ -59,8 +59,8 @@ export interface BulkUpdateScheduledExpensesInput {
   parentId: string;
   amount?: number;
   description?: string;
-  categoryId?: string;
-  budgetId?: string;
+  categoryId?: string | null;
+  budgetId?: string | null;
 }
 
 export interface BulkDeleteScheduledExpensesInput {

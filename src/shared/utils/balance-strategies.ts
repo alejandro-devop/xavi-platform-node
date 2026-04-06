@@ -114,8 +114,8 @@ export class ApplyBalanceStrategy extends BaseBalanceStrategy {
   async updateBudgetBalance(params: BalanceUpdateParams): Promise<void> {
     if (!params.budgetId) return;
 
-    // Budget balance: spending reduces available budget
-    const budgetBalanceChange = params.debit - params.credit;
+    // Budget balance tracks available funds.
+    const budgetBalanceChange = params.credit - params.debit;
 
     await params.tx
       .update(walletBudgets)
@@ -159,7 +159,7 @@ export class ReverseBalanceStrategy extends BaseBalanceStrategy {
     if (!params.budgetId) return;
 
     // Reverse the budget balance change
-    const budgetBalanceChange = params.debit - params.credit;
+    const budgetBalanceChange = params.credit - params.debit;
 
     await params.tx
       .update(walletBudgets)

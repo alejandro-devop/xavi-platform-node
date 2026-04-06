@@ -1,5 +1,6 @@
 import { GraphQLError } from 'graphql';
 import { scheduledExpenseService } from '../../../services/scheduled-expense.service';
+import { budgetService } from '../../../services/budget.service';
 import { walletService } from '../../../services/wallet.service';
 import { expenseCategoryService } from '../../../services/expense-category.service';
 import { expenseService } from '../../../services/expense.service';
@@ -456,9 +457,13 @@ export const scheduledExpenseResolvers = {
       }
     },
 
-    budget: async (parent: any) => {
-      // Budget service not yet implemented
-      return null;
+    budget: async (parent: any, _: unknown, context: any) => {
+      if (!parent.budgetId) return null;
+      try {
+        return await budgetService.getBudgetById(parent.budgetId, context.user.id);
+      } catch (error) {
+        return null;
+      }
     },
 
     parent: async (parent: any, _: unknown, context: any) => {

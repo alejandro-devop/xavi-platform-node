@@ -11,8 +11,8 @@ export const repeatTypeEnum = z.enum(['none', 'daily', 'weekly', 'biweekly', 'mo
 export const scheduledExpenseInputSchema = z
   .object({
     walletId: z.string().uuid('Invalid wallet ID format'),
-    categoryId: z.string().uuid('Invalid category ID format').optional(),
-    budgetId: z.string().uuid('Invalid budget ID format').optional(),
+    categoryId: z.string().uuid('Invalid category ID format').nullable().optional(),
+    budgetId: z.string().uuid('Invalid budget ID format').nullable().optional(),
     amount: z.number().positive('Amount must be greater than 0'),
     description: z
       .string()
@@ -56,8 +56,8 @@ export const scheduledExpenseInputSchema = z
  */
 export const scheduledExpenseUpdateSchema = z.object({
   walletId: z.string().uuid('Invalid wallet ID format').optional(),
-  categoryId: z.string().uuid('Invalid category ID format').optional(),
-  budgetId: z.string().uuid('Invalid budget ID format').optional(),
+  categoryId: z.string().uuid('Invalid category ID format').nullable().optional(),
+  budgetId: z.string().uuid('Invalid budget ID format').nullable().optional(),
   amount: z.number().positive('Amount must be greater than 0').optional(),
   description: z
     .string()
@@ -105,8 +105,8 @@ export const bulkUpdateScheduledExpensesSchema = z.object({
     .min(3, 'Description must be at least 3 characters')
     .max(255, 'Description must be less than 255 characters')
     .optional(),
-  categoryId: z.string().uuid('Invalid category ID format').optional(),
-  budgetId: z.string().uuid('Invalid budget ID format').optional(),
+  categoryId: z.string().uuid('Invalid category ID format').nullable().optional(),
+  budgetId: z.string().uuid('Invalid budget ID format').nullable().optional(),
 });
 
 /**

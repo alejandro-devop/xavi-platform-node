@@ -6,8 +6,8 @@ import { z } from 'zod';
 export const expenseInputSchema = z
   .object({
     walletId: z.string().uuid('Invalid wallet ID format'),
-    categoryId: z.string().uuid('Invalid category ID format').optional(),
-    budgetId: z.string().uuid('Invalid budget ID format').optional(),
+    categoryId: z.string().uuid('Invalid category ID format').nullable().optional(),
+    budgetId: z.string().uuid('Invalid budget ID format').nullable().optional(),
     debit: z.number().min(0, 'Debit must be positive').optional().default(0),
     credit: z.number().min(0, 'Credit must be positive').optional().default(0),
     description: z
@@ -26,8 +26,8 @@ export const expenseInputSchema = z
  */
 export const expenseUpdateSchema = z.object({
   walletId: z.string().uuid('Invalid wallet ID format').optional(),
-  categoryId: z.string().uuid('Invalid category ID format').optional(),
-  budgetId: z.string().uuid('Invalid budget ID format').optional(),
+  categoryId: z.string().uuid('Invalid category ID format').nullable().optional(),
+  budgetId: z.string().uuid('Invalid budget ID format').nullable().optional(),
   debit: z.number().min(0, 'Debit must be positive').optional(),
   credit: z.number().min(0, 'Credit must be positive').optional(),
   description: z

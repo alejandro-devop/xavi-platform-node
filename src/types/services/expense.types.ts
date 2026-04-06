@@ -14,8 +14,8 @@ export interface Expense {
 
 export interface CreateExpenseInput {
   walletId: string;
-  categoryId?: string;
-  budgetId?: string;
+  categoryId?: string | null;
+  budgetId?: string | null;
   debit?: number;
   credit?: number;
   description: string;
@@ -24,8 +24,8 @@ export interface CreateExpenseInput {
 
 export interface UpdateExpenseInput {
   walletId?: string;
-  categoryId?: string;
-  budgetId?: string;
+  categoryId?: string | null;
+  budgetId?: string | null;
   debit?: number;
   credit?: number;
   description?: string;

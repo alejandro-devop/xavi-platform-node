@@ -200,7 +200,7 @@ export const scheduledExpenseService = {
     }
 
     // Verify wallet if being changed
-    if (input.walletId) {
+    if (input.walletId !== undefined) {
       await checkRecordExists({
         table: walletWallets,
         idValue: input.walletId,
@@ -212,7 +212,7 @@ export const scheduledExpenseService = {
     }
 
     // Verify category if being changed
-    if (input.categoryId) {
+    if (input.categoryId !== undefined && input.categoryId !== null) {
       await checkRecordExists({
         table: walletExpenseCategories,
         idValue: input.categoryId,
@@ -224,7 +224,7 @@ export const scheduledExpenseService = {
     }
 
     // Verify budget if being changed
-    if (input.budgetId) {
+    if (input.budgetId !== undefined && input.budgetId !== null) {
       await checkRecordExists({
         table: walletBudgets,
         idValue: input.budgetId,
@@ -298,7 +298,7 @@ export const scheduledExpenseService = {
     }
 
     // Verify category if being changed
-    if (input.categoryId) {
+    if (input.categoryId !== undefined && input.categoryId !== null) {
       await checkRecordExists({
         table: walletExpenseCategories,
         idValue: input.categoryId,
@@ -310,7 +310,7 @@ export const scheduledExpenseService = {
     }
 
     // Verify budget if being changed
-    if (input.budgetId) {
+    if (input.budgetId !== undefined && input.budgetId !== null) {
       await checkRecordExists({
         table: walletBudgets,
         idValue: input.budgetId,
