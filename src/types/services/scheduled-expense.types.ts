@@ -52,6 +52,7 @@ export interface GetScheduledExpensesFilter {
 
 export interface PayScheduledExpenseInput {
   id: string;
+  amountPaid?: number;
   paidDate?: string;
 }
 

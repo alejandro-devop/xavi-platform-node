@@ -78,6 +78,7 @@ export const scheduledExpenseIdSchema = z.object({
  */
 export const payScheduledExpenseSchema = z.object({
   id: z.string().uuid('Invalid scheduled expense ID format'),
+  amountPaid: z.number().positive('Amount paid must be greater than 0').optional(),
   paidDate: z.string().date('Invalid date format (use YYYY-MM-DD)').optional(),
 });
 

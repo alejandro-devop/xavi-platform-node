@@ -370,6 +370,8 @@ export const scheduledExpenseService = {
       throw new BadRequestError('Scheduled expense is already paid');
     }
 
+    // Use provided amountPaid or default to scheduled amount
+    const amountPaid = input.amountPaid ?? scheduledExpense.amount;
     const paidDate = input.paidDate || new Date().toISOString().split('T')[0];
 
     await budgetClosureService.assertBudgetDateOpen(
@@ -391,7 +393,7 @@ export const scheduledExpenseService = {
           budgetId: scheduledExpense.budgetId,
           date: paidDate,
           description: scheduledExpense.description,
-          debit: scheduledExpense.amount.toString(),
+          debit: amountPaid.toString(),
           credit: '0',
           isIncome: false,
           isOutcome: true,
@@ -404,7 +406,7 @@ export const scheduledExpenseService = {
         walletId: scheduledExpense.walletId,
         budgetId: scheduledExpense.budgetId,
         credit: 0,
-        debit: scheduledExpense.amount,
+        debit: amountPaid,
       });
 
       // Update scheduled expense

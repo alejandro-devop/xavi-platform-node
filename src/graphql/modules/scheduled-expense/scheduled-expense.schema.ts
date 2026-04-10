@@ -66,6 +66,7 @@ export const scheduledExpenseTypeDefs = gql`
 
   input PayScheduledExpenseInput {
     id: ID!
+    amountPaid: Float
     paidDate: String
   }
 
