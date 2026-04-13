@@ -38,3 +38,13 @@ export const logoutSchema = z.object({
     refreshToken: z.string().min(1, 'Refresh token is required'),
   }),
 });
+
+export const resendOTPSchema = z.object({
+  body: z.object({}), // No body required - uses req.user from auth middleware
+});
+
+export const verifyAccountSchema = z.object({
+  body: z.object({
+    code: z.string().length(6, 'Verification code must be 6 digits'),
+  }),
+});

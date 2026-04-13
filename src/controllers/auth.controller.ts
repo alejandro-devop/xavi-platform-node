@@ -7,6 +7,7 @@ import { successResponse } from '../shared/utils/response';
 import { UnauthorizedError, ConflictError, NotFoundError, BadRequestError } from '../shared/errors';
 import { v4 as uuidv4 } from 'uuid';
 import { decodeToken } from '../shared/utils/jwt';
+import { emailService } from '../shared/services/email.service';
 
 export async function register(req: Request, res: Response): Promise<void> {
   const { email, password, name } = req.body;
@@ -25,20 +26,29 @@ export async function register(req: Request, res: Response): Promise<void> {
   // Generate OTP for email verification
   const otp = generateOTP();
   const encodedOTP = encodeOTP(otp);
-  const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+  const expirationMinutes = parseInt(process.env.EMAIL_OTP_EXPIRATION_MINUTES || '15', 10);
+  const expiresAt = new Date(Date.now() + expirationMinutes * 60 * 1000);
+  const now = new Date();
 
   // Create user
   const result = await db.query(
-    `INSERT INTO users (email, password, name, verification_code, verification_code_expires_at)
-     VALUES ($1, $2, $3, $4, $5)
+    `INSERT INTO users (email, password, name, verification_code, verification_code_expires_at, otp_last_sent_at)
+     VALUES ($1, $2, $3, $4, $5, $6)
      RETURNING id, email, name, is_account_verified, created_at`,
-    [email, hashedPassword, name, encodedOTP, expiresAt]
+    [email, hashedPassword, name, encodedOTP, expiresAt, now]
   );
 
   const user = result.rows[0];
 
-  // TODO: Send verification email with OTP
-  // For now, we'll return it in development mode
+  // Send verification email
+  const emailResult = await emailService.sendVerificationEmail(email, otp, name);
+
+  if (!emailResult.success) {
+    // Log the error but don't fail registration
+    // User can request a resend later
+    console.error('Failed to send verification email:', emailResult.error);
+  }
+
   const response: any = {
     user: {
       id: user.id,
@@ -48,8 +58,10 @@ export async function register(req: Request, res: Response): Promise<void> {
       createdAt: user.created_at,
     },
     message: 'Registration successful. Please verify your email.',
+    emailSent: emailResult.success,
   };
 
+  // In development, include the OTP in the response for testing
   if (process.env.NODE_ENV === 'development') {
     response.verificationCode = otp;
   }
@@ -63,7 +75,7 @@ export async function login(req: Request, res: Response): Promise<void> {
 
   // Find user
   const result = await db.query(
-    'SELECT id, email, password, name, is_account_verified FROM users WHERE email = $1',
+    'SELECT id, email, password, name, is_account_verified, otp_last_sent_at FROM users WHERE email = $1',
     [email]
   );
 
@@ -102,6 +114,19 @@ export async function login(req: Request, res: Response): Promise<void> {
     [user.id, refreshToken, refreshJti, refreshExpiresAt]
   );
 
+  // Calculate nextResendAvailableAt for unverified users
+  let nextResendAvailableAt: string | null = null;
+  if (!user.is_account_verified && user.otp_last_sent_at) {
+    const lastSent = new Date(user.otp_last_sent_at);
+    const nextAvailable = new Date(lastSent.getTime() + 5 * 60 * 1000); // 5 minutes
+    const now = new Date();
+
+    // Only set if the cooldown hasn't expired yet
+    if (nextAvailable > now) {
+      nextResendAvailableAt = nextAvailable.toISOString();
+    }
+  }
+
   res.json(
     successResponse({
       accessToken,
@@ -113,6 +138,7 @@ export async function login(req: Request, res: Response): Promise<void> {
         name: user.name,
         isAccountVerified: user.is_account_verified,
       },
+      ...(nextResendAvailableAt && { nextResendAvailableAt }),
     })
   );
 }
@@ -262,6 +288,158 @@ export async function getProfile(req: Request, res: Response): Promise<void> {
   res.json(
     successResponse({
       user: req.user,
+    })
+  );
+}
+
+/**
+ * Resend verification OTP
+ * Protected endpoint - requires authentication
+ * Enforces 5-minute rate limit between resends
+ */
+export async function resendVerificationOTP(req: Request, res: Response): Promise<void> {
+  const db = getDbPool();
+  const userId = req.user!.id;
+
+  // Check if user is already verified
+  const userResult = await db.query(
+    `SELECT is_account_verified, otp_last_sent_at, email, name 
+     FROM users 
+     WHERE id = $1`,
+    [userId]
+  );
+
+  if (userResult.rows.length === 0) {
+    throw new NotFoundError('User not found');
+  }
+
+  const user = userResult.rows[0];
+
+  if (user.is_account_verified) {
+    throw new BadRequestError('Account is already verified');
+  }
+
+  // Check rate limit (5 minutes)
+  if (user.otp_last_sent_at) {
+    const lastSent = new Date(user.otp_last_sent_at);
+    const now = new Date();
+    const timeSinceLastSend = now.getTime() - lastSent.getTime();
+    const fiveMinutesInMs = 5 * 60 * 1000;
+
+    if (timeSinceLastSend < fiveMinutesInMs) {
+      const nextAvailable = new Date(lastSent.getTime() + fiveMinutesInMs);
+      const secondsRemaining = Math.ceil((nextAvailable.getTime() - now.getTime()) / 1000);
+
+      throw new BadRequestError(
+        JSON.stringify({
+          message: 'Please wait before requesting a new code',
+          nextResendAvailableAt: nextAvailable.toISOString(),
+          secondsRemaining,
+        })
+      );
+    }
+  }
+
+  // Generate new OTP
+  const otp = generateOTP();
+  const encodedOTP = encodeOTP(otp);
+  const expirationMinutes = parseInt(process.env.EMAIL_OTP_EXPIRATION_MINUTES || '15', 10);
+  const expiresAt = new Date(Date.now() + expirationMinutes * 60 * 1000);
+  const now = new Date();
+
+  // Update user with new OTP and timestamp
+  await db.query(
+    `UPDATE users 
+     SET verification_code = $1, 
+         verification_code_expires_at = $2,
+         otp_last_sent_at = $3
+     WHERE id = $4`,
+    [encodedOTP, expiresAt, now, userId]
+  );
+
+  // Send verification email
+  const emailResult = await emailService.sendVerificationEmail(user.email, otp, user.name);
+
+  if (!emailResult.success) {
+    throw new BadRequestError('Failed to send verification email. Please try again later.');
+  }
+
+  const nextResendAvailableAt = new Date(now.getTime() + 5 * 60 * 1000).toISOString();
+
+  const response: any = {
+    message: 'Verification code sent successfully',
+    nextResendAvailableAt,
+    emailSent: true,
+  };
+
+  // In development, include the OTP in the response for testing
+  if (process.env.NODE_ENV === 'development') {
+    response.verificationCode = otp;
+  }
+
+  res.json(successResponse(response));
+}
+
+/**
+ * Verify account with OTP
+ * Protected endpoint - requires authentication
+ */
+export async function verifyAccount(req: Request, res: Response): Promise<void> {
+  const { code } = req.body;
+  const db = getDbPool();
+  const userId = req.user!.id;
+
+  // Get user verification data
+  const result = await db.query(
+    `SELECT id, verification_code, verification_code_expires_at, is_account_verified
+     FROM users 
+     WHERE id = $1`,
+    [userId]
+  );
+
+  if (result.rows.length === 0) {
+    throw new NotFoundError('User not found');
+  }
+
+  const user = result.rows[0];
+
+  // Check if already verified
+  if (user.is_account_verified) {
+    throw new BadRequestError('Account is already verified');
+  }
+
+  // Check if verification code exists
+  if (!user.verification_code) {
+    throw new BadRequestError('No verification code found. Please request a new one.');
+  }
+
+  const encodedCode = encodeOTP(code);
+
+  // Check if code matches
+  if (user.verification_code !== encodedCode) {
+    throw new BadRequestError('Invalid verification code');
+  }
+
+  // Check if code expired
+  if (new Date() > new Date(user.verification_code_expires_at)) {
+    throw new BadRequestError('Verification code has expired. Please request a new one.');
+  }
+
+  // Mark as verified and clear verification data
+  await db.query(
+    `UPDATE users 
+     SET is_account_verified = TRUE, 
+         verification_code = NULL, 
+         verification_code_expires_at = NULL,
+         otp_last_sent_at = NULL
+     WHERE id = $1`,
+    [userId]
+  );
+
+  res.json(
+    successResponse({
+      message: 'Account verified successfully',
+      isAccountVerified: true,
     })
   );
 }

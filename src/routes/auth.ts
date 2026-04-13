@@ -9,6 +9,8 @@ import {
   refreshAccessToken,
   logout,
   getProfile,
+  resendVerificationOTP,
+  verifyAccount,
 } from '../controllers/auth.controller';
 import {
   registerSchema,
@@ -16,6 +18,8 @@ import {
   verifyEmailSchema,
   refreshTokenSchema,
   logoutSchema,
+  resendOTPSchema,
+  verifyAccountSchema,
 } from '../validators/auth.validator';
 
 const router = Router();
@@ -29,5 +33,17 @@ router.post('/logout', validate(logoutSchema), asyncHandler(logout));
 
 // Protected routes
 router.get('/profile', authMiddleware, asyncHandler(getProfile));
+router.post(
+  '/resend-otp',
+  authMiddleware,
+  validate(resendOTPSchema),
+  asyncHandler(resendVerificationOTP)
+);
+router.post(
+  '/verify-account',
+  authMiddleware,
+  validate(verifyAccountSchema),
+  asyncHandler(verifyAccount)
+);
 
 export default router;
