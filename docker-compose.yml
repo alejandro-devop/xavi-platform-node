@@ -78,6 +78,11 @@ services:
 
       # Logging
       LOG_LEVEL: debug
+
+      # Email (Resend)
+      EMAIL_API_KEY: ${EMAIL_API_KEY}
+      EMAIL_FROM: ${EMAIL_FROM:-noreply@xavi.app}
+      EMAIL_OTP_EXPIRATION_MINUTES: ${EMAIL_OTP_EXPIRATION_MINUTES:-15}
     volumes:
       - ./src:/app/src
       - ./scripts:/app/scripts
