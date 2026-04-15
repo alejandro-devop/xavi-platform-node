@@ -23,15 +23,34 @@ class EmailService {
     this.isEnabled = !!apiKey;
 
     if (!apiKey) {
-      logger.warn('EMAIL_API_KEY not configured - email sending is disabled');
+      logger.warn(
+        {
+          fromEmail: this.fromEmail,
+          nodeEnv: process.env.NODE_ENV,
+        },
+        'EMAIL_API_KEY not configured - email sending is disabled'
+      );
       return;
     }
 
     try {
       this.resend = new Resend(apiKey);
-      logger.info('Email service initialized successfully');
+      logger.info(
+        {
+          fromEmail: this.fromEmail,
+          apiKeyPrefix: apiKey.substring(0, 8) + '...',
+          nodeEnv: process.env.NODE_ENV,
+        },
+        'Email service initialized successfully'
+      );
     } catch (error) {
-      logger.error({ error }, 'Failed to initialize Resend email service');
+      logger.error(
+        {
+          error,
+          fromEmail: this.fromEmail,
+        },
+        'Failed to initialize Resend email service'
+      );
       this.isEnabled = false;
     }
   }
@@ -81,14 +100,38 @@ class EmailService {
       });
 
       if (result.error) {
-        logger.error({ error: result.error, email }, 'Failed to send verification email');
+        logger.error(
+          {
+            error: result.error,
+            email,
+            from: this.fromEmail,
+            errorName: result.error.name,
+            errorMessage: result.error.message,
+          },
+          'Failed to send verification email'
+        );
         return { success: false, error: result.error.message };
       }
 
-      logger.info({ email, messageId: result.data?.id }, 'Verification email sent successfully');
+      logger.info(
+        {
+          email,
+          messageId: result.data?.id,
+          from: this.fromEmail,
+        },
+        'Verification email sent successfully'
+      );
       return { success: true, messageId: result.data?.id };
     } catch (error) {
-      logger.error({ error, email }, 'Error sending verification email');
+      logger.error(
+        {
+          error,
+          email,
+          from: this.fromEmail,
+          errorType: error instanceof Error ? error.constructor.name : typeof error,
+        },
+        'Error sending verification email'
+      );
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',

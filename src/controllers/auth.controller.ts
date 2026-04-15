@@ -8,6 +8,7 @@ import { UnauthorizedError, ConflictError, NotFoundError, BadRequestError } from
 import { v4 as uuidv4 } from 'uuid';
 import { decodeToken } from '../shared/utils/jwt';
 import { emailService } from '../shared/services/email.service';
+import { logger } from '../shared/logger';
 
 export async function register(req: Request, res: Response): Promise<void> {
   const { email, password, name } = req.body;
@@ -46,27 +47,38 @@ export async function register(req: Request, res: Response): Promise<void> {
   if (!emailResult.success) {
     // Log the error but don't fail registration
     // User can request a resend later
-    console.error('Failed to send verification email:', emailResult.error);
+    logger.error(
+      {
+        email,
+        error: emailResult.error,
+        userId: user.id,
+      },
+      'Failed to send verification email during registration'
+    );
+  } else {
+    logger.info(
+      {
+        email,
+        userId: user.id,
+        messageId: emailResult.messageId,
+      },
+      'Verification email sent during registration'
+    );
   }
 
-  const response: any = {
-    user: {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      isAccountVerified: user.is_account_verified,
-      createdAt: user.created_at,
-    },
-    message: 'Registration successful. Please verify your email.',
-    emailSent: emailResult.success,
-  };
-
-  // In development, include the OTP in the response for testing
-  if (process.env.NODE_ENV === 'development') {
-    response.verificationCode = otp;
-  }
-
-  res.status(201).json(successResponse(response));
+  res.status(201).json(
+    successResponse({
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        isAccountVerified: user.is_account_verified,
+        createdAt: user.created_at,
+      },
+      message: 'Registration successful. Please verify your email.',
+      emailSent: emailResult.success,
+    })
+  );
 }
 
 export async function login(req: Request, res: Response): Promise<void> {
@@ -119,28 +131,27 @@ export async function login(req: Request, res: Response): Promise<void> {
   if (!user.is_account_verified && user.otp_last_sent_at) {
     const lastSent = new Date(user.otp_last_sent_at);
     const nextAvailable = new Date(lastSent.getTime() + 5 * 60 * 1000); // 5 minutes
-    const now = new Date();
-
-    // Only set if the cooldown hasn't expired yet
-    if (nextAvailable > now) {
-      nextResendAvailableAt = nextAvailable.toISOString();
-    }
+    nextResendAvailableAt = nextAvailable.toISOString();
   }
 
-  res.json(
-    successResponse({
-      accessToken,
-      accessExpiresAt,
-      refreshToken,
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        isAccountVerified: user.is_account_verified,
-      },
-      ...(nextResendAvailableAt && { nextResendAvailableAt }),
-    })
-  );
+  const responseData: any = {
+    accessToken,
+    accessExpiresAt,
+    refreshToken,
+    user: {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      isAccountVerified: user.is_account_verified,
+    },
+  };
+
+  // Include nextResendAvailableAt for unverified users
+  if (!user.is_account_verified) {
+    responseData.nextResendAvailableAt = nextResendAvailableAt;
+  }
+
+  res.json(successResponse(responseData));
 }
 
 export async function verifyEmail(req: Request, res: Response): Promise<void> {
@@ -361,23 +372,35 @@ export async function resendVerificationOTP(req: Request, res: Response): Promis
   const emailResult = await emailService.sendVerificationEmail(user.email, otp, user.name);
 
   if (!emailResult.success) {
+    logger.error(
+      {
+        email: user.email,
+        error: emailResult.error,
+        userId,
+      },
+      'Failed to send verification email during resend OTP'
+    );
     throw new BadRequestError('Failed to send verification email. Please try again later.');
   }
 
+  logger.info(
+    {
+      email: user.email,
+      userId,
+      messageId: emailResult.messageId,
+    },
+    'Verification email resent successfully'
+  );
+
   const nextResendAvailableAt = new Date(now.getTime() + 5 * 60 * 1000).toISOString();
 
-  const response: any = {
-    message: 'Verification code sent successfully',
-    nextResendAvailableAt,
-    emailSent: true,
-  };
-
-  // In development, include the OTP in the response for testing
-  if (process.env.NODE_ENV === 'development') {
-    response.verificationCode = otp;
-  }
-
-  res.json(successResponse(response));
+  res.json(
+    successResponse({
+      message: 'Verification code sent successfully',
+      nextResendAvailableAt,
+      emailSent: true,
+    })
+  );
 }
 
 /**
