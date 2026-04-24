@@ -4,17 +4,17 @@ Personal productivity & personal finance API. Node.js/TypeScript migrated from L
 
 ## Stack
 
-| Layer | Technology |
-|---|---|
-| Runtime | Node.js ≥18, TypeScript 5.3 (ES2022, CommonJS) |
-| Web | Express 4 + Apollo Server 5 (GraphQL) |
-| Database | PostgreSQL 17 via Drizzle ORM + pg pool |
-| Cache | Redis 7 via ioredis |
-| Validation | Zod 3 |
-| Auth | JWT (jsonwebtoken) + bcryptjs |
-| Logging | Pino + pino-pretty |
-| Tests | Jest 29 + ts-jest, threshold 70% |
-| Deploy | Docker + Google Cloud Run, port 8080 |
+| Layer      | Technology                                     |
+| ---------- | ---------------------------------------------- |
+| Runtime    | Node.js ≥18, TypeScript 5.3 (ES2022, CommonJS) |
+| Web        | Express 4 + Apollo Server 5 (GraphQL)          |
+| Database   | PostgreSQL 17 via Drizzle ORM + pg pool        |
+| Cache      | Redis 7 via ioredis                            |
+| Validation | Zod 3                                          |
+| Auth       | JWT (jsonwebtoken) + bcryptjs                  |
+| Logging    | Pino + pino-pretty                             |
+| Tests      | Jest 29 + ts-jest, threshold 70%               |
+| Deploy     | Docker + Google Cloud Run, port 8080           |
 
 ## Directory Map
 
@@ -52,20 +52,22 @@ migrations/                   # Sequential SQL files: 001_…sql, 002_…sql
 
 ## Naming Conventions
 
-| Target | Convention | Example |
-|---|---|---|
-| Files | kebab-case | `expense-category.service.ts` |
-| Classes | PascalCase | `WalletService`, `NotFoundError` |
-| Functions/variables | camelCase | `getWalletById`, `userId` |
-| DB columns | snake_case | `user_id`, `is_main`, `created_at` |
-| GraphQL types | PascalCase | `Wallet`, `ExpenseCategory` |
-| GraphQL operations | camelCase | `walletAdd`, `expenseCategoryRemove` |
-| Service exports | camelCase singleton | `export const walletService = { ... }` |
+| Target              | Convention          | Example                                |
+| ------------------- | ------------------- | -------------------------------------- |
+| Files               | kebab-case          | `expense-category.service.ts`          |
+| Classes             | PascalCase          | `WalletService`, `NotFoundError`       |
+| Functions/variables | camelCase           | `getWalletById`, `userId`              |
+| DB columns          | snake_case          | `user_id`, `is_main`, `created_at`     |
+| GraphQL types       | PascalCase          | `Wallet`, `ExpenseCategory`            |
+| GraphQL operations  | camelCase           | `walletAdd`, `expenseCategoryRemove`   |
+| Service exports     | camelCase singleton | `export const walletService = { ... }` |
 
 ## Key Patterns (apply everywhere)
 
 ### Error Classes
+
 Always import from `@shared/errors`:
+
 ```typescript
 throw new NotFoundError('Wallet not found');
 throw new ForbiddenError('Access denied');
@@ -73,6 +75,7 @@ throw new BadRequestError('Invalid input');
 ```
 
 ### REST Response Format
+
 ```typescript
 // Success: { status: true, data: T, message: string, meta: { env: string } }
 res.json(successResponse(data, 'Wallet created'));
@@ -80,6 +83,7 @@ res.json(successResponse(data, 'Wallet created'));
 ```
 
 ### Path Aliases
+
 - `@/` → `src/`
 - `@shared/` → `src/shared/`
 
@@ -103,6 +107,7 @@ npm run migrate:create   # Scaffold new SQL migration
 ```
 
 ## Docs
+
 - `docs/` — Extended technical documentation
 - `AI_CONTEXT.md` — Legacy context file (superseded by these instructions)
 - See `docs/VALIDATION_GUIDE.md`, `docs/ERROR_HANDLING.md`, `docs/MIGRATIONS_GUIDE.md` for details

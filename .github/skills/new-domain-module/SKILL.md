@@ -1,7 +1,7 @@
 ---
 name: new-domain-module
-description: "Use when adding a new feature domain to the project. Scaffolds the complete vertical slice: service, types, Zod validators, GraphQL schema, GraphQL resolvers, and unit tests. Invoke with: /new-domain-module <domain-name>"
-argument-hint: "<domain-name> (e.g. habit, shopping, note)"
+description: 'Use when adding a new feature domain to the project. Scaffolds the complete vertical slice: service, types, Zod validators, GraphQL schema, GraphQL resolvers, and unit tests. Invoke with: /new-domain-module <domain-name>'
+argument-hint: '<domain-name> (e.g. habit, shopping, note)'
 ---
 
 # New Domain Module
@@ -9,6 +9,7 @@ argument-hint: "<domain-name> (e.g. habit, shopping, note)"
 Creates a complete vertical slice for a new feature domain following all project conventions.
 
 ## When to Use
+
 - Adding a new business entity with CRUD operations (e.g., `habit`, `note`, `goal`)
 - The domain needs both a GraphQL API and optional REST support
 - You want all layers scaffolded consistently from the start
@@ -17,18 +18,19 @@ Creates a complete vertical slice for a new feature domain following all project
 
 Given domain name `<domain>` (e.g. `habit`), create these files:
 
-| File | Purpose |
-|---|---|
-| `src/types/services/<domain>.types.ts` | TypeScript interfaces |
-| `src/validators/schemas/<domain>.schemas.ts` | Zod schemas for GraphQL |
-| `src/services/<domain>.service.ts` | Business logic singleton |
-| `src/graphql/modules/<domain>/<domain>.schema.ts` | GraphQL type definitions |
-| `src/graphql/modules/<domain>/<domain>.resolvers.ts` | GraphQL resolvers |
-| `tests/unit/services/<domain>.service.test.ts` | Unit tests for service |
+| File                                                 | Purpose                  |
+| ---------------------------------------------------- | ------------------------ |
+| `src/types/services/<domain>.types.ts`               | TypeScript interfaces    |
+| `src/validators/schemas/<domain>.schemas.ts`         | Zod schemas for GraphQL  |
+| `src/services/<domain>.service.ts`                   | Business logic singleton |
+| `src/graphql/modules/<domain>/<domain>.schema.ts`    | GraphQL type definitions |
+| `src/graphql/modules/<domain>/<domain>.resolvers.ts` | GraphQL resolvers        |
+| `tests/unit/services/<domain>.service.test.ts`       | Unit tests for service   |
 
 ## Step-by-Step Procedure
 
 ### Step 1 — Confirm domain name and fields
+
 Ask the user (or infer from context): what is the domain name, its primary fields, and which operations are needed (CRUD subset)?
 
 ### Step 2 — Create Types (`src/types/services/<domain>.types.ts`)
@@ -115,6 +117,7 @@ import { domainResolvers } from './modules/<domain>/<domain>.resolvers';
 - See [tests.instructions.md](../../instructions/tests.instructions.md) for full template
 
 ## Checklist
+
 - [ ] Types defined (interfaces match DB schema with numbers not strings)
 - [ ] Zod schemas: flat objects, nullable handled
 - [ ] Service: getDb() called inside methods, DECIMAL → parseFloat, ownership check

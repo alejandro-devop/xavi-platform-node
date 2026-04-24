@@ -1,11 +1,12 @@
 ---
-description: "Use when creating, editing, or reviewing GraphQL schema or resolver files in src/graphql/. Covers module structure, resolver wrappers, authentication, schema registration, and naming conventions."
-applyTo: "src/graphql/**"
+description: 'Use when creating, editing, or reviewing GraphQL schema or resolver files in src/graphql/. Covers module structure, resolver wrappers, authentication, schema registration, and naming conventions.'
+applyTo: 'src/graphql/**'
 ---
 
 # GraphQL Layer Guidelines
 
 GraphQL modules live in `src/graphql/modules/<domain>/` and consist of two files:
+
 - `<domain>.schema.ts` — GraphQL type definitions (gql tagged template)
 - `<domain>.resolvers.ts` — Resolver map with wrapped handlers
 

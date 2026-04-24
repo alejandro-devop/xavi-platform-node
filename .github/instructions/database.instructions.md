@@ -1,6 +1,6 @@
 ---
-description: "Use when working with database schema, Drizzle ORM, or migrations. Covers schema definition conventions, UUID v7, DECIMAL handling, query patterns, and migration workflow."
-applyTo: "src/shared/database/**"
+description: 'Use when working with database schema, Drizzle ORM, or migrations. Covers schema definition conventions, UUID v7, DECIMAL handling, query patterns, and migration workflow.'
+applyTo: 'src/shared/database/**'
 ---
 
 # Database & Drizzle ORM Guidelines
@@ -12,13 +12,23 @@ applyTo: "src/shared/database/**"
 ```typescript
 // Column conventions
 import {
-  pgTable, uuid, integer, varchar, text, decimal,
-  boolean, timestamp, date, pgEnum
+  pgTable,
+  uuid,
+  integer,
+  varchar,
+  text,
+  decimal,
+  boolean,
+  timestamp,
+  date,
+  pgEnum,
 } from 'drizzle-orm/pg-core';
 import { generateUuidV7 } from './uuid';
 
 export const domainItems = pgTable('domain_items', {
-  id: uuid('id').primaryKey().$defaultFn(() => generateUuidV7()),
+  id: uuid('id')
+    .primaryKey()
+    .$defaultFn(() => generateUuidV7()),
   userId: integer('user_id')
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
@@ -50,18 +60,12 @@ const db = getDb(); // call inside methods, never at module level
 
 // Read — use query API for type safety
 const items = await db.query.domainItems.findMany({
-  where: and(
-    eq(domainItems.userId, userId),
-    eq(domainItems.isActive, true)
-  ),
+  where: and(eq(domainItems.userId, userId), eq(domainItems.isActive, true)),
   orderBy: [desc(domainItems.createdAt)],
 });
 
 // Create
-const [created] = await db
-  .insert(domainItems)
-  .values({ userId, name, amount: '0' })
-  .returning();
+const [created] = await db.insert(domainItems).values({ userId, name, amount: '0' }).returning();
 
 // Update
 const [updated] = await db
@@ -71,10 +75,7 @@ const [updated] = await db
   .returning();
 
 // Delete
-const [deleted] = await db
-  .delete(domainItems)
-  .where(eq(domainItems.id, id))
-  .returning();
+const [deleted] = await db.delete(domainItems).where(eq(domainItems.id, id)).returning();
 ```
 
 ## Migrations

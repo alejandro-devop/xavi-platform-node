@@ -1,7 +1,7 @@
 ---
 name: add-migration
-description: "Use when adding a new database migration: creating tables, adding columns, renaming fields, adding indexes, or any schema change. Covers file naming, SQL conventions, Drizzle schema updates, and running the migration."
-argument-hint: "<description> (e.g. add_tags_table, add_priority_to_todos)"
+description: 'Use when adding a new database migration: creating tables, adding columns, renaming fields, adding indexes, or any schema change. Covers file naming, SQL conventions, Drizzle schema updates, and running the migration.'
+argument-hint: '<description> (e.g. add_tags_table, add_priority_to_todos)'
 ---
 
 # Add Database Migration
@@ -9,6 +9,7 @@ argument-hint: "<description> (e.g. add_tags_table, add_priority_to_todos)"
 Creates and applies a new SQL migration following the project's sequential numbering system.
 
 ## When to Use
+
 - Adding a new table
 - Adding/removing columns from existing tables
 - Adding indexes or constraints
@@ -26,6 +27,7 @@ ls migrations/ | sort | tail -5
 The next file should be `NNN_description.sql` where `NNN` is the next sequential number (zero-padded to 3 digits).
 
 Or use the scaffold command:
+
 ```bash
 npm run migrate:create
 ```
@@ -63,7 +65,9 @@ Add the new table or column definition. This is the **single source of truth** â
 
 ```typescript
 export const domainTags = pgTable('domain_tags', {
-  id: uuid('id').primaryKey().$defaultFn(() => generateUuidV7()),
+  id: uuid('id')
+    .primaryKey()
+    .$defaultFn(() => generateUuidV7()),
   userId: integer('user_id')
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
@@ -81,6 +85,7 @@ npm run migrate
 ```
 
 Verify it ran:
+
 ```bash
 # Check migration status
 npx tsx scripts/migration-status.ts
@@ -94,18 +99,19 @@ npm run migrate:rollback
 
 ## SQL Conventions
 
-| Convention | Rule |
-|---|---|
-| Table names | `snake_case`, plural (`domain_tags`, `wallet_wallets`) |
-| Column names | `snake_case` (`user_id`, `created_at`) |
-| Primary keys | `UUID DEFAULT uuid_generate_v7()` |
-| Timestamps | Always `TIMESTAMPTZ NOT NULL DEFAULT NOW()` |
-| Soft-delete? | Use `deleted_at TIMESTAMPTZ` column |
-| Nullable | Omit `NOT NULL` for optional columns |
-| Indexes | Prefix with `idx_tablename_column` |
-| Constraints | Prefix with `uq_` (unique), `fk_` (foreign key), `ck_` (check) |
+| Convention   | Rule                                                           |
+| ------------ | -------------------------------------------------------------- |
+| Table names  | `snake_case`, plural (`domain_tags`, `wallet_wallets`)         |
+| Column names | `snake_case` (`user_id`, `created_at`)                         |
+| Primary keys | `UUID DEFAULT uuid_generate_v7()`                              |
+| Timestamps   | Always `TIMESTAMPTZ NOT NULL DEFAULT NOW()`                    |
+| Soft-delete? | Use `deleted_at TIMESTAMPTZ` column                            |
+| Nullable     | Omit `NOT NULL` for optional columns                           |
+| Indexes      | Prefix with `idx_tablename_column`                             |
+| Constraints  | Prefix with `uq_` (unique), `fk_` (foreign key), `ck_` (check) |
 
 ## Rules
+
 - **Never modify existing migration files** â€” only add new sequential files
 - **Always use `IF NOT EXISTS` / `IF EXISTS`** for idempotency
 - **Always update `schema.ts` to match** after migration is confirmed

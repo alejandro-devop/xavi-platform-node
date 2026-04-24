@@ -1,6 +1,6 @@
 ---
-description: "Use when creating, editing, or reviewing service files in src/services/. Covers service singleton pattern, Drizzle ORM usage, DECIMAL conversion, ownership validation, and error handling."
-applyTo: "src/services/**"
+description: 'Use when creating, editing, or reviewing service files in src/services/. Covers service singleton pattern, Drizzle ORM usage, DECIMAL conversion, ownership validation, and error handling.'
+applyTo: 'src/services/**'
 ---
 
 # Service Layer Guidelines
@@ -77,10 +77,7 @@ export const domainService = {
       notFoundMessage: 'Domain not found',
       forbiddenMessage: 'Access denied',
     });
-    const [deleted] = await db
-      .delete(domainTable)
-      .where(eq(domainTable.id, id))
-      .returning();
+    const [deleted] = await db.delete(domainTable).where(eq(domainTable.id, id)).returning();
     return mapRow(deleted);
   },
 };
@@ -103,7 +100,7 @@ export const domainService = {
 function mapRow(row: typeof domainTable.$inferSelect): Domain {
   return {
     ...row,
-    amount: parseFloat(row.amount),   // DB returns string
+    amount: parseFloat(row.amount), // DB returns string
     balance: parseFloat(row.balance), // DB returns string
   };
 }

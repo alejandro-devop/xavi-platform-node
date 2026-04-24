@@ -1,6 +1,6 @@
 ---
-description: "Use when writing or reviewing unit tests in tests/. Covers mocking strategy for Drizzle ORM, mock factory usage, test structure, coverage exclusions, and Jest patterns."
-applyTo: "tests/**"
+description: 'Use when writing or reviewing unit tests in tests/. Covers mocking strategy for Drizzle ORM, mock factory usage, test structure, coverage exclusions, and Jest patterns.'
+applyTo: 'tests/**'
 ---
 
 # Testing Guidelines
@@ -80,8 +80,7 @@ describe('ServiceName.methodName', () => {
   it('should throw NotFoundError when record does not exist', async () => {
     mockDb.query.walletWallets.findFirst.mockResolvedValue(undefined);
 
-    await expect(domainService.getById('non-existent', 1))
-      .rejects.toThrow(NotFoundError);
+    await expect(domainService.getById('non-existent', 1)).rejects.toThrow(NotFoundError);
   });
 });
 ```

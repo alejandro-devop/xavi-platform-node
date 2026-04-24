@@ -1,6 +1,6 @@
 ---
-description: "Use when creating or editing Zod validation schemas in src/validators/. Covers the difference between REST validators and GraphQL schemas, nullable handling, custom validators, and schema registration."
-applyTo: "src/validators/**"
+description: 'Use when creating or editing Zod validation schemas in src/validators/. Covers the difference between REST validators and GraphQL schemas, nullable handling, custom validators, and schema registration.'
+applyTo: 'src/validators/**'
 ---
 
 # Validation Guidelines
@@ -19,7 +19,10 @@ export const createDomainSchema = z.object({
   body: z.object({
     name: z.string().min(1).max(255),
     amount: z.number().nonnegative(),
-    color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional(),
+    color: z
+      .string()
+      .regex(/^#[0-9A-Fa-f]{6}$/)
+      .optional(),
   }),
 });
 
@@ -34,6 +37,7 @@ export const updateDomainSchema = z.object({
 ```
 
 Usage in routes:
+
 ```typescript
 import { validateRequest } from '@shared/middleware/validate';
 import { createDomainSchema } from '../validators/domain.validator';
@@ -75,11 +79,13 @@ export const createDomainInputSchema = z.object({
 import { uniqueNameValidator, checkExistsByField } from '@shared/utils/custom-validators';
 
 // Example: validate unique name within user scope
-name: z.string().superRefine(uniqueNameValidator({
-  table: walletExpenseCategories,
-  field: walletExpenseCategories.name,
-  scopeField: walletExpenseCategories.userId,
-  scopeValue: userId,
-  excludeId: existingId, // for updates
-}))
+name: z.string().superRefine(
+  uniqueNameValidator({
+    table: walletExpenseCategories,
+    field: walletExpenseCategories.name,
+    scopeField: walletExpenseCategories.userId,
+    scopeValue: userId,
+    excludeId: existingId, // for updates
+  })
+);
 ```
