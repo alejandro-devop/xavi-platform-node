@@ -1,0 +1,20 @@
+---
+description: Contexto base del proyecto Xavi Platform Node
+alwaysApply: true
+---
+
+# Xavi Platform: contexto operativo
+
+- Este repo es `xavi-api`: backend Node.js + TypeScript para productividad/finanzas, desplegado en Cloud Run.
+- Antes de cambios grandes, revisa `AI_CONTEXT.md` para arquitectura, convenciones y estructura completa.
+- Prioriza esta lectura para contexto funcional: `docs/architecture/MASTER_SPEC.md`, `DATA_MODEL.md`, `API_CONTRACTS.md`, `BEHAVIOR_SPEC.md`.
+- El backend expone REST (`/api/*`) y GraphQL (`/graphql`); no romper contratos existentes sin indicarlo explícitamente.
+- Usa `src/shared/database/schema.ts` como fuente única del esquema de base de datos.
+- Valida entradas externas con Zod y reutiliza utilidades/middlewares compartidos en `src/shared/`.
+
+## Convenciones al editar
+
+- Haz cambios mínimos y orientados al requerimiento; evita refactors amplios no solicitados.
+- Mantén TypeScript estricto y estilo del proyecto (ESLint + Prettier).
+- Añade o ajusta pruebas de Jest cuando cambie lógica de negocio.
+- Si faltan requisitos, pregunta en lugar de asumir reglas de dominio sensibles (wallet, auth, recurrencias).
