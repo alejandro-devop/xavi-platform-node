@@ -213,6 +213,7 @@ import {
 - `POST /api/auth/verify-email`
 - `POST /api/auth/forgot-password`
 - `POST /api/auth/reset-password`
+- Recuperacion de contrasena via OTP implementada en `src/controllers/auth.controller.ts`
 
 ---
 

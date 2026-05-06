@@ -199,6 +199,122 @@ export async function verifyEmail(req: Request, res: Response): Promise<void> {
   );
 }
 
+export async function forgotPassword(req: Request, res: Response): Promise<void> {
+  const { email } = req.body;
+  const db = getDbPool();
+  const genericMessage =
+    'If an account exists with this email, a password reset code has been sent.';
+
+  const result = await db.query(
+    `SELECT id, email, name, password_reset_otp_last_sent_at
+     FROM users
+     WHERE email = $1`,
+    [email]
+  );
+
+  if (result.rows.length === 0) {
+    res.json(successResponse({ message: genericMessage }));
+    return;
+  }
+
+  const user = result.rows[0];
+  const now = new Date();
+  const fiveMinutesInMs = 5 * 60 * 1000;
+
+  if (user.password_reset_otp_last_sent_at) {
+    const lastSent = new Date(user.password_reset_otp_last_sent_at);
+    const timeSinceLastSend = now.getTime() - lastSent.getTime();
+    if (timeSinceLastSend < fiveMinutesInMs) {
+      res.json(successResponse({ message: genericMessage }));
+      return;
+    }
+  }
+
+  const otp = generateOTP();
+  const encodedOTP = encodeOTP(otp);
+  const expirationMinutes = parseInt(
+    process.env.PASSWORD_RESET_OTP_EXPIRATION_MINUTES ||
+      process.env.EMAIL_OTP_EXPIRATION_MINUTES ||
+      '15',
+    10
+  );
+  const expiresAt = new Date(now.getTime() + expirationMinutes * 60 * 1000);
+
+  await db.query(
+    `UPDATE users
+     SET password_reset_code = $1,
+         password_reset_code_expires_at = $2,
+         password_reset_otp_last_sent_at = $3
+     WHERE id = $4`,
+    [encodedOTP, expiresAt, now, user.id]
+  );
+
+  const emailResult = await emailService.sendPasswordResetEmail(user.email, otp, user.name || 'Usuario');
+
+  if (!emailResult.success) {
+    logger.error(
+      {
+        email: user.email,
+        userId: user.id,
+        error: emailResult.error,
+      },
+      'Failed to send password reset email'
+    );
+  }
+
+  res.json(successResponse({ message: genericMessage }));
+}
+
+export async function resetPassword(req: Request, res: Response): Promise<void> {
+  const { email, code, password } = req.body;
+  const db = getDbPool();
+
+  const result = await db.query(
+    `SELECT id, password_reset_code, password_reset_code_expires_at
+     FROM users
+     WHERE email = $1`,
+    [email]
+  );
+
+  if (result.rows.length === 0) {
+    throw new BadRequestError('Invalid or expired reset code');
+  }
+
+  const user = result.rows[0];
+  if (!user.password_reset_code || !user.password_reset_code_expires_at) {
+    throw new BadRequestError('Invalid or expired reset code');
+  }
+
+  const encodedCode = encodeOTP(code);
+  if (user.password_reset_code !== encodedCode) {
+    throw new BadRequestError('Invalid or expired reset code');
+  }
+
+  if (new Date() > new Date(user.password_reset_code_expires_at)) {
+    throw new BadRequestError('Invalid or expired reset code');
+  }
+
+  const hashedPassword = await hashPassword(password);
+
+  await db.query(
+    `UPDATE users
+     SET password = $1,
+         password_reset_code = NULL,
+         password_reset_code_expires_at = NULL,
+         password_reset_otp_last_sent_at = NULL
+     WHERE id = $2`,
+    [hashedPassword, user.id]
+  );
+
+  await db.query(`UPDATE refresh_tokens SET is_revoked = TRUE WHERE user_id = $1`, [user.id]);
+
+  res.json(
+    successResponse({
+      message: 'Password reset successful',
+    })
+  );
+}
+
 export async function refreshAccessToken(req: Request, res: Response): Promise<void> {
   const { refreshToken } = req.body;
   const db = getDbPool();

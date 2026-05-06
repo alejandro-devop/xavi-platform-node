@@ -21,6 +21,13 @@ export const users = pgTable('users', {
   email: varchar('email', { length: 255 }).notNull().unique(),
   passwordHash: varchar('password_hash', { length: 255 }).notNull(),
   name: varchar('name', { length: 255 }),
+  isAccountVerified: boolean('is_account_verified').notNull().default(false),
+  verificationCode: varchar('verification_code', { length: 255 }),
+  verificationCodeExpiresAt: timestamp('verification_code_expires_at'),
+  otpLastSentAt: timestamp('otp_last_sent_at'),
+  passwordResetCode: varchar('password_reset_code', { length: 255 }),
+  passwordResetCodeExpiresAt: timestamp('password_reset_code_expires_at'),
+  passwordResetOtpLastSentAt: timestamp('password_reset_otp_last_sent_at'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });

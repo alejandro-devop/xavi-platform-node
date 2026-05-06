@@ -53,6 +53,30 @@ const documentation: ModuleDoc[] = [
       },
       {
         method: 'POST',
+        path: '/api/auth/forgot-password',
+        description: 'Request a password reset OTP code',
+        auth: false,
+        body: {
+          email: 'string (required)',
+        },
+        response: {
+          message: 'If an account exists with this email, a password reset code has been sent.',
+        },
+      },
+      {
+        method: 'POST',
+        path: '/api/auth/reset-password',
+        description: 'Reset password using email + OTP code',
+        auth: false,
+        body: {
+          email: 'string (required)',
+          code: 'string (6 digits, required)',
+          password: 'string (min 8 chars, required)',
+        },
+        response: { message: 'Password reset successful' },
+      },
+      {
+        method: 'POST',
         path: '/api/auth/logout',
         description: 'Logout and invalidate token',
         auth: true,

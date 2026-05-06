@@ -4,6 +4,10 @@ import {
   generateVerificationEmailHTML,
   generateVerificationEmailText,
 } from '../templates/verification-email';
+import {
+  generatePasswordResetEmailHTML,
+  generatePasswordResetEmailText,
+} from '../templates/password-reset-email';
 
 /**
  * Email Service using Resend
@@ -131,6 +135,94 @@ class EmailService {
           errorType: error instanceof Error ? error.constructor.name : typeof error,
         },
         'Error sending verification email'
+      );
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  }
+
+  /**
+   * Send password reset OTP email to a user
+   */
+  async sendPasswordResetEmail(
+    email: string,
+    code: string,
+    name: string
+  ): Promise<{ success: boolean; messageId?: string; error?: string }> {
+    if (!this.isEnabled || !this.resend) {
+      const errorMsg = 'Email service is not configured';
+      logger.warn({ email }, errorMsg);
+
+      if (process.env.NODE_ENV === 'development') {
+        logger.info({ email, code }, 'DEV MODE: Would have sent password reset email');
+        return { success: true, messageId: 'dev-mode-no-email' };
+      }
+
+      return { success: false, error: errorMsg };
+    }
+
+    const expirationMinutes = parseInt(
+      process.env.PASSWORD_RESET_OTP_EXPIRATION_MINUTES ||
+        process.env.EMAIL_OTP_EXPIRATION_MINUTES ||
+        '15',
+      10
+    );
+
+    try {
+      const html = generatePasswordResetEmailHTML({
+        name,
+        code,
+        expirationMinutes,
+      });
+
+      const text = generatePasswordResetEmailText({
+        name,
+        code,
+        expirationMinutes,
+      });
+
+      const result = await this.resend.emails.send({
+        from: this.fromEmail,
+        to: email,
+        subject: 'Restablece tu contrasena - Xavi Platform',
+        html,
+        text,
+      });
+
+      if (result.error) {
+        logger.error(
+          {
+            error: result.error,
+            email,
+            from: this.fromEmail,
+            errorName: result.error.name,
+            errorMessage: result.error.message,
+          },
+          'Failed to send password reset email'
+        );
+        return { success: false, error: result.error.message };
+      }
+
+      logger.info(
+        {
+          email,
+          messageId: result.data?.id,
+          from: this.fromEmail,
+        },
+        'Password reset email sent successfully'
+      );
+      return { success: true, messageId: result.data?.id };
+    } catch (error) {
+      logger.error(
+        {
+          error,
+          email,
+          from: this.fromEmail,
+          errorType: error instanceof Error ? error.constructor.name : typeof error,
+        },
+        'Error sending password reset email'
       );
       return {
         success: false,

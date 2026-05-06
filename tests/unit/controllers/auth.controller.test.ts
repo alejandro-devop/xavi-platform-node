@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import { login } from '../../../src/controllers/auth.controller';
-import { UnauthorizedError } from '../../../src/shared/errors';
+import { forgotPassword, login, resetPassword } from '../../../src/controllers/auth.controller';
+import { BadRequestError, UnauthorizedError } from '../../../src/shared/errors';
 import { mockDbPool, resetAllMocks } from '../../helpers/mocks';
 
 // Mock dependencies BEFORE importing
@@ -10,12 +10,18 @@ jest.mock('../../../src/shared/database/pool', () => ({
 jest.mock('../../../src/shared/utils/password');
 jest.mock('../../../src/shared/utils/jwt');
 jest.mock('../../../src/shared/utils/response');
+jest.mock('../../../src/shared/services/email.service', () => ({
+  emailService: {
+    sendPasswordResetEmail: jest.fn(),
+  },
+}));
 jest.mock('uuid');
 
 // Now import the mocked modules
 import { getDbPool } from '../../../src/shared/database/pool';
-import { comparePassword } from '../../../src/shared/utils/password';
+import { comparePassword, hashPassword } from '../../../src/shared/utils/password';
 import { generateAccessToken, generateRefreshToken } from '../../../src/shared/utils/jwt';
+import { emailService } from '../../../src/shared/services/email.service';
 
 const mockGetDbPool = getDbPool as jest.MockedFunction<typeof getDbPool>;
 
@@ -33,6 +39,7 @@ errorResponse.mockImplementation((message: string) => ({ error: message }));
 // Mock uuid
 const { v4: uuidv4 } = require('uuid');
 uuidv4.mockReturnValue('mock-uuid');
+const sendPasswordResetEmailMock = emailService.sendPasswordResetEmail as jest.Mock;
 
 describe('Auth Controller - Login', () => {
   let mockRequest: Partial<Request>;
@@ -162,5 +169,123 @@ describe('Auth Controller - Login', () => {
     mockDbPool.query.mockResolvedValue({ rows: [] });
 
     await expect(login(mockRequest as Request, mockResponse as Response)).rejects.toThrow();
+  });
+});
+
+describe('Auth Controller - Forgot Password', () => {
+  let mockRequest: Partial<Request>;
+  let mockResponse: Partial<Response>;
+  let jsonMock: jest.Mock;
+
+  beforeEach(() => {
+    resetAllMocks();
+    mockGetDbPool.mockReturnValue(mockDbPool as any);
+    sendPasswordResetEmailMock.mockResolvedValue({ success: true, messageId: 'msg-1' });
+    jsonMock = jest.fn();
+
+    mockRequest = {
+      body: {
+        email: 'test@example.com',
+      },
+    };
+
+    mockResponse = {
+      json: jsonMock,
+    };
+  });
+
+  it('returns a generic success response when user does not exist', async () => {
+    mockDbPool.query.mockResolvedValueOnce({ rows: [] });
+
+    await forgotPassword(mockRequest as Request, mockResponse as Response);
+
+    expect(jsonMock).toHaveBeenCalledTimes(1);
+    expect(sendPasswordResetEmailMock).not.toHaveBeenCalled();
+  });
+
+  it('stores otp and sends email when user exists', async () => {
+    mockDbPool.query
+      .mockResolvedValueOnce({
+        rows: [{ id: 1, email: 'test@example.com', name: 'Test User', password_reset_otp_last_sent_at: null }],
+      })
+      .mockResolvedValueOnce({ rows: [] });
+
+    await forgotPassword(mockRequest as Request, mockResponse as Response);
+
+    expect(mockDbPool.query).toHaveBeenNthCalledWith(
+      2,
+      expect.stringContaining('UPDATE users'),
+      expect.any(Array)
+    );
+    expect(sendPasswordResetEmailMock).toHaveBeenCalledWith(
+      'test@example.com',
+      expect.any(String),
+      'Test User'
+    );
+  });
+});
+
+describe('Auth Controller - Reset Password', () => {
+  let mockRequest: Partial<Request>;
+  let mockResponse: Partial<Response>;
+  let jsonMock: jest.Mock;
+
+  beforeEach(() => {
+    resetAllMocks();
+    mockGetDbPool.mockReturnValue(mockDbPool as any);
+    (hashPassword as jest.Mock).mockResolvedValue('new-hashed-password');
+    jsonMock = jest.fn();
+
+    mockRequest = {
+      body: {
+        email: 'test@example.com',
+        code: '123456',
+        password: 'NewPassword123',
+      },
+    };
+
+    mockResponse = {
+      json: jsonMock,
+    };
+  });
+
+  it('throws when reset code is invalid', async () => {
+    mockDbPool.query.mockResolvedValueOnce({
+      rows: [{ id: 1, password_reset_code: 'ZmFrZQ==', password_reset_code_expires_at: new Date(Date.now() + 60000) }],
+    });
+
+    await expect(resetPassword(mockRequest as Request, mockResponse as Response)).rejects.toThrow(
+      BadRequestError
+    );
+  });
+
+  it('resets password and revokes refresh tokens on success', async () => {
+    mockDbPool.query
+      .mockResolvedValueOnce({
+        rows: [
+          {
+            id: 1,
+            password_reset_code: Buffer.from('123456').toString('base64'),
+            password_reset_code_expires_at: new Date(Date.now() + 60000),
+          },
+        ],
+      })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [] });
+
+    await resetPassword(mockRequest as Request, mockResponse as Response);
+
+    expect(hashPassword).toHaveBeenCalledWith('NewPassword123');
+    expect(mockDbPool.query).toHaveBeenNthCalledWith(
+      2,
+      expect.stringContaining('UPDATE users'),
+      ['new-hashed-password', 1]
+    );
+    expect(mockDbPool.query).toHaveBeenNthCalledWith(
+      3,
+      expect.stringContaining('UPDATE refresh_tokens SET is_revoked = TRUE'),
+      [1]
+    );
+    expect(jsonMock).toHaveBeenCalledTimes(1);
   });
 });
