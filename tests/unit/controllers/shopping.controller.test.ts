@@ -167,6 +167,7 @@ describe('Shopping controller', () => {
         item_id: ITEM_ID,
         price: '1.80',
         quantity: '2',
+        is_purchased: false,
         created_at: new Date(),
         updated_at: new Date(),
       };
@@ -210,6 +211,7 @@ describe('Shopping controller', () => {
         item_id: ITEM_ID,
         price: null,
         quantity: '1',
+        is_purchased: false,
         created_at: new Date(),
         updated_at: new Date(),
       };

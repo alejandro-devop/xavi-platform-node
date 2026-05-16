@@ -14,6 +14,7 @@ import {
   shoppingListItemCreateWithCatalogInputSchema,
   shoppingListItemUpdateInputSchema,
   shoppingListItemRemoveInputSchema,
+  shoppingListItemsSetPurchasedInputSchema,
 } from '../../../validators/schemas/shopping.schemas';
 
 function uid(context: { user?: { id: string | number } | null }): number {
@@ -243,6 +244,32 @@ export const shoppingResolvers = {
         return true;
       },
       'shoppingListItemRemove'
+    ),
+
+    shoppingListItemsSetPurchased: withValidatedResolver(
+      shoppingListItemsSetPurchasedInputSchema,
+      async (
+        _parent: unknown,
+        {
+          input,
+        }: {
+          input: {
+            listId: string;
+            purchasedListItemIds: string[];
+            unpurchasedListItemIds: string[];
+          };
+        },
+        context
+      ) => {
+        requireAuth(context, 'shoppingListItemsSetPurchased');
+        return await shoppingService.setShoppingListItemsPurchased(
+          input.listId,
+          uid(context),
+          input.purchasedListItemIds,
+          input.unpurchasedListItemIds
+        );
+      },
+      'shoppingListItemsSetPurchased'
     ),
   },
 };

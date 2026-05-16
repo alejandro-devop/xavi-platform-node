@@ -1,0 +1,2 @@
+ALTER TABLE shopping_list_items
+  ADD COLUMN IF NOT EXISTS is_purchased BOOLEAN NOT NULL DEFAULT FALSE;

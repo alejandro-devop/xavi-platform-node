@@ -78,3 +78,36 @@ export const shoppingListItemRemoveInputSchema = z.object({
   listId: z.string().uuid(),
   listItemId: z.string().uuid(),
 });
+
+const shoppingListItemIdsBatchSchema = z
+  .array(z.string().uuid('Invalid list item ID'))
+  .max(200)
+  .optional()
+  .default([])
+  .transform((ids) => [...new Set(ids)]);
+
+export const shoppingListItemsSetPurchasedInputSchema = z
+  .object({
+    listId: z.string().uuid(),
+    purchasedListItemIds: shoppingListItemIdsBatchSchema,
+    unpurchasedListItemIds: shoppingListItemIdsBatchSchema,
+  })
+  .superRefine((data, ctx) => {
+    if (data.purchasedListItemIds.length === 0 && data.unpurchasedListItemIds.length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'At least one of purchasedListItemIds or unpurchasedListItemIds is required',
+        path: ['purchasedListItemIds'],
+      });
+    }
+    const overlap = data.purchasedListItemIds.filter((id) =>
+      data.unpurchasedListItemIds.includes(id)
+    );
+    if (overlap.length > 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'A list item cannot appear in both purchasedListItemIds and unpurchasedListItemIds',
+        path: ['unpurchasedListItemIds'],
+      });
+    }
+  });

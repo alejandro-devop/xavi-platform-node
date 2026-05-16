@@ -1,4 +1,5 @@
 import {
+  BadRequestError,
   ConflictError,
   ForbiddenError,
   NotFoundError,
@@ -17,6 +18,7 @@ const mockGetDbPool = getDbPool as jest.MockedFunction<typeof getDbPool>;
 const LIST_ID = '019c7d42-15dc-7000-8000-000000000010';
 const ITEM_ID = '019c7d42-15dc-7000-8000-000000000020';
 const LIST_ITEM_ID = '019c7d42-15dc-7000-8000-000000000030';
+const LIST_ITEM_ID_B = '019c7d42-15dc-7000-8000-000000000031';
 const USER_ID = 1;
 const OTHER_USER_ID = 2;
 
@@ -58,6 +60,7 @@ describe('ShoppingService.createCatalogItemAndAddToShoppingList', () => {
       item_id: ITEM_ID,
       price: '3.0',
       quantity: '2',
+      is_purchased: false,
       created_at: now,
       updated_at: now,
     };
@@ -109,6 +112,7 @@ describe('ShoppingService.createCatalogItemAndAddToShoppingList', () => {
     expect(result.item.price).toBe(2.5);
     expect(result.price).toBe(3);
     expect(result.quantity).toBe(2);
+    expect(result.isPurchased).toBe(false);
   });
 
   it('allows null line price when adding new catalog item to list', async () => {
@@ -134,6 +138,7 @@ describe('ShoppingService.createCatalogItemAndAddToShoppingList', () => {
       item_id: ITEM_ID,
       price: null,
       quantity: '2',
+      is_purchased: false,
       created_at: now,
       updated_at: now,
     };
@@ -239,6 +244,7 @@ describe('ShoppingService.getShoppingLists', () => {
       item_id: ITEM_ID,
       list_price: '3',
       quantity: '1',
+      list_item_is_purchased: false,
       list_item_created_at: now,
       list_item_updated_at: now,
       item_name: 'Leche',
@@ -279,6 +285,7 @@ describe('ShoppingService.getShoppingLists', () => {
       item_id: ITEM_ID,
       list_price: null,
       quantity: '1',
+      list_item_is_purchased: false,
       list_item_created_at: now,
       list_item_updated_at: now,
       item_name: 'Leche',
@@ -306,5 +313,155 @@ describe('ShoppingService.getShoppingLists', () => {
 
     expect(result.shoppingLists).toEqual([]);
     expect(mockDbPool.query).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('ShoppingService.setShoppingListItemsPurchased', () => {
+  let clientQuery: jest.Mock;
+  let clientRelease: jest.Mock;
+
+  beforeEach(() => {
+    resetAllMocks();
+    clientQuery = jest.fn();
+    clientRelease = jest.fn();
+    mockDbPool.connect.mockResolvedValue({
+      query: clientQuery,
+      release: clientRelease,
+    });
+    mockGetDbPool.mockReturnValue(mockDbPool as never);
+  });
+
+  function listRow(now: Date) {
+    return {
+      id: LIST_ID,
+      user_id: USER_ID,
+      name: 'Groceries',
+      created_at: now,
+      updated_at: now,
+    };
+  }
+
+  function joinRow(now: Date, isPurchased: boolean) {
+    return {
+      list_item_id: LIST_ITEM_ID,
+      shopping_list_id: LIST_ID,
+      item_id: ITEM_ID,
+      list_price: '1',
+      quantity: '1',
+      list_item_is_purchased: isPurchased,
+      list_item_created_at: now,
+      list_item_updated_at: now,
+      item_name: 'Leche',
+      catalog_price: '2',
+      item_user_id: USER_ID,
+      item_created_at: now,
+      item_updated_at: now,
+    };
+  }
+
+  it('marks purchased only', async () => {
+    const now = new Date();
+    mockDbPool.query
+      .mockResolvedValueOnce({ rows: [listRow(now)] })
+      .mockResolvedValueOnce({ rows: [joinRow(now, true)] });
+
+    clientQuery
+      .mockResolvedValueOnce(undefined)
+      .mockResolvedValueOnce({ rows: [{ id: LIST_ITEM_ID }], rowCount: 1 })
+      .mockResolvedValueOnce(undefined);
+
+    const result = await shoppingService.setShoppingListItemsPurchased(
+      LIST_ID,
+      USER_ID,
+      [LIST_ITEM_ID],
+      []
+    );
+
+    expect(clientQuery).toHaveBeenNthCalledWith(
+      2,
+      expect.stringContaining('is_purchased = TRUE'),
+      [LIST_ID, [LIST_ITEM_ID]]
+    );
+    expect(result.listItems[0].isPurchased).toBe(true);
+    expect(clientRelease).toHaveBeenCalled();
+  });
+
+  it('marks unpurchased only', async () => {
+    const now = new Date();
+    mockDbPool.query
+      .mockResolvedValueOnce({ rows: [listRow(now)] })
+      .mockResolvedValueOnce({ rows: [joinRow(now, false)] });
+
+    clientQuery
+      .mockResolvedValueOnce(undefined)
+      .mockResolvedValueOnce({ rows: [{ id: LIST_ITEM_ID }], rowCount: 1 })
+      .mockResolvedValueOnce(undefined);
+
+    const result = await shoppingService.setShoppingListItemsPurchased(
+      LIST_ID,
+      USER_ID,
+      [],
+      [LIST_ITEM_ID]
+    );
+
+    expect(clientQuery).toHaveBeenNthCalledWith(
+      2,
+      expect.stringContaining('is_purchased = FALSE'),
+      [LIST_ID, [LIST_ITEM_ID]]
+    );
+    expect(result.listItems[0].isPurchased).toBe(false);
+  });
+
+  it('marks purchased and unpurchased in one transaction', async () => {
+    const now = new Date();
+    mockDbPool.query
+      .mockResolvedValueOnce({ rows: [listRow(now)] })
+      .mockResolvedValueOnce({ rows: [joinRow(now, true), joinRow(now, false)] });
+
+    clientQuery
+      .mockResolvedValueOnce(undefined)
+      .mockResolvedValueOnce({ rows: [{ id: LIST_ITEM_ID }], rowCount: 1 })
+      .mockResolvedValueOnce({ rows: [{ id: LIST_ITEM_ID_B }], rowCount: 1 })
+      .mockResolvedValueOnce(undefined);
+
+    await shoppingService.setShoppingListItemsPurchased(
+      LIST_ID,
+      USER_ID,
+      [LIST_ITEM_ID],
+      [LIST_ITEM_ID_B]
+    );
+
+    expect(clientQuery).toHaveBeenNthCalledWith(
+      2,
+      expect.stringContaining('is_purchased = TRUE'),
+      [LIST_ID, [LIST_ITEM_ID]]
+    );
+    expect(clientQuery).toHaveBeenNthCalledWith(
+      3,
+      expect.stringContaining('is_purchased = FALSE'),
+      [LIST_ID, [LIST_ITEM_ID_B]]
+    );
+  });
+
+  it('throws BadRequestError when purchased ids are invalid', async () => {
+    const now = new Date();
+    mockDbPool.query.mockResolvedValueOnce({ rows: [listRow(now)] });
+
+    clientQuery
+      .mockResolvedValueOnce(undefined)
+      .mockResolvedValueOnce({ rows: [{ id: LIST_ITEM_ID }], rowCount: 1 })
+      .mockResolvedValue(undefined);
+
+    await expect(
+      shoppingService.setShoppingListItemsPurchased(
+        LIST_ID,
+        USER_ID,
+        [LIST_ITEM_ID, LIST_ITEM_ID_B],
+        []
+      )
+    ).rejects.toThrow(BadRequestError);
+
+    expect(clientQuery).toHaveBeenCalledWith('ROLLBACK');
+    expect(clientRelease).toHaveBeenCalled();
   });
 });

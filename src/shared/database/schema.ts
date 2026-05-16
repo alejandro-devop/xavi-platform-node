@@ -265,6 +265,7 @@ export const shoppingListItems = pgTable('shopping_list_items', {
     .references(() => items.id, { onDelete: 'cascade' }),
   price: decimal('price', { precision: 15, scale: 2 }),
   quantity: decimal('quantity', { precision: 15, scale: 2 }).notNull().default('1'),
+  isPurchased: boolean('is_purchased').notNull().default(false),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });

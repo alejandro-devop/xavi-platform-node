@@ -24,6 +24,7 @@ export const shoppingTypeDefs = gql`
     shoppingListId: ID!
     price: Decimal
     quantity: Decimal!
+    isPurchased: Boolean!
     item: ShoppingCatalogItem!
     createdAt: DateTime!
     updatedAt: DateTime!
@@ -64,6 +65,9 @@ export const shoppingTypeDefs = gql`
     ): ShoppingListItem!
     shoppingListItemUpdate(input: ShoppingListItemUpdateInput!): ShoppingListItem!
     shoppingListItemRemove(input: ShoppingListItemRemoveInput!): Boolean!
+    shoppingListItemsSetPurchased(
+      input: ShoppingListItemsSetPurchasedInput!
+    ): ShoppingList!
   }
 
   input ShoppingListInput {
@@ -112,5 +116,12 @@ export const shoppingTypeDefs = gql`
   input ShoppingListItemRemoveInput {
     listId: ID!
     listItemId: ID!
+  }
+
+  """Mark and/or unmark list lines as purchased in one request."""
+  input ShoppingListItemsSetPurchasedInput {
+    listId: ID!
+    purchasedListItemIds: [ID!]
+    unpurchasedListItemIds: [ID!]
   }
 `;

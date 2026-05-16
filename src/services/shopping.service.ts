@@ -60,6 +60,7 @@ export type ShoppingListItem = {
   shoppingListId: string;
   price: number | null;
   quantity: number;
+  isPurchased: boolean;
   item: ShoppingItem;
   createdAt: Date;
   updatedAt: Date;
@@ -121,6 +122,7 @@ function mapListItemRows(rows: Record<string, unknown>[]): ShoppingListItem[] {
     shoppingListId: row.shopping_list_id as string,
     price: parseListLinePrice(row.list_price as string | null | undefined),
     quantity: parseFloat(row.quantity as string),
+    isPurchased: Boolean(row.list_item_is_purchased),
     item: {
       id: row.item_id as string,
       userId: row.item_user_id as number,
@@ -148,6 +150,7 @@ async function fetchListItemsForLists(listIds: string[]): Promise<Map<string, Sh
        sli.item_id,
        sli.price AS list_price,
        sli.quantity,
+       sli.is_purchased AS list_item_is_purchased,
        sli.created_at AS list_item_created_at,
        sli.updated_at AS list_item_updated_at,
        i.name AS item_name,
@@ -451,7 +454,7 @@ export const shoppingService = {
       const insert = await db.query(
         `INSERT INTO shopping_list_items (shopping_list_id, item_id, price, quantity)
          VALUES ($1, $2, $3, $4)
-         RETURNING id, shopping_list_id, item_id, price, quantity, created_at, updated_at`,
+         RETURNING id, shopping_list_id, item_id, price, quantity, is_purchased, created_at, updated_at`,
         [listId, input.itemId, linePrice, qty]
       );
 
@@ -461,6 +464,7 @@ export const shoppingService = {
         shoppingListId: row.shopping_list_id,
         price: parseListLinePrice(row.price),
         quantity: parseFloat(String(row.quantity)),
+        isPurchased: Boolean(row.is_purchased),
         item: mapItemRow(itemResult.rows[0]),
         createdAt: row.created_at,
         updatedAt: row.updated_at,
@@ -523,7 +527,7 @@ export const shoppingService = {
         listItemInsert = await client.query(
           `INSERT INTO shopping_list_items (shopping_list_id, item_id, price, quantity)
            VALUES ($1, $2, $3, $4)
-           RETURNING id, shopping_list_id, item_id, price, quantity, created_at, updated_at`,
+           RETURNING id, shopping_list_id, item_id, price, quantity, is_purchased, created_at, updated_at`,
           [listId, itemRow.id, linePrice, qty]
         );
       } catch (error) {
@@ -541,6 +545,7 @@ export const shoppingService = {
         shoppingListId: row.shopping_list_id,
         price: parseListLinePrice(row.price),
         quantity: parseFloat(String(row.quantity)),
+        isPurchased: Boolean(row.is_purchased),
         item: mapItemRow(itemRow),
         createdAt: row.created_at,
         updatedAt: row.updated_at,
@@ -576,6 +581,7 @@ export const shoppingService = {
          sli.item_id,
          sli.price AS list_price,
          sli.quantity,
+         sli.is_purchased AS list_item_is_purchased,
          sli.created_at AS list_item_created_at,
          sli.updated_at AS list_item_updated_at,
          i.name AS item_name,
@@ -657,6 +663,7 @@ export const shoppingService = {
       shoppingListId: row.shopping_list_id,
       price: parseListLinePrice(row.price),
       quantity: parseFloat(row.quantity),
+      isPurchased: Boolean(row.is_purchased),
       item: mapItemRow(itemRow.rows[0]),
       createdAt: row.created_at,
       updatedAt: row.updated_at,
@@ -683,5 +690,71 @@ export const shoppingService = {
     if (del.rowCount === 0) {
       throw new NotFoundError('List item not found');
     }
+  },
+
+  async setShoppingListItemsPurchased(
+    listId: string,
+    userId: number,
+    purchasedListItemIds: string[],
+    unpurchasedListItemIds: string[]
+  ): Promise<ShoppingListWithItems> {
+    const db = getDbPool();
+    const listResult = await db.query('SELECT * FROM shopping_lists WHERE id = $1', [listId]);
+    if (listResult.rows.length === 0) {
+      throw new NotFoundError('Shopping list not found');
+    }
+    assertListOwnership(
+      listResult.rows[0],
+      userId,
+      'You do not have permission to update this shopping list'
+    );
+
+    const client = await db.connect();
+    try {
+      await client.query('BEGIN');
+
+      if (purchasedListItemIds.length > 0) {
+        const purchasedUpd = await client.query(
+          `UPDATE shopping_list_items
+           SET is_purchased = TRUE
+           WHERE shopping_list_id = $1 AND id = ANY($2::uuid[])
+           RETURNING id`,
+          [listId, purchasedListItemIds]
+        );
+        if (purchasedUpd.rowCount !== purchasedListItemIds.length) {
+          throw new BadRequestError(
+            'One or more list items were not found on this shopping list'
+          );
+        }
+      }
+
+      if (unpurchasedListItemIds.length > 0) {
+        const unpurchasedUpd = await client.query(
+          `UPDATE shopping_list_items
+           SET is_purchased = FALSE
+           WHERE shopping_list_id = $1 AND id = ANY($2::uuid[])
+           RETURNING id`,
+          [listId, unpurchasedListItemIds]
+        );
+        if (unpurchasedUpd.rowCount !== unpurchasedListItemIds.length) {
+          throw new BadRequestError(
+            'One or more list items were not found on this shopping list'
+          );
+        }
+      }
+
+      await client.query('COMMIT');
+    } catch (err) {
+      await client.query('ROLLBACK');
+      throw err;
+    } finally {
+      client.release();
+    }
+
+    const listItems = await fetchListItemsForList(listId);
+    return {
+      ...mapListRow(listResult.rows[0]),
+      listItems,
+    };
   },
 };

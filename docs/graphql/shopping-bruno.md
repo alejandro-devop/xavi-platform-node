@@ -37,6 +37,7 @@ fragment ShoppingListItemFields on ShoppingListItem {
   shoppingListId
   price
   quantity
+  isPurchased
   createdAt
   updatedAt
   item {
@@ -366,6 +367,35 @@ mutation ShoppingListItemRemove($input: ShoppingListItemRemoveInput!) {
   }
 }
 ```
+
+---
+
+### `ShoppingListItemsSetPurchased` — marcar y/o desmarcar comprado (lote)
+
+```graphql
+mutation ShoppingListItemsSetPurchased($input: ShoppingListItemsSetPurchasedInput!) {
+  shoppingListItemsSetPurchased(input: $input) {
+    ...ShoppingListFields
+    listItems {
+      ...ShoppingListItemFields
+    }
+  }
+}
+```
+
+**Variables** (al menos uno de los dos arreglos debe tener ids; un mismo id no puede estar en ambos)
+
+```json
+{
+  "input": {
+    "listId": "LIST-UUID",
+    "purchasedListItemIds": ["LINE-UUID-1"],
+    "unpurchasedListItemIds": ["LINE-UUID-2"]
+  }
+}
+```
+
+Solo marcar: `"unpurchasedListItemIds": []` o omitir el campo. Solo desmarcar: `"purchasedListItemIds": []` o omitir.
 
 ---
 
