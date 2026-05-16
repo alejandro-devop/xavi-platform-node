@@ -10,6 +10,58 @@ import { decodeToken } from '../shared/utils/jwt';
 import { emailService } from '../shared/services/email.service';
 import { logger } from '../shared/logger';
 
+const FIVE_MINUTES_IN_MS = 5 * 60 * 1000;
+
+async function generateAndSendAccountDeletionOTP(params: {
+  userId: number;
+  email: string;
+  name: string | null;
+}): Promise<{ nextResendAvailableAt: string }> {
+  const db = getDbPool();
+  const now = new Date();
+  const otp = generateOTP();
+  const encodedOTP = encodeOTP(otp);
+  const expirationMinutes = parseInt(
+    process.env.ACCOUNT_DELETION_OTP_EXPIRATION_MINUTES ||
+      process.env.EMAIL_OTP_EXPIRATION_MINUTES ||
+      '15',
+    10
+  );
+  const expiresAt = new Date(now.getTime() + expirationMinutes * 60 * 1000);
+
+  await db.query(
+    `UPDATE users
+     SET is_pending_deletion = TRUE,
+         account_deletion_code = $1,
+         account_deletion_code_expires_at = $2,
+         account_deletion_otp_last_sent_at = $3
+     WHERE id = $4`,
+    [encodedOTP, expiresAt, now, params.userId]
+  );
+
+  const emailResult = await emailService.sendAccountDeletionEmail(
+    params.email,
+    otp,
+    params.name || 'Usuario'
+  );
+
+  if (!emailResult.success) {
+    logger.error(
+      {
+        email: params.email,
+        userId: params.userId,
+        error: emailResult.error,
+      },
+      'Failed to send account deletion email'
+    );
+    throw new BadRequestError('Failed to send deletion confirmation email. Please try again later.');
+  }
+
+  return {
+    nextResendAvailableAt: new Date(now.getTime() + FIVE_MINUTES_IN_MS).toISOString(),
+  };
+}
+
 export async function register(req: Request, res: Response): Promise<void> {
   const { email, password, name } = req.body;
   const db = getDbPool();
@@ -579,6 +631,165 @@ export async function verifyAccount(req: Request, res: Response): Promise<void> 
     successResponse({
       message: 'Account verified successfully',
       isAccountVerified: true,
+    })
+  );
+}
+
+/**
+ * Start account deletion flow with OTP.
+ * Public endpoint - identifies account by email.
+ */
+export async function requestAccountDeletion(req: Request, res: Response): Promise<void> {
+  const { email } = req.body;
+  const db = getDbPool();
+
+  const result = await db.query(
+    `SELECT id, email, name, account_deletion_otp_last_sent_at
+     FROM users
+     WHERE email = $1`,
+    [email]
+  );
+
+  if (result.rows.length === 0) {
+    throw new NotFoundError('User not found');
+  }
+
+  const user = result.rows[0];
+
+  if (user.account_deletion_otp_last_sent_at) {
+    const lastSent = new Date(user.account_deletion_otp_last_sent_at);
+    const now = new Date();
+    const timeSinceLastSend = now.getTime() - lastSent.getTime();
+
+    if (timeSinceLastSend < FIVE_MINUTES_IN_MS) {
+      const nextAvailable = new Date(lastSent.getTime() + FIVE_MINUTES_IN_MS);
+      const secondsRemaining = Math.ceil((nextAvailable.getTime() - now.getTime()) / 1000);
+      throw new BadRequestError(
+        JSON.stringify({
+          message: 'Please wait before requesting a new deletion code',
+          nextResendAvailableAt: nextAvailable.toISOString(),
+          secondsRemaining,
+        })
+      );
+    }
+  }
+
+  const { nextResendAvailableAt } = await generateAndSendAccountDeletionOTP({
+    userId: user.id,
+    email: user.email,
+    name: user.name,
+  });
+
+  res.json(
+    successResponse({
+      message: 'Account marked as pending deletion. OTP sent successfully.',
+      isPendingDeletion: true,
+      nextResendAvailableAt,
+    })
+  );
+}
+
+/**
+ * Resend account deletion OTP.
+ * Public endpoint - identifies account by email.
+ */
+export async function resendAccountDeletionOTP(req: Request, res: Response): Promise<void> {
+  const { email } = req.body;
+  const db = getDbPool();
+
+  const result = await db.query(
+    `SELECT id, email, name, is_pending_deletion, account_deletion_otp_last_sent_at
+     FROM users
+     WHERE email = $1`,
+    [email]
+  );
+
+  if (result.rows.length === 0) {
+    throw new NotFoundError('User not found');
+  }
+
+  const user = result.rows[0];
+
+  if (!user.is_pending_deletion) {
+    throw new BadRequestError('Account is not pending deletion. Request deletion first.');
+  }
+
+  if (user.account_deletion_otp_last_sent_at) {
+    const lastSent = new Date(user.account_deletion_otp_last_sent_at);
+    const now = new Date();
+    const timeSinceLastSend = now.getTime() - lastSent.getTime();
+
+    if (timeSinceLastSend < FIVE_MINUTES_IN_MS) {
+      const nextAvailable = new Date(lastSent.getTime() + FIVE_MINUTES_IN_MS);
+      const secondsRemaining = Math.ceil((nextAvailable.getTime() - now.getTime()) / 1000);
+      throw new BadRequestError(
+        JSON.stringify({
+          message: 'Please wait before requesting a new deletion code',
+          nextResendAvailableAt: nextAvailable.toISOString(),
+          secondsRemaining,
+        })
+      );
+    }
+  }
+
+  const { nextResendAvailableAt } = await generateAndSendAccountDeletionOTP({
+    userId: user.id,
+    email: user.email,
+    name: user.name,
+  });
+
+  res.json(
+    successResponse({
+      message: 'Deletion OTP resent successfully',
+      isPendingDeletion: true,
+      nextResendAvailableAt,
+    })
+  );
+}
+
+/**
+ * Confirm account deletion with OTP.
+ * Permanently removes user and all associated data via ON DELETE CASCADE.
+ */
+export async function confirmAccountDeletion(req: Request, res: Response): Promise<void> {
+  const { email, code } = req.body;
+  const db = getDbPool();
+
+  const result = await db.query(
+    `SELECT id, is_pending_deletion, account_deletion_code, account_deletion_code_expires_at
+     FROM users
+     WHERE email = $1`,
+    [email]
+  );
+
+  if (result.rows.length === 0) {
+    throw new NotFoundError('User not found');
+  }
+
+  const user = result.rows[0];
+
+  if (!user.is_pending_deletion) {
+    throw new BadRequestError('Account is not pending deletion');
+  }
+
+  if (!user.account_deletion_code || !user.account_deletion_code_expires_at) {
+    throw new BadRequestError('No deletion OTP found. Request a new one.');
+  }
+
+  const encodedCode = encodeOTP(code);
+  if (user.account_deletion_code !== encodedCode) {
+    throw new BadRequestError('Invalid deletion code');
+  }
+
+  if (new Date() > new Date(user.account_deletion_code_expires_at)) {
+    throw new BadRequestError('Deletion code has expired. Please request a new one.');
+  }
+
+  await db.query(`DELETE FROM users WHERE id = $1`, [user.id]);
+
+  res.json(
+    successResponse({
+      message: 'Account deleted successfully',
     })
   );
 }

@@ -67,3 +67,22 @@ export const verifyAccountSchema = z.object({
     code: z.string().length(6, 'Verification code must be 6 digits'),
   }),
 });
+
+export const requestAccountDeletionSchema = z.object({
+  body: z.object({
+    email: z.string().email('Invalid email format'),
+  }),
+});
+
+export const resendAccountDeletionOTPSchema = z.object({
+  body: z.object({
+    email: z.string().email('Invalid email format'),
+  }),
+});
+
+export const confirmAccountDeletionSchema = z.object({
+  body: z.object({
+    email: z.string().email('Invalid email format'),
+    code: z.string().length(6, 'Verification code must be 6 digits'),
+  }),
+});

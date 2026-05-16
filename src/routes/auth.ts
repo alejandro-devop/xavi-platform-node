@@ -13,6 +13,9 @@ import {
   getProfile,
   resendVerificationOTP,
   verifyAccount,
+  requestAccountDeletion,
+  resendAccountDeletionOTP,
+  confirmAccountDeletion,
 } from '../controllers/auth.controller';
 import {
   registerSchema,
@@ -24,6 +27,9 @@ import {
   logoutSchema,
   resendOTPSchema,
   verifyAccountSchema,
+  requestAccountDeletionSchema,
+  resendAccountDeletionOTPSchema,
+  confirmAccountDeletionSchema,
 } from '../validators/auth.validator';
 
 const router = Router();
@@ -50,6 +56,21 @@ router.post(
   authMiddleware,
   validate(verifyAccountSchema),
   asyncHandler(verifyAccount)
+);
+router.post(
+  '/request-account-deletion',
+  validate(requestAccountDeletionSchema),
+  asyncHandler(requestAccountDeletion)
+);
+router.post(
+  '/resend-account-deletion-otp',
+  validate(resendAccountDeletionOTPSchema),
+  asyncHandler(resendAccountDeletionOTP)
+);
+router.post(
+  '/confirm-account-deletion',
+  validate(confirmAccountDeletionSchema),
+  asyncHandler(confirmAccountDeletion)
 );
 
 export default router;
