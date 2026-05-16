@@ -36,9 +36,13 @@ graphql/
 │   │   ├── frequency.schema.ts
 │   │   └── frequency.resolvers.ts
 │   │
-│   └── period/           # Periods domain
-│       ├── period.schema.ts
-│       └── period.resolvers.ts
+│   ├── period/           # Periods domain
+│   │   ├── period.schema.ts
+│   │   └── period.resolvers.ts
+│   │
+│   └── shopping/         # Shopping lists, catalog, list lines
+│       ├── shopping.schema.ts
+│       └── shopping.resolvers.ts
 │
 ├── schema.ts            # Main schema file (imports and combines all modules)
 └── resolvers.ts         # Main resolvers file (merges all module resolvers)
@@ -113,8 +117,9 @@ graphql/
 - Wallet
 - Expense Category
 - Expense
+- Shopping (lists, catalog items, list lines)
 
-🔄 **Stub (Not Yet Implemented)**:
+🔄 **Stub (Not Yet Implemented)** (verify current code — some may have been completed since this README was written):
 
 - Scheduled Expense
 - Budget & Budget Follow-up
@@ -122,3 +127,5 @@ graphql/
 - Period
 
 Stub modules return null/empty arrays for queries and throw "Not yet implemented" errors for mutations.
+
+**API policy:** Prefer GraphQL for new domains. See repo root `AGENTS.md`.

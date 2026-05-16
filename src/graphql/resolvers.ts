@@ -7,6 +7,7 @@ import { scheduledExpenseResolvers } from './modules/scheduled-expense/scheduled
 import { budgetResolvers } from './modules/budget/budget.resolvers';
 import { frequencyResolvers } from './modules/frequency/frequency.resolvers';
 import { periodResolvers } from './modules/period/period.resolvers';
+import { shoppingResolvers } from './modules/shopping/shopping.resolvers';
 
 // Merge all resolvers
 export const resolvers = mergeResolvers([
@@ -18,4 +19,5 @@ export const resolvers = mergeResolvers([
   budgetResolvers,
   frequencyResolvers,
   periodResolvers,
+  shoppingResolvers,
 ]);

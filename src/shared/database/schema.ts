@@ -226,6 +226,77 @@ export const walletScheduledExpenses = pgTable('wallet_scheduled_expenses', {
 });
 
 // ============================================
+// SHOPPING LISTS & CATALOG ITEMS
+// ============================================
+export const shoppingLists = pgTable('shopping_lists', {
+  id: uuid('id')
+    .primaryKey()
+    .$defaultFn(() => generateUuidV7()),
+  userId: integer('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  name: varchar('name', { length: 255 }).notNull(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+export const items = pgTable('items', {
+  id: uuid('id')
+    .primaryKey()
+    .$defaultFn(() => generateUuidV7()),
+  userId: integer('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  name: varchar('name', { length: 255 }).notNull(),
+  price: decimal('price', { precision: 15, scale: 2 }),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+export const shoppingListItems = pgTable('shopping_list_items', {
+  id: uuid('id')
+    .primaryKey()
+    .$defaultFn(() => generateUuidV7()),
+  shoppingListId: uuid('shopping_list_id')
+    .notNull()
+    .references(() => shoppingLists.id, { onDelete: 'cascade' }),
+  itemId: uuid('item_id')
+    .notNull()
+    .references(() => items.id, { onDelete: 'cascade' }),
+  price: decimal('price', { precision: 15, scale: 2 }),
+  quantity: decimal('quantity', { precision: 15, scale: 2 }).notNull().default('1'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+export const shoppingListsRelations = relations(shoppingLists, ({ one, many }) => ({
+  user: one(users, {
+    fields: [shoppingLists.userId],
+    references: [users.id],
+  }),
+  listItems: many(shoppingListItems),
+}));
+
+export const itemsRelations = relations(items, ({ one, many }) => ({
+  user: one(users, {
+    fields: [items.userId],
+    references: [users.id],
+  }),
+  shoppingListItems: many(shoppingListItems),
+}));
+
+export const shoppingListItemsRelations = relations(shoppingListItems, ({ one }) => ({
+  shoppingList: one(shoppingLists, {
+    fields: [shoppingListItems.shoppingListId],
+    references: [shoppingLists.id],
+  }),
+  item: one(items, {
+    fields: [shoppingListItems.itemId],
+    references: [items.id],
+  }),
+}));
+
+// ============================================
 // RELATIONS (Optional - for query convenience)
 // ============================================
 export const walletWalletsRelations = relations(walletWallets, ({ one, many }) => ({

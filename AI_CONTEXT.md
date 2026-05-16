@@ -43,11 +43,12 @@ src/
 │   ├── auth.ts, activity.ts, course.ts, docs.ts
 │   ├── habit.ts, health.ts, learning.ts, routine.ts
 │   ├── shopping.ts, sleep.ts, todo.ts, wallet.ts
-├── services/                # Lógica de negocio (solo módulo wallet actualmente)
+├── services/                # Lógica de negocio (wallet, gastos, shopping, …)
 │   ├── wallet.service.ts
 │   ├── expense.service.ts
 │   ├── expense-category.service.ts
-│   └── scheduled-expense.service.ts
+│   ├── scheduled-expense.service.ts
+│   └── shopping.service.ts
 ├── graphql/                 # Capa GraphQL completa
 │   ├── server.ts            # Crea ApolloServer, context
 │   ├── schema.ts            # Combina todos los typeDefs
@@ -60,7 +61,8 @@ src/
 │   │   ├── scheduled-expense/
 │   │   ├── budget/
 │   │   ├── frequency/
-│   │   └── period/
+│   │   ├── period/
+│   │   └── shopping/
 │   └── utils/
 │       ├── error-handler.ts
 │       └── validation.ts
@@ -102,7 +104,8 @@ src/
         ├── wallet.schemas.ts
         ├── expense.schemas.ts
         ├── expense-category.schemas.ts
-        └── scheduled-expense.schemas.ts
+        ├── scheduled-expense.schemas.ts
+        └── shopping.schemas.ts
 
 tests/
 ├── setup.ts
@@ -127,11 +130,13 @@ docs/         # Documentación técnica extensa
 
 ## 3. Dos APIs en paralelo
 
+**Política:** las funcionalidades **nuevas** se implementan en **GraphQL** (`src/graphql/modules/` + servicios en `src/services/`). No se añaden rutas REST nuevas salvo decisión explícita; ver `AGENTS.md`.
+
 ### REST API — `/api/*`
 
 Patrón: `routes/ → controllers/ → (services/ o DB directo)`
 
-Dominios REST: `auth`, `activity`, `course`, `habit`, `learning`, `routine`, `shopping`, `sleep`, `todo`, `wallet`, `health`, `docs`
+Dominios REST (legado / compatibles): `auth`, `activity`, `course`, `habit`, `learning`, `routine`, `shopping`, `sleep`, `todo`, `wallet`, `health`, `docs`
 
 **Formato de respuesta estándar:**
 

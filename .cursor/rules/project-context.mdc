@@ -8,7 +8,7 @@ alwaysApply: true
 - Este repo es `xavi-api`: backend Node.js + TypeScript para productividad/finanzas, desplegado en Cloud Run.
 - Antes de cambios grandes, revisa `AI_CONTEXT.md` para arquitectura, convenciones y estructura completa.
 - Prioriza esta lectura para contexto funcional: `docs/architecture/MASTER_SPEC.md`, `DATA_MODEL.md`, `API_CONTRACTS.md`, `BEHAVIOR_SPEC.md`.
-- El backend expone REST (`/api/*`) y GraphQL (`/graphql`); no romper contratos existentes sin indicarlo explícitamente.
+- El backend expone REST (`/api/*`, legado y rutas existentes) y GraphQL (`/graphql`). **Las funcionalidades nuevas deben implementarse en GraphQL** (`src/graphql/modules/` + `src/services/`); no añadas rutas REST nuevas salvo decisión explícita del equipo (ver `AGENTS.md`).
 - Usa `src/shared/database/schema.ts` como fuente única del esquema de base de datos.
 - Valida entradas externas con Zod y reutiliza utilidades/middlewares compartidos en `src/shared/`.
 

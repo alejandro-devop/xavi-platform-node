@@ -8,6 +8,7 @@ import { scheduledExpenseTypeDefs } from './modules/scheduled-expense/scheduled-
 import { budgetTypeDefs } from './modules/budget/budget.schema';
 import { frequencyTypeDefs } from './modules/frequency/frequency.schema';
 import { periodTypeDefs } from './modules/period/period.schema';
+import { shoppingTypeDefs } from './modules/shopping/shopping.schema';
 
 // Base Query and Mutation types
 const baseTypeDefs = gql`
@@ -32,4 +33,5 @@ export const typeDefs = [
   budgetTypeDefs,
   frequencyTypeDefs,
   periodTypeDefs,
+  shoppingTypeDefs,
 ];

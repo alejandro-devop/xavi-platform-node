@@ -1,99 +1,121 @@
 import { z } from 'zod';
 
+const uuidParam = z.string().uuid();
+
+const paginationQuery = z.object({
+  page: z.string().regex(/^\d+$/).optional(),
+  limit: z.string().regex(/^\d+$/).optional(),
+});
+
 // ============ SHOPPING LISTS ============
 
 export const createShoppingListSchema = z.object({
   body: z.object({
     name: z.string().min(1).max(255),
-    description: z.string().optional(),
-    shoppingDate: z.string().date().optional(),
   }),
 });
 
 export const getShoppingListsSchema = z.object({
-  query: z.object({
-    status: z.enum(['active', 'completed', 'cancelled']).optional(),
-    startDate: z.string().date().optional(),
-    endDate: z.string().date().optional(),
-    page: z.string().regex(/^\d+$/).optional(),
-    limit: z.string().regex(/^\d+$/).optional(),
-  }),
+  query: paginationQuery,
 });
 
 export const getShoppingListSchema = z.object({
   params: z.object({
-    id: z.string().regex(/^\d+$/),
+    listId: uuidParam,
   }),
 });
 
 export const updateShoppingListSchema = z.object({
   params: z.object({
-    id: z.string().regex(/^\d+$/),
+    listId: uuidParam,
   }),
   body: z.object({
-    name: z.string().min(1).max(255).optional(),
-    description: z.string().optional(),
-    status: z.enum(['active', 'completed', 'cancelled']).optional(),
-    shoppingDate: z.string().date().optional(),
+    name: z.string().min(1).max(255),
   }),
 });
 
 export const deleteShoppingListSchema = z.object({
   params: z.object({
-    id: z.string().regex(/^\d+$/),
+    listId: uuidParam,
   }),
 });
 
-export const completeShoppingListSchema = z.object({
-  params: z.object({
-    id: z.string().regex(/^\d+$/),
-  }),
-});
+// ============ CATALOG ITEMS ============
 
-// ============ SHOPPING ITEMS ============
-
-export const createShoppingItemSchema = z.object({
-  params: z.object({
-    id: z.string().regex(/^\d+$/), // shopping list id
-  }),
+export const createCatalogItemSchema = z.object({
   body: z.object({
     name: z.string().min(1).max(255),
-    quantity: z.number().positive().optional().default(1),
-    unit: z.string().max(50).optional(),
-    price: z.number().positive().optional(),
-    category: z.string().max(100).optional(),
-    notes: z.string().optional(),
-    orderIndex: z.number().int().min(0).optional().default(0),
+    price: z.number().nonnegative().optional(),
   }),
 });
 
-export const updateShoppingItemSchema = z.object({
+export const getCatalogItemsSchema = z.object({
+  query: paginationQuery,
+});
+
+export const getCatalogItemSchema = z.object({
   params: z.object({
-    id: z.string().regex(/^\d+$/), // shopping list id
-    itemId: z.string().regex(/^\d+$/),
+    itemId: uuidParam,
+  }),
+});
+
+export const updateCatalogItemSchema = z.object({
+  params: z.object({
+    itemId: uuidParam,
+  }),
+  body: z
+    .object({
+      name: z.string().min(1).max(255).optional(),
+      price: z.union([z.number().nonnegative(), z.null()]).optional(),
+    })
+    .refine((data) => data.name !== undefined || data.price !== undefined, {
+      message: 'At least one of name, price is required',
+    }),
+});
+
+export const deleteCatalogItemSchema = z.object({
+  params: z.object({
+    itemId: uuidParam,
+  }),
+});
+
+// ============ LIST ↔ ITEM ============
+
+export const addItemToShoppingListSchema = z.object({
+  params: z.object({
+    listId: uuidParam,
   }),
   body: z.object({
-    name: z.string().min(1).max(255).optional(),
-    quantity: z.number().positive().optional(),
-    unit: z.string().max(50).optional(),
-    price: z.number().positive().optional(),
-    isPurchased: z.boolean().optional(),
-    category: z.string().max(100).optional(),
-    notes: z.string().optional(),
-    orderIndex: z.number().int().min(0).optional(),
+    itemId: uuidParam,
+    price: z.number().nonnegative().optional(),
+    quantity: z.number().positive().optional().default(1),
   }),
 });
 
-export const deleteShoppingItemSchema = z.object({
+export const getShoppingListItemsSchema = z.object({
   params: z.object({
-    id: z.string().regex(/^\d+$/), // shopping list id
-    itemId: z.string().regex(/^\d+$/),
+    listId: uuidParam,
   }),
 });
 
-export const toggleItemPurchasedSchema = z.object({
+export const updateShoppingListItemSchema = z.object({
   params: z.object({
-    id: z.string().regex(/^\d+$/), // shopping list id
-    itemId: z.string().regex(/^\d+$/),
+    listId: uuidParam,
+    listItemId: uuidParam,
+  }),
+  body: z
+    .object({
+      price: z.union([z.number().nonnegative(), z.null()]).optional(),
+      quantity: z.number().positive().optional(),
+    })
+    .refine((data) => data.price !== undefined || data.quantity !== undefined, {
+      message: 'At least one of price, quantity is required',
+    }),
+});
+
+export const deleteShoppingListItemSchema = z.object({
+  params: z.object({
+    listId: uuidParam,
+    listItemId: uuidParam,
   }),
 });

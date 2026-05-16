@@ -8,11 +8,15 @@ import {
   getShoppingListById,
   updateShoppingList,
   deleteShoppingList,
-  completeShoppingList,
-  createShoppingItem,
-  updateShoppingItem,
-  deleteShoppingItem,
-  toggleItemPurchased,
+  createCatalogItem,
+  getCatalogItems,
+  getCatalogItemById,
+  updateCatalogItem,
+  deleteCatalogItem,
+  addItemToShoppingList,
+  getShoppingListItems,
+  updateShoppingListItem,
+  deleteShoppingListItem,
 } from '../controllers/shopping.controller';
 import {
   createShoppingListSchema,
@@ -20,46 +24,63 @@ import {
   getShoppingListSchema,
   updateShoppingListSchema,
   deleteShoppingListSchema,
-  completeShoppingListSchema,
-  createShoppingItemSchema,
-  updateShoppingItemSchema,
-  deleteShoppingItemSchema,
-  toggleItemPurchasedSchema,
+  createCatalogItemSchema,
+  getCatalogItemsSchema,
+  getCatalogItemSchema,
+  updateCatalogItemSchema,
+  deleteCatalogItemSchema,
+  addItemToShoppingListSchema,
+  getShoppingListItemsSchema,
+  updateShoppingListItemSchema,
+  deleteShoppingListItemSchema,
 } from '../validators/shopping.validator';
 
 const router = Router();
 
-// All shopping routes require authentication
 router.use(authMiddleware);
 
-// ============ SHOPPING LIST ROUTES ============
-router.post('/', validate(createShoppingListSchema), asyncHandler(createShoppingList));
-router.get('/', validate(getShoppingListsSchema), asyncHandler(getShoppingLists));
-router.get('/:id', validate(getShoppingListSchema), asyncHandler(getShoppingListById));
-router.put('/:id', validate(updateShoppingListSchema), asyncHandler(updateShoppingList));
-router.delete('/:id', validate(deleteShoppingListSchema), asyncHandler(deleteShoppingList));
-router.post(
-  '/:id/complete',
-  validate(completeShoppingListSchema),
-  asyncHandler(completeShoppingList)
-);
+// Catalog items (declare before /lists/:listId to avoid shadowing if paths overlap)
+router.post('/items', validate(createCatalogItemSchema), asyncHandler(createCatalogItem));
+router.get('/items', validate(getCatalogItemsSchema), asyncHandler(getCatalogItems));
+router.get('/items/:itemId', validate(getCatalogItemSchema), asyncHandler(getCatalogItemById));
+router.patch('/items/:itemId', validate(updateCatalogItemSchema), asyncHandler(updateCatalogItem));
+router.delete('/items/:itemId', validate(deleteCatalogItemSchema), asyncHandler(deleteCatalogItem));
 
-// ============ SHOPPING ITEM ROUTES ============
-router.post('/:id/items', validate(createShoppingItemSchema), asyncHandler(createShoppingItem));
-router.put(
-  '/:id/items/:itemId',
-  validate(updateShoppingItemSchema),
-  asyncHandler(updateShoppingItem)
+// Shopping lists
+router.post('/lists', validate(createShoppingListSchema), asyncHandler(createShoppingList));
+router.get('/lists', validate(getShoppingListsSchema), asyncHandler(getShoppingLists));
+router.get('/lists/:listId', validate(getShoppingListSchema), asyncHandler(getShoppingListById));
+router.patch(
+  '/lists/:listId',
+  validate(updateShoppingListSchema),
+  asyncHandler(updateShoppingList)
 );
 router.delete(
-  '/:id/items/:itemId',
-  validate(deleteShoppingItemSchema),
-  asyncHandler(deleteShoppingItem)
+  '/lists/:listId',
+  validate(deleteShoppingListSchema),
+  asyncHandler(deleteShoppingList)
 );
+
+// List ↔ catalog item relations
 router.post(
-  '/:id/items/:itemId/toggle',
-  validate(toggleItemPurchasedSchema),
-  asyncHandler(toggleItemPurchased)
+  '/lists/:listId/items',
+  validate(addItemToShoppingListSchema),
+  asyncHandler(addItemToShoppingList)
+);
+router.get(
+  '/lists/:listId/items',
+  validate(getShoppingListItemsSchema),
+  asyncHandler(getShoppingListItems)
+);
+router.patch(
+  '/lists/:listId/items/:listItemId',
+  validate(updateShoppingListItemSchema),
+  asyncHandler(updateShoppingListItem)
+);
+router.delete(
+  '/lists/:listId/items/:listItemId',
+  validate(deleteShoppingListItemSchema),
+  asyncHandler(deleteShoppingListItem)
 );
 
 export default router;
