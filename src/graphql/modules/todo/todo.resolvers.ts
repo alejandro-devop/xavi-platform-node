@@ -1,0 +1,126 @@
+import { todoService } from '../../../services/todo.service';
+import type { Todo } from '../../../types/services/todo.types';
+import { requireAuth } from '../../utils/error-handler';
+import { withValidatedResolver } from '../../utils/validation';
+import {
+  todoAddInputSchema,
+  todoEditInputSchema,
+  todoIdArgSchema,
+  todoSubtaskAddInputSchema,
+  todoSubtaskEditInputSchema,
+  todoSubtaskRemoveInputSchema,
+  todosListArgsSchema,
+} from '../../../validators/schemas/todo.schemas';
+
+function uid(context: { user?: { id: string | number } | null }): number {
+  return Number(context.user!.id);
+}
+
+export const todoResolvers = {
+  Todo: {
+    subtasks: async (parent: Todo, _args: unknown, context: { user?: { id: string | number } | null }) => {
+      requireAuth(context, 'Todo.subtasks');
+      if (parent.subtasks) return parent.subtasks;
+      return await todoService.listSubtasksForTodo(parseInt(parent.id, 10));
+    },
+
+    subtasksCount: (parent: Todo) => {
+      if (parent.subtasksCount) return parent.subtasksCount;
+      if (parent.subtasks) {
+        return {
+          total: parent.subtasks.length,
+          completed: parent.subtasks.filter((s) => s.isCompleted).length,
+        };
+      }
+      return { total: 0, completed: 0 };
+    },
+  },
+
+  Query: {
+    todo: withValidatedResolver(
+      todoIdArgSchema,
+      async (_parent, { id }: { id: string }, context) => {
+        requireAuth(context, 'todo');
+        return await todoService.getTodoById(id, uid(context));
+      },
+      'todo'
+    ),
+
+    todos: withValidatedResolver(
+      todosListArgsSchema,
+      async (_parent, args, context) => {
+        requireAuth(context, 'todos');
+        return await todoService.listTodos(uid(context), args);
+      },
+      'todos'
+    ),
+  },
+
+  Mutation: {
+    todoAdd: withValidatedResolver(
+      todoAddInputSchema,
+      async (_parent, { input }, context) => {
+        requireAuth(context, 'todoAdd');
+        return await todoService.createTodo(uid(context), input);
+      },
+      'todoAdd'
+    ),
+
+    todoEdit: withValidatedResolver(
+      todoEditInputSchema,
+      async (_parent, { input }, context) => {
+        requireAuth(context, 'todoEdit');
+        const { id, ...fields } = input;
+        return await todoService.updateTodo(id, uid(context), fields);
+      },
+      'todoEdit'
+    ),
+
+    todoRemove: withValidatedResolver(
+      todoIdArgSchema,
+      async (_parent, { id }: { id: string }, context) => {
+        requireAuth(context, 'todoRemove');
+        return await todoService.deleteTodo(id, uid(context));
+      },
+      'todoRemove'
+    ),
+
+    todoComplete: withValidatedResolver(
+      todoIdArgSchema,
+      async (_parent, { id }: { id: string }, context) => {
+        requireAuth(context, 'todoComplete');
+        return await todoService.completeTodo(id, uid(context));
+      },
+      'todoComplete'
+    ),
+
+    todoSubtaskAdd: withValidatedResolver(
+      todoSubtaskAddInputSchema,
+      async (_parent, { input }, context) => {
+        requireAuth(context, 'todoSubtaskAdd');
+        return await todoService.createSubtask(uid(context), input);
+      },
+      'todoSubtaskAdd'
+    ),
+
+    todoSubtaskEdit: withValidatedResolver(
+      todoSubtaskEditInputSchema,
+      async (_parent, { input }, context) => {
+        requireAuth(context, 'todoSubtaskEdit');
+        const { todoId, subtaskId, ...fields } = input;
+        return await todoService.updateSubtask(todoId, subtaskId, uid(context), fields);
+      },
+      'todoSubtaskEdit'
+    ),
+
+    todoSubtaskRemove: withValidatedResolver(
+      todoSubtaskRemoveInputSchema,
+      async (_parent, { input }, context) => {
+        requireAuth(context, 'todoSubtaskRemove');
+        const { todoId, subtaskId } = input;
+        return await todoService.deleteSubtask(todoId, subtaskId, uid(context));
+      },
+      'todoSubtaskRemove'
+    ),
+  },
+};

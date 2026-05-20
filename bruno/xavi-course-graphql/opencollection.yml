@@ -1,0 +1,10 @@
+info:
+  name: Xavi Course GraphQL
+  type: collection
+  description: Courses, modules, lessons and progress GraphQL API
+
+vars:
+  - name: baseUrl
+    value: http://localhost:8080
+  - name: token
+    value: ""

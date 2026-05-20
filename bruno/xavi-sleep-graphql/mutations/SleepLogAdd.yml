@@ -1,0 +1,39 @@
+info:
+  name: SleepLogAdd
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseUrl}}/graphql"
+  headers:
+    - name: Content-Type
+      value: application/json
+    - name: Authorization
+      value: "Bearer {{token}}"
+  body:
+    type: graphql
+    data:
+      query: |
+        mutation SleepLogAdd($input: SleepLogInput!) {
+          sleepLogAdd(input: $input) {
+            id
+            sleepDate
+            durationMinutes
+            durationHours
+            quality
+          }
+        }
+      variables: |
+        {
+          "input": {
+            "sleepDate": "2024-06-01",
+            "bedtime": "2024-05-31T23:00:00.000Z",
+            "wakeTime": "2024-06-01T07:00:00.000Z",
+            "quality": "good",
+            "moodOnWaking": "refreshed"
+          }
+        }
+
+settings:
+  encodeUrl: true

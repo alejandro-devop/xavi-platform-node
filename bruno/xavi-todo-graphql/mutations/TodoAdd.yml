@@ -1,0 +1,36 @@
+info:
+  name: TodoAdd
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseUrl}}/graphql"
+  headers:
+    - name: Content-Type
+      value: application/json
+    - name: Authorization
+      value: "Bearer {{token}}"
+  body:
+    type: graphql
+    data:
+      query: |
+        mutation TodoAdd($input: TodoInput!) {
+          todoAdd(input: $input) {
+            id
+            title
+            status
+            priority
+            dueDate
+          }
+        }
+      variables: |
+        {
+          "input": {
+            "title": "Buy groceries",
+            "priority": "high"
+          }
+        }
+
+settings:
+  encodeUrl: true

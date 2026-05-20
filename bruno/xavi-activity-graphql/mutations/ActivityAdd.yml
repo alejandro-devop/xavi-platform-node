@@ -1,0 +1,36 @@
+info:
+  name: ActivityAdd
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseUrl}}/graphql"
+  headers:
+    - name: Content-Type
+      value: application/json
+    - name: Authorization
+      value: "Bearer {{token}}"
+  body:
+    type: graphql
+    data:
+      query: |
+        mutation ActivityAdd($input: ActivityInput!) {
+          activityAdd(input: $input) {
+            id
+            title
+            status
+            priority
+          }
+        }
+      variables: |
+        {
+          "input": {
+            "title": "Deep work session",
+            "priority": "high",
+            "status": "pending"
+          }
+        }
+
+settings:
+  encodeUrl: true

@@ -1,0 +1,26 @@
+info:
+  name: Courses
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseUrl}}/graphql"
+  headers:
+    - name: Content-Type
+      value: application/json
+    - name: Authorization
+      value: "Bearer {{token}}"
+  body:
+    type: graphql
+    data:
+      query: |
+        query Courses {
+          courses(page: 1, limit: 20) {
+            courses { id title status progress totalLessons completedLessons }
+            total
+          }
+        }
+
+settings:
+  encodeUrl: true

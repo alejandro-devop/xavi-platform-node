@@ -1,0 +1,42 @@
+info:
+  name: HabitAdd
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{baseUrl}}/graphql"
+  headers:
+    - name: Content-Type
+      value: application/json
+    - name: Authorization
+      value: "Bearer {{token}}"
+  body:
+    type: graphql
+    data:
+      query: |
+        mutation HabitAdd($input: HabitInput!) {
+          habitAdd(input: $input) {
+            id
+            name
+            categoryId
+            streak
+            maxStreak
+            dailyGoal
+            isCounter
+            isTimer
+          }
+        }
+      variables: |
+        {
+          "input": {
+            "name": "Drink water",
+            "categoryId": "REPLACE_WITH_CATEGORY_UUID",
+            "shouldKeep": true,
+            "isCounter": true,
+            "dailyGoal": 8
+          }
+        }
+
+settings:
+  encodeUrl: true

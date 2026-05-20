@@ -1,0 +1,41 @@
+info:
+  name: Habits
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseUrl}}/graphql"
+  headers:
+    - name: Content-Type
+      value: application/json
+    - name: Authorization
+      value: "Bearer {{token}}"
+  body:
+    type: graphql
+    data:
+      query: |
+        query Habits($isActive: Boolean, $categoryId: ID, $page: Int, $limit: Int) {
+          habits(isActive: $isActive, categoryId: $categoryId, page: $page, limit: $limit) {
+            habits {
+              id
+              name
+              streak
+              maxStreak
+              categoryId
+              isActive
+            }
+            page
+            limit
+            total
+          }
+        }
+      variables: |
+        {
+          "isActive": true,
+          "page": 1,
+          "limit": 50
+        }
+
+settings:
+  encodeUrl: true

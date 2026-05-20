@@ -1,0 +1,38 @@
+info:
+  name: HabitFollowUps
+  type: http
+  seq: 5
+
+http:
+  method: POST
+  url: "{{baseUrl}}/graphql"
+  headers:
+    - name: Content-Type
+      value: application/json
+    - name: Authorization
+      value: "Bearer {{token}}"
+  body:
+    type: graphql
+    data:
+      query: |
+        query HabitFollowUps($habitId: ID, $from: String, $to: String) {
+          habitFollowUps(habitId: $habitId, from: $from, to: $to, isArchived: false) {
+            id
+            habitId
+            date
+            count
+            time
+            isAccomplished
+            isFailed
+            archived
+          }
+        }
+      variables: |
+        {
+          "habitId": "1",
+          "from": "2026-01-01",
+          "to": "2026-12-31"
+        }
+
+settings:
+  encodeUrl: true

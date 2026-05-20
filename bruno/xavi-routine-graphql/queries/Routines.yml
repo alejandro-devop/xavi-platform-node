@@ -1,0 +1,26 @@
+info:
+  name: Routines
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseUrl}}/graphql"
+  headers:
+    - name: Content-Type
+      value: application/json
+    - name: Authorization
+      value: "Bearer {{token}}"
+  body:
+    type: graphql
+    data:
+      query: |
+        query Routines {
+          routines(isActive: true) {
+            routines { id name timeOfDay isActive stepsCount }
+            total
+          }
+        }
+
+settings:
+  encodeUrl: true

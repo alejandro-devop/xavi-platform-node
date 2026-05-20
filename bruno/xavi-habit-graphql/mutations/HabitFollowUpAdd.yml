@@ -1,0 +1,44 @@
+info:
+  name: HabitFollowUpAdd
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: "{{baseUrl}}/graphql"
+  headers:
+    - name: Content-Type
+      value: application/json
+    - name: Authorization
+      value: "Bearer {{token}}"
+  body:
+    type: graphql
+    data:
+      query: |
+        mutation HabitFollowUpAdd($input: HabitFollowUpAddInput!) {
+          habitFollowUpAdd(input: $input) {
+            id
+            date
+            count
+            time
+            isAccomplished
+            isFailed
+            habit {
+              id
+              streak
+              maxStreak
+            }
+          }
+        }
+      variables: |
+        {
+          "input": {
+            "habitId": "1",
+            "date": "2026-05-19",
+            "count": 8,
+            "isAccomplished": true
+          }
+        }
+
+settings:
+  encodeUrl: true

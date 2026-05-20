@@ -1,0 +1,27 @@
+info:
+  name: SleepStats
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{baseUrl}}/graphql"
+  headers:
+    - name: Content-Type
+      value: application/json
+    - name: Authorization
+      value: "Bearer {{token}}"
+  body:
+    type: graphql
+    data:
+      query: |
+        query SleepStats {
+          sleepStats {
+            totalNights
+            avgDurationHours
+            qualityDistribution { poor fair good excellent }
+          }
+        }
+
+settings:
+  encodeUrl: true

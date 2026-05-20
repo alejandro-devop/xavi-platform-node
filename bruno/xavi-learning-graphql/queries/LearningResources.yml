@@ -1,0 +1,32 @@
+info:
+  name: LearningResources
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseUrl}}/graphql"
+  headers:
+    - name: Content-Type
+      value: application/json
+    - name: Authorization
+      value: "Bearer {{token}}"
+  body:
+    type: graphql
+    data:
+      query: |
+        query LearningResources {
+          learningResources(page: 1, limit: 20) {
+            resources {
+              id
+              title
+              resourceType
+              status
+              progressStats { totalSessions totalTimeSpent currentProgress }
+            }
+            total
+          }
+        }
+
+settings:
+  encodeUrl: true

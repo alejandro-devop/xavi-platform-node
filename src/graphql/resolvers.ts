@@ -8,6 +8,13 @@ import { budgetResolvers } from './modules/budget/budget.resolvers';
 import { frequencyResolvers } from './modules/frequency/frequency.resolvers';
 import { periodResolvers } from './modules/period/period.resolvers';
 import { shoppingResolvers } from './modules/shopping/shopping.resolvers';
+import { activityResolvers } from './modules/activity/activity.resolvers';
+import { habitResolvers } from './modules/habit/habit.resolvers';
+import { routineResolvers } from './modules/routine/routine.resolvers';
+import { todoResolvers } from './modules/todo/todo.resolvers';
+import { sleepResolvers } from './modules/sleep/sleep.resolvers';
+import { learningResolvers } from './modules/learning/learning.resolvers';
+import { courseResolvers } from './modules/course/course.resolvers';
 
 // Merge all resolvers
 export const resolvers = mergeResolvers([
@@ -20,4 +27,11 @@ export const resolvers = mergeResolvers([
   frequencyResolvers,
   periodResolvers,
   shoppingResolvers,
+  activityResolvers,
+  habitResolvers,
+  routineResolvers,
+  todoResolvers,
+  sleepResolvers,
+  learningResolvers,
+  courseResolvers,
 ]);

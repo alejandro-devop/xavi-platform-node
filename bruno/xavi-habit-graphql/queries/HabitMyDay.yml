@@ -1,0 +1,40 @@
+info:
+  name: HabitMyDay
+  type: http
+  seq: 4
+
+http:
+  method: POST
+  url: "{{baseUrl}}/graphql"
+  headers:
+    - name: Content-Type
+      value: application/json
+    - name: Authorization
+      value: "Bearer {{token}}"
+  body:
+    type: graphql
+    data:
+      query: |
+        query HabitMyDay($date: String!) {
+          habitMyDay(date: $date) {
+            habit {
+              id
+              name
+              streak
+            }
+            followUp {
+              id
+              date
+              count
+              time
+              isAccomplished
+            }
+          }
+        }
+      variables: |
+        {
+          "date": "2026-05-19"
+        }
+
+settings:
+  encodeUrl: true

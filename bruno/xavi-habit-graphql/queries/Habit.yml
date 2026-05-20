@@ -1,0 +1,53 @@
+info:
+  name: Habit
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{baseUrl}}/graphql"
+  headers:
+    - name: Content-Type
+      value: application/json
+    - name: Authorization
+      value: "Bearer {{token}}"
+  body:
+    type: graphql
+    data:
+      query: |
+        query Habit($id: ID!) {
+          habit(id: $id) {
+            id
+            name
+            description
+            streak
+            maxStreak
+            dailyGoal
+            isCounter
+            isTimer
+            category {
+              id
+              name
+            }
+            followUps(limit: 30, isArchived: false) {
+              id
+              date
+              count
+              time
+              isAccomplished
+              isFailed
+            }
+            stats {
+              currentStreak
+              maxStreak
+              last30Days
+            }
+          }
+        }
+      variables: |
+        {
+          "id": "1"
+        }
+
+settings:
+  encodeUrl: true

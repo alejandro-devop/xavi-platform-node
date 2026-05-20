@@ -1,0 +1,27 @@
+info:
+  name: HabitRemove
+  type: http
+  seq: 6
+
+http:
+  method: POST
+  url: "{{baseUrl}}/graphql"
+  headers:
+    - name: Content-Type
+      value: application/json
+    - name: Authorization
+      value: "Bearer {{token}}"
+  body:
+    type: graphql
+    data:
+      query: |
+        mutation HabitRemove($id: ID!) {
+          habitRemove(id: $id)
+        }
+      variables: |
+        {
+          "id": "1"
+        }
+
+settings:
+  encodeUrl: true

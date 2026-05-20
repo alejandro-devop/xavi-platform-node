@@ -1,0 +1,10 @@
+info:
+  name: Xavi Habit GraphQL
+  type: collection
+  description: Habit tracker GraphQL (Fase 1 + Fase 2). Requiere migración 024 y JWT en `token`.
+
+vars:
+  - name: baseUrl
+    value: http://localhost:8080
+  - name: token
+    value: ""

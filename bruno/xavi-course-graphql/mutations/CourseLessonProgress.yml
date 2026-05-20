@@ -1,0 +1,34 @@
+info:
+  name: CourseLessonProgress
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseUrl}}/graphql"
+  headers:
+    - name: Content-Type
+      value: application/json
+    - name: Authorization
+      value: "Bearer {{token}}"
+  body:
+    type: graphql
+    data:
+      query: |
+        mutation CourseLessonProgress($input: CourseLessonProgressInput!) {
+          courseLessonProgress(input: $input) {
+            progress { lessonId completed completionDate }
+            courseStatus
+          }
+        }
+      variables: |
+        {
+          "input": {
+            "courseId": "3",
+            "lessonId": "20",
+            "completed": true
+          }
+        }
+
+settings:
+  encodeUrl: true

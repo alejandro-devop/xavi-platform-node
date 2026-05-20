@@ -1,0 +1,36 @@
+info:
+  name: HabitCategoryAdd
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseUrl}}/graphql"
+  headers:
+    - name: Content-Type
+      value: application/json
+    - name: Authorization
+      value: "Bearer {{token}}"
+  body:
+    type: graphql
+    data:
+      query: |
+        mutation HabitCategoryAdd($input: HabitCategoryInput!) {
+          habitCategoryAdd(input: $input) {
+            id
+            name
+            icon
+            color
+          }
+        }
+      variables: |
+        {
+          "input": {
+            "name": "Health",
+            "icon": "💪",
+            "color": "#4CAF50"
+          }
+        }
+
+settings:
+  encodeUrl: true

@@ -1,0 +1,35 @@
+info:
+  name: HabitEdit
+  type: http
+  seq: 5
+
+http:
+  method: POST
+  url: "{{baseUrl}}/graphql"
+  headers:
+    - name: Content-Type
+      value: application/json
+    - name: Authorization
+      value: "Bearer {{token}}"
+  body:
+    type: graphql
+    data:
+      query: |
+        mutation HabitEdit($input: HabitEditInput!) {
+          habitEdit(input: $input) {
+            id
+            name
+            dailyGoal
+            isActive
+          }
+        }
+      variables: |
+        {
+          "input": {
+            "id": "1",
+            "dailyGoal": 10
+          }
+        }
+
+settings:
+  encodeUrl: true

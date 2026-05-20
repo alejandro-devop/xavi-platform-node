@@ -1,0 +1,9 @@
+info:
+  name: Xavi Activity GraphQL
+  type: collection
+
+vars:
+  - name: baseUrl
+    value: http://localhost:8080
+  - name: token
+    value: ""

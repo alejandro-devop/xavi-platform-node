@@ -14,6 +14,56 @@
 - Documentación de operaciones para clientes (Bruno, etc.): `docs/graphql/shopping-bruno.md`.
 - **Colección Bruno importable:** `bruno/xavi-shopping-graphql/`.
 
+## Habit tracker
+
+- Esquema SDL y resolvers: `src/graphql/modules/habit/`.
+- Servicios: `src/services/habit.service.ts`, `habit-category.service.ts`, `habit-measure.service.ts`, `habit-streak.ts`.
+- Migración Fase 2: `migrations/024_habit_legacy_phase2.sql`.
+- Documentación: `docs/graphql/habit-bruno.md`.
+- **Colección Bruno importable:** `bruno/xavi-habit-graphql/`.
+
+## Routines
+
+- Esquema SDL y resolvers: `src/graphql/modules/routine/`.
+- Servicio: `src/services/routine.service.ts`.
+- Documentación: `docs/graphql/routine-bruno.md`.
+- **Colección Bruno:** `bruno/xavi-routine-graphql/`.
+
+## Activities
+
+- Esquema SDL y resolvers: `src/graphql/modules/activity/`.
+- Servicio: `src/services/activity.service.ts`.
+- Documentación: `docs/graphql/activity-bruno.md`.
+- **Colección Bruno:** `bruno/xavi-activity-graphql/`.
+
+## Todos
+
+- Esquema SDL y resolvers: `src/graphql/modules/todo/`.
+- Servicio: `src/services/todo.service.ts`.
+- Documentación: `docs/graphql/todo-bruno.md`.
+- **Colección Bruno:** `bruno/xavi-todo-graphql/`.
+
+## Sleep
+
+- Esquema SDL y resolvers: `src/graphql/modules/sleep/`.
+- Servicio: `src/services/sleep.service.ts`.
+- Documentación: `docs/graphql/sleep-bruno.md`.
+- **Colección Bruno:** `bruno/xavi-sleep-graphql/`.
+
+## Learning
+
+- Esquema SDL y resolvers: `src/graphql/modules/learning/`.
+- Servicio: `src/services/learning.service.ts`.
+- Documentación: `docs/graphql/learning-bruno.md`.
+- **Colección Bruno:** `bruno/xavi-learning-graphql/`.
+
+## Courses
+
+- Esquema SDL y resolvers: `src/graphql/modules/course/`.
+- Servicio: `src/services/course.service.ts`.
+- Documentación: `docs/graphql/course-bruno.md`.
+- **Colección Bruno:** `bruno/xavi-course-graphql/`.
+
 ## Referencias
 
 - Contexto del proyecto: `.cursor/rules/project-context.mdc`, `AI_CONTEXT.md`.

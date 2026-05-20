@@ -1,0 +1,10 @@
+info:
+  name: Xavi Routine GraphQL
+  type: collection
+  description: Daily routines GraphQL API
+
+vars:
+  - name: baseUrl
+    value: http://localhost:8080
+  - name: token
+    value: ""

@@ -1,0 +1,36 @@
+info:
+  name: HabitFollowUpsInDates
+  type: http
+  seq: 6
+
+http:
+  method: POST
+  url: "{{baseUrl}}/graphql"
+  headers:
+    - name: Content-Type
+      value: application/json
+    - name: Authorization
+      value: "Bearer {{token}}"
+  body:
+    type: graphql
+    data:
+      query: |
+        query HabitFollowUpsInDates($from: String!, $to: String!) {
+          habitFollowUpsInDates(from: $from, to: $to) {
+            date
+            followUps {
+              id
+              habitId
+              date
+              isAccomplished
+            }
+          }
+        }
+      variables: |
+        {
+          "from": "2026-01-01",
+          "to": "2026-12-31"
+        }
+
+settings:
+  encodeUrl: true

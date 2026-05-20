@@ -9,6 +9,13 @@ import { budgetTypeDefs } from './modules/budget/budget.schema';
 import { frequencyTypeDefs } from './modules/frequency/frequency.schema';
 import { periodTypeDefs } from './modules/period/period.schema';
 import { shoppingTypeDefs } from './modules/shopping/shopping.schema';
+import { activityTypeDefs } from './modules/activity/activity.schema';
+import { habitTypeDefs } from './modules/habit/habit.schema';
+import { routineTypeDefs } from './modules/routine/routine.schema';
+import { todoTypeDefs } from './modules/todo/todo.schema';
+import { sleepTypeDefs } from './modules/sleep/sleep.schema';
+import { learningTypeDefs } from './modules/learning/learning.schema';
+import { courseTypeDefs } from './modules/course/course.schema';
 
 // Base Query and Mutation types
 const baseTypeDefs = gql`
@@ -34,4 +41,11 @@ export const typeDefs = [
   frequencyTypeDefs,
   periodTypeDefs,
   shoppingTypeDefs,
+  activityTypeDefs,
+  habitTypeDefs,
+  routineTypeDefs,
+  todoTypeDefs,
+  sleepTypeDefs,
+  learningTypeDefs,
+  courseTypeDefs,
 ];
