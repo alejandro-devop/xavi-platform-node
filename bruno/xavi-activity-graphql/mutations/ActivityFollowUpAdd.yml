@@ -1,0 +1,45 @@
+info:
+  name: ActivityFollowUpAdd
+  type: http
+  seq: 7
+
+http:
+  method: POST
+  url: "{{baseUrl}}/graphql"
+  headers:
+    - name: Content-Type
+      value: application/json
+    - name: Authorization
+      value: "Bearer {{token}}"
+  body:
+    type: graphql
+    data:
+      query: |
+        mutation ActivityFollowUpAdd($input: ActivityFollowUpAddInput!) {
+          activityFollowUpAdd(input: $input) {
+            id
+            date
+            startTime
+            durationMinutes
+            endTime
+            endDateTime
+            activity {
+              id
+              title
+              spentTimeMinutes
+            }
+          }
+        }
+      variables: |
+        {
+          "input": {
+            "activityId": "1",
+            "date": "2026-05-20",
+            "startTime": "09:30",
+            "durationMinutes": 90,
+            "notes": "Focused session"
+          }
+        }
+
+settings:
+  encodeUrl: true

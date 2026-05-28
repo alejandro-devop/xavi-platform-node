@@ -32,7 +32,8 @@
 ## Activities
 
 - Esquema SDL y resolvers: `src/graphql/modules/activity/`.
-- Servicio: `src/services/activity.service.ts`.
+- Servicios: `src/services/activity.service.ts`, `activity-category.service.ts`, `activity-follow-up.service.ts`.
+- Migración categorías + follow-ups: `migrations/025_activity_categories_and_followups.sql`.
 - Documentación: `docs/graphql/activity-bruno.md`.
 - **Colección Bruno:** `bruno/xavi-activity-graphql/`.
 
@@ -63,6 +64,12 @@
 - Servicio: `src/services/course.service.ts`.
 - Documentación: `docs/graphql/course-bruno.md`.
 - **Colección Bruno:** `bruno/xavi-course-graphql/`.
+
+## Colección Bruno (monorepo)
+
+- **Ruta:** `../bruno/xavi-api/` (desde este repo: `/Users/jako/Developer/xavi-platform/bruno/xavi-api`)
+- Ambientes: `development`, `production` (`baseUrl`, `email`, `password`, `token`, `refreshToken`)
+- Regenerar: `node scripts/generate-bruno-collection.mjs`
 
 ## Referencias
 

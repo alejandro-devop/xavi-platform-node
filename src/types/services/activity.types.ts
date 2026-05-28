@@ -9,6 +9,7 @@ export interface Activity {
   description: string | null;
   status: ActivityStatus;
   priority: ActivityPriority;
+  categoryId: string | null;
   scheduledDate: Date | null;
   completedAt: Date | null;
   createdAt: Date;
@@ -27,6 +28,7 @@ export interface CreateActivityInput {
   description?: string | null;
   status?: ActivityStatus;
   priority?: ActivityPriority;
+  categoryId?: string | null;
   scheduledDate?: Date | string | null;
 }
 
@@ -35,12 +37,14 @@ export interface UpdateActivityInput {
   description?: string | null;
   status?: ActivityStatus;
   priority?: ActivityPriority;
+  categoryId?: string | null;
   scheduledDate?: Date | string | null;
 }
 
 export interface ListActivitiesOptions {
   status?: ActivityStatus;
   priority?: ActivityPriority;
+  categoryId?: string;
   startDate?: Date | string;
   endDate?: Date | string;
   page?: number;

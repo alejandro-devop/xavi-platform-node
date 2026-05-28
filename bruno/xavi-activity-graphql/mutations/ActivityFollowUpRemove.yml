@@ -1,0 +1,25 @@
+info:
+  name: ActivityFollowUpRemove
+  type: http
+  seq: 9
+
+http:
+  method: POST
+  url: "{{baseUrl}}/graphql"
+  headers:
+    - name: Content-Type
+      value: application/json
+    - name: Authorization
+      value: "Bearer {{token}}"
+  body:
+    type: graphql
+    data:
+      query: |
+        mutation ActivityFollowUpRemove($id: ID!) {
+          activityFollowUpRemove(id: $id)
+        }
+      variables: |
+        { "id": "1" }
+
+settings:
+  encodeUrl: true

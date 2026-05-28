@@ -7,6 +7,7 @@ import type {
   ListActivitiesOptions,
   UpdateActivityInput,
 } from '../types/services/activity.types';
+import { activityCategoryService } from './activity-category.service';
 
 type ActivityRow = {
   id: number;
@@ -15,13 +16,14 @@ type ActivityRow = {
   description: string | null;
   status: string;
   priority: string;
+  category_id: string | null;
   scheduled_date: Date | null;
   completed_at: Date | null;
   created_at: Date;
   updated_at: Date;
 };
 
-const ACTIVITY_RETURNING = `id, user_id, title, description, status, priority, scheduled_date, completed_at, created_at, updated_at`;
+const ACTIVITY_RETURNING = `id, user_id, title, description, status, priority, category_id, scheduled_date, completed_at, created_at, updated_at`;
 
 function mapActivity(row: ActivityRow): Activity {
   return {
@@ -31,11 +33,23 @@ function mapActivity(row: ActivityRow): Activity {
     description: row.description,
     status: row.status as Activity['status'],
     priority: row.priority as Activity['priority'],
+    categoryId: row.category_id,
     scheduledDate: row.scheduled_date,
     completedAt: row.completed_at,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
+}
+
+async function resolveCategoryId(
+  userId: number,
+  categoryId: string | null | undefined
+): Promise<string | null> {
+  if (categoryId === undefined || categoryId === null) {
+    return null;
+  }
+  await activityCategoryService.getCategoryById(categoryId, userId);
+  return categoryId;
 }
 
 export function parseActivityId(id: string | number): number {
@@ -68,10 +82,11 @@ async function getOwnedActivityOrThrow(activityId: number, userId: number): Prom
 }
 
 async function createActivity(userId: number, input: CreateActivityInput): Promise<Activity> {
+  const categoryId = await resolveCategoryId(userId, input.categoryId);
   const db = getDbPool();
   const result = await db.query<ActivityRow>(
-    `INSERT INTO activities (user_id, title, description, status, priority, scheduled_date)
-     VALUES ($1, $2, $3, $4, $5, $6)
+    `INSERT INTO activities (user_id, title, description, status, priority, category_id, scheduled_date)
+     VALUES ($1, $2, $3, $4, $5, $6, $7)
      RETURNING ${ACTIVITY_RETURNING}`,
     [
       userId,
@@ -79,6 +94,7 @@ async function createActivity(userId: number, input: CreateActivityInput): Promi
       input.description ?? null,
       input.status ?? 'pending',
       input.priority ?? 'medium',
+      categoryId,
       input.scheduledDate ?? null,
     ]
   );
@@ -106,6 +122,11 @@ async function listActivities(
   if (options.priority) {
     whereClause += ` AND priority = $${paramIndex}`;
     params.push(options.priority);
+    paramIndex++;
+  }
+  if (options.categoryId) {
+    whereClause += ` AND category_id = $${paramIndex}`;
+    params.push(options.categoryId);
     paramIndex++;
   }
   if (options.startDate) {
@@ -181,6 +202,12 @@ async function updateActivity(
   if (input.scheduledDate !== undefined) {
     updates.push(`scheduled_date = $${paramIndex}`);
     params.push(input.scheduledDate);
+    paramIndex++;
+  }
+  if (input.categoryId !== undefined) {
+    const categoryId = await resolveCategoryId(userId, input.categoryId);
+    updates.push(`category_id = $${paramIndex}`);
+    params.push(categoryId);
     paramIndex++;
   }
 

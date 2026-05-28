@@ -337,11 +337,19 @@ Habilitada solo en `NODE_ENV !== 'production'`. En prod usar este documento o co
 
 ## 5. Módulo — Actividades
 
-**Documentación adicional:** `docs/graphql/activity-bruno.md`
+**Documentación adicional:** `docs/graphql/activity-bruno.md`  
+**Migración DB:** `migrations/025_activity_categories_and_followups.sql`
 
 ### 5.1 Modelo de dominio
 
-Tareas puntuales con estado, prioridad y fecha programada (similar a un todo calendarizado).
+| Concepto | Uso |
+|----------|-----|
+| **Activity** | Tarea con estado, prioridad, fecha programada; opcionalmente categoría |
+| **ActivityCategory** | Agrupación simple (UUID), como `HabitCategory` |
+| **ActivityFollowUp** | Registro de tiempo: día, hora inicio, duración en minutos (la hora fin **no se guarda**, se calcula en API) |
+
+- **IDs actividad / follow-up:** numéricos como `ID` string (`"7"`).
+- **IDs categoría:** UUID v7.
 
 ### 5.2 Enums
 
@@ -352,18 +360,59 @@ type ActivityPriority = 'low' | 'medium' | 'high' | 'urgent';
 
 ### 5.3 Operaciones
 
+#### Actividades
+
 | Tipo | Operación | Descripción |
 |------|-----------|-------------|
-| Query | `activity(id)` | Detalle |
-| Query | `activities(status, priority, startDate, endDate, page, limit)` | Listado paginado |
-| Mutation | `activityAdd(input)` | Crear |
-| Mutation | `activityEdit(input)` | Editar (requiere `id` + al menos un campo) |
-| Mutation | `activityRemove(id)` | Eliminar → `Boolean` |
+| Query | `activity(id)` | Detalle + `category`, `followUps`, `spentTimeMinutes` |
+| Query | `activities(...)` | Listado; filtros `status`, `priority`, `categoryId`, fechas, paginación |
+| Mutation | `activityAdd` / `activityEdit` / `activityRemove` | CRUD |
 | Mutation | `activityComplete(id)` | Marca `completed` + `completedAt` |
 
-### 5.4 Fragmento TypeScript
+#### Categorías
+
+| Tipo | Operación |
+|------|-----------|
+| Query | `activityCategories`, `activityCategory(id)` |
+| Mutation | `activityCategoryAdd`, `activityCategoryEdit`, `activityCategoryRemove` |
+
+No eliminar categoría si hay actividades con `categoryId` asignado.
+
+#### Follow-ups (time tracking)
+
+| Tipo | Operación |
+|------|-----------|
+| Query | `activityFollowUp(id)`, `activityFollowUps(activityId, from, to)` |
+| Query | `activityDayFollowUps(date)`, `activityFollowUpsInDates(from, to)` |
+| Mutation | `activityFollowUpAdd`, `activityFollowUpEdit`, `activityFollowUpRemove` |
+
+Campos calculados en cada follow-up: `endTime`, `endDate`, `endDateTime` (= `date` + `startTime` + `durationMinutes`).
+
+### 5.4 Fragmentos TypeScript
 
 ```typescript
+interface ActivityCategory {
+  id: string;
+  userId: number;
+  orderIndex: number;
+  name: string;
+  description: string | null;
+  icon: string | null;
+  color: string | null;
+}
+
+interface ActivityFollowUp {
+  id: string;
+  activityId: string;
+  date: string; // YYYY-MM-DD
+  startTime: string; // HH:mm:ss
+  durationMinutes: number;
+  endTime: string;
+  endDate: string;
+  endDateTime: string;
+  notes: string | null;
+}
+
 interface Activity {
   id: string;
   userId: number;
@@ -371,29 +420,29 @@ interface Activity {
   description: string | null;
   status: ActivityStatus;
   priority: ActivityPriority;
-  scheduledDate: string | null; // DateTime ISO
+  categoryId: string | null;
+  scheduledDate: string | null;
   completedAt: string | null;
-  createdAt: string;
-  updatedAt: string;
+  spentTimeMinutes: number;
+  category?: ActivityCategory | null;
 }
 ```
 
 ### 5.5 Queries de ejemplo
 
 ```graphql
-query Activities($status: ActivityStatus, $page: Int) {
-  activities(status: $status, page: $page, limit: 20) {
+query Activities($status: ActivityStatus, $categoryId: ID, $page: Int) {
+  activities(status: $status, categoryId: $categoryId, page: $page, limit: 20) {
     activities {
       id
       title
       status
       priority
-      scheduledDate
-      completedAt
+      categoryId
+      category { id name color icon }
+      spentTimeMinutes
     }
     total
-    page
-    limit
   }
 }
 
@@ -401,12 +450,27 @@ query Activity($id: ID!) {
   activity(id: $id) {
     id
     title
-    description
-    status
-    priority
-    scheduledDate
-    completedAt
-    createdAt
+    category { id name }
+    spentTimeMinutes
+    followUps(limit: 20) {
+      id
+      date
+      startTime
+      durationMinutes
+      endTime
+      notes
+    }
+  }
+}
+
+query ActivityDayFollowUps($date: String!) {
+  activityDayFollowUps(date: $date) {
+    id
+    activityId
+    startTime
+    durationMinutes
+    endDateTime
+    activity { id title }
   }
 }
 ```
@@ -418,37 +482,43 @@ mutation ActivityAdd($input: ActivityInput!) {
   activityAdd(input: $input) {
     id
     title
-    status
-    priority
+    categoryId
   }
 }
 
-mutation ActivityComplete($id: ID!) {
-  activityComplete(id: $id) {
+mutation ActivityFollowUpAdd($input: ActivityFollowUpAddInput!) {
+  activityFollowUpAdd(input: $input) {
     id
-    status
-    completedAt
+    date
+    startTime
+    durationMinutes
+    endTime
+    endDateTime
   }
 }
 ```
 
-**Variables `activityAdd`:**
+**Variables `activityFollowUpAdd`:**
 
 ```json
 {
   "input": {
-    "title": "Revisar informe",
-    "priority": "high",
-    "scheduledDate": "2026-05-20T09:00:00.000Z"
+    "activityId": "7",
+    "date": "2026-05-20",
+    "startTime": "09:30",
+    "durationMinutes": 90,
+    "notes": "Deep work"
   }
 }
 ```
 
 ### 5.7 Pantallas sugeridas (IA)
 
-1. **Lista** — filtros status/priority, FAB crear, swipe completar/archivar.
-2. **Detalle / edición** — formulario con `activityEdit` o `activityAdd`.
-3. **Vista agenda** — opcional: agrupar por `scheduledDate`.
+1. **Lista** — filtros status/priority/categoría, FAB crear, swipe completar.
+2. **Detalle** — edición, lista de follow-ups, total `spentTimeMinutes`.
+3. **Registrar tiempo** — formulario día + hora inicio + duración → `activityFollowUpAdd`.
+4. **Categorías** — settings con CRUD `activityCategory*`.
+5. **Vista día** — `activityDayFollowUps(date)` o calendario con `activityFollowUpsInDates`.
 
 ---
 
@@ -785,7 +855,9 @@ Invalidar tras mutations:
 ### Fase C — Actividades
 
 - [ ] Lista paginada + filtros
-- [ ] CRUD + `activityComplete`
+- [ ] CRUD actividades + `activityComplete`
+- [ ] CRUD categorías (`activityCategory*`)
+- [ ] Follow-ups de tiempo (`activityFollowUp*`, `activityDayFollowUps`)
 
 ### Fase D — Hábitos
 

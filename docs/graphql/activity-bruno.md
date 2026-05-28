@@ -4,23 +4,26 @@
 
 Endpoint: **`POST /graphql`** · Header: **`Authorization: Bearer <token>`**
 
-IDs: enteros como string (`"7"`).
+- IDs de actividad y follow-up: enteros como string (`"7"`).
+- IDs de categoría: UUID (`"0194a1b2-..."`).
 
 ---
 
-## Queries
+## Queries — Actividades
 
 ### `Activities`
 
 ```graphql
-query Activities($status: ActivityStatus, $priority: ActivityPriority) {
-  activities(status: $status, priority: $priority, page: 1, limit: 20) {
+query Activities($status: ActivityStatus, $categoryId: ID) {
+  activities(status: $status, categoryId: $categoryId, page: 1, limit: 20) {
     activities {
       id
       title
       status
       priority
-      scheduledDate
+      categoryId
+      category { id name color }
+      spentTimeMinutes
     }
     total
   }
@@ -37,15 +40,92 @@ query Activity($id: ID!) {
     description
     status
     priority
-    scheduledDate
-    completedAt
+    categoryId
+    category { id name icon color }
+    spentTimeMinutes
+    followUps(limit: 20) {
+      id
+      date
+      startTime
+      durationMinutes
+      endTime
+      endDateTime
+      notes
+    }
   }
 }
 ```
 
 ---
 
-## Mutations
+## Queries — Categorías
+
+### `ActivityCategories`
+
+```graphql
+query ActivityCategories {
+  activityCategories {
+    id
+    name
+    orderIndex
+    color
+    icon
+  }
+}
+```
+
+### `ActivityCategory`
+
+```graphql
+query ActivityCategory($id: ID!) {
+  activityCategory(id: $id) {
+    id
+    name
+    description
+    orderIndex
+  }
+}
+```
+
+---
+
+## Queries — Follow-ups
+
+### `ActivityFollowUps`
+
+```graphql
+query ActivityFollowUps($activityId: ID, $from: String, $to: String) {
+  activityFollowUps(activityId: $activityId, from: $from, to: $to, limit: 50) {
+    id
+    activityId
+    date
+    startTime
+    durationMinutes
+    endTime
+    endDate
+    endDateTime
+    notes
+  }
+}
+```
+
+### `ActivityDayFollowUps`
+
+```graphql
+query ActivityDayFollowUps($date: String!) {
+  activityDayFollowUps(date: $date) {
+    id
+    startTime
+    durationMinutes
+    endDateTime
+    activity { id title }
+  }
+}
+```
+
+---
+
+## Mutations — Actividades
 
 | Operación | REST equivalente |
 |-----------|------------------|
@@ -54,15 +134,101 @@ query Activity($id: ID!) {
 | `activityRemove` | `DELETE /api/activity/:id` |
 | `activityComplete` | `POST /api/activity/:id/complete` |
 
-### `ActivityComplete`
+### `ActivityAdd` (con categoría)
 
 ```graphql
-mutation ActivityComplete($id: ID!) {
-  activityComplete(id: $id) {
+mutation ActivityAdd($input: ActivityInput!) {
+  activityAdd(input: $input) {
     id
-    status
-    completedAt
+    title
+    categoryId
   }
+}
+```
+
+```json
+{
+  "input": {
+    "title": "Revisar informe",
+    "priority": "high",
+    "categoryId": "0194a1b2-c3d4-7000-8000-000000000001"
+  }
+}
+```
+
+---
+
+## Mutations — Categorías
+
+```graphql
+mutation ActivityCategoryAdd($input: ActivityCategoryInput!) {
+  activityCategoryAdd(input: $input) {
+    id
+    name
+  }
+}
+```
+
+```graphql
+mutation ActivityCategoryEdit($input: ActivityCategoryEditInput!) {
+  activityCategoryEdit(input: $input) {
+    id
+    name
+    color
+  }
+}
+```
+
+```graphql
+mutation ActivityCategoryRemove($id: ID!) {
+  activityCategoryRemove(id: $id)
+}
+```
+
+---
+
+## Mutations — Follow-ups
+
+La hora de fin **no se persiste**; el API devuelve `endTime`, `endDate` y `endDateTime` calculados.
+
+```graphql
+mutation ActivityFollowUpAdd($input: ActivityFollowUpAddInput!) {
+  activityFollowUpAdd(input: $input) {
+    id
+    date
+    startTime
+    durationMinutes
+    endTime
+    endDateTime
+  }
+}
+```
+
+```json
+{
+  "input": {
+    "activityId": "7",
+    "date": "2026-05-20",
+    "startTime": "09:30",
+    "durationMinutes": 90,
+    "notes": "Sesión enfocada"
+  }
+}
+```
+
+```graphql
+mutation ActivityFollowUpEdit($input: ActivityFollowUpEditInput!) {
+  activityFollowUpEdit(input: $input) {
+    id
+    durationMinutes
+    endTime
+  }
+}
+```
+
+```graphql
+mutation ActivityFollowUpRemove($id: ID!) {
+  activityFollowUpRemove(id: $id)
 }
 ```
 

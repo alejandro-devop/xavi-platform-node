@@ -1,0 +1,31 @@
+info:
+  name: ActivityDayFollowUps
+  type: http
+  seq: 5
+
+http:
+  method: POST
+  url: "{{baseUrl}}/graphql"
+  headers:
+    - name: Content-Type
+      value: application/json
+    - name: Authorization
+      value: "Bearer {{token}}"
+  body:
+    type: graphql
+    data:
+      query: |
+        query ActivityDayFollowUps($date: String!) {
+          activityDayFollowUps(date: $date) {
+            id
+            startTime
+            durationMinutes
+            endDateTime
+            activity { id title }
+          }
+        }
+      variables: |
+        { "date": "2026-05-20" }
+
+settings:
+  encodeUrl: true

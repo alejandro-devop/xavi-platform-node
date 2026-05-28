@@ -22,6 +22,7 @@ function createActivityRow(overrides: Record<string, unknown> = {}) {
     description: null,
     status: 'pending',
     priority: 'high',
+    category_id: null,
     scheduled_date: now,
     completed_at: null,
     created_at: now,

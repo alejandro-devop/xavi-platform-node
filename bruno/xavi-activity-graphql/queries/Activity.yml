@@ -1,0 +1,38 @@
+info:
+  name: Activity
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{baseUrl}}/graphql"
+  headers:
+    - name: Content-Type
+      value: application/json
+    - name: Authorization
+      value: "Bearer {{token}}"
+  body:
+    type: graphql
+    data:
+      query: |
+        query Activity($id: ID!) {
+          activity(id: $id) {
+            id
+            title
+            category { id name }
+            spentTimeMinutes
+            followUps(limit: 20) {
+              id
+              date
+              startTime
+              durationMinutes
+              endTime
+              endDateTime
+            }
+          }
+        }
+      variables: |
+        { "id": "1" }
+
+settings:
+  encodeUrl: true

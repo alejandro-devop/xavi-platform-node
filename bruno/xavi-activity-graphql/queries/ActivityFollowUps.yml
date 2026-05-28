@@ -1,0 +1,38 @@
+info:
+  name: ActivityFollowUps
+  type: http
+  seq: 4
+
+http:
+  method: POST
+  url: "{{baseUrl}}/graphql"
+  headers:
+    - name: Content-Type
+      value: application/json
+    - name: Authorization
+      value: "Bearer {{token}}"
+  body:
+    type: graphql
+    data:
+      query: |
+        query ActivityFollowUps($activityId: ID, $from: String, $to: String) {
+          activityFollowUps(activityId: $activityId, from: $from, to: $to) {
+            id
+            activityId
+            date
+            startTime
+            durationMinutes
+            endTime
+            endDateTime
+            notes
+          }
+        }
+      variables: |
+        {
+          "activityId": "1",
+          "from": "2026-05-01",
+          "to": "2026-05-31"
+        }
+
+settings:
+  encodeUrl: true

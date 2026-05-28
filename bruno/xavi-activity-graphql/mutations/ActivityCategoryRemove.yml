@@ -1,0 +1,25 @@
+info:
+  name: ActivityCategoryRemove
+  type: http
+  seq: 6
+
+http:
+  method: POST
+  url: "{{baseUrl}}/graphql"
+  headers:
+    - name: Content-Type
+      value: application/json
+    - name: Authorization
+      value: "Bearer {{token}}"
+  body:
+    type: graphql
+    data:
+      query: |
+        mutation ActivityCategoryRemove($id: ID!) {
+          activityCategoryRemove(id: $id)
+        }
+      variables: |
+        { "id": "CATEGORY_UUID" }
+
+settings:
+  encodeUrl: true

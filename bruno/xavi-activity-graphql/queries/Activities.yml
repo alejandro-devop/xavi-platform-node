@@ -15,9 +15,17 @@ http:
     type: graphql
     data:
       query: |
-        query Activities {
-          activities(status: pending, limit: 20) {
-            activities { id title status priority scheduledDate }
+        query Activities($status: ActivityStatus, $categoryId: ID) {
+          activities(status: $status, categoryId: $categoryId, limit: 20) {
+            activities {
+              id
+              title
+              status
+              priority
+              categoryId
+              category { id name color }
+              spentTimeMinutes
+            }
             total
           }
         }

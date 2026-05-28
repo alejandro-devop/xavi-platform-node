@@ -15,6 +15,39 @@ export const activityTypeDefs = gql`
     urgent
   }
 
+  type ActivityCategory {
+    id: ID!
+    userId: Int!
+    orderIndex: Int!
+    name: String!
+    description: String
+    icon: String
+    color: String
+    createdAt: DateTime!
+    updatedAt: DateTime!
+  }
+
+  type ActivityFollowUp {
+    id: ID!
+    activityId: ID!
+    userId: Int!
+    date: String!
+    startTime: String!
+    durationMinutes: Int!
+    endTime: String!
+    endDate: String!
+    endDateTime: String!
+    notes: String
+    createdAt: DateTime!
+    updatedAt: DateTime!
+    activity: Activity
+  }
+
+  type ActivityFollowUpsDateGroup {
+    date: String!
+    followUps: [ActivityFollowUp!]!
+  }
+
   type Activity {
     id: ID!
     userId: Int!
@@ -22,10 +55,14 @@ export const activityTypeDefs = gql`
     description: String
     status: ActivityStatus!
     priority: ActivityPriority!
+    categoryId: ID
     scheduledDate: DateTime
     completedAt: DateTime
+    spentTimeMinutes: Int!
     createdAt: DateTime!
     updatedAt: DateTime!
+    category: ActivityCategory
+    followUps(limit: Int, from: String, to: String): [ActivityFollowUp!]!
   }
 
   type ActivityCollection {
@@ -40,11 +77,18 @@ export const activityTypeDefs = gql`
     activities(
       status: ActivityStatus
       priority: ActivityPriority
+      categoryId: ID
       startDate: DateTime
       endDate: DateTime
       page: Int
       limit: Int
     ): ActivityCollection!
+    activityCategories: [ActivityCategory!]!
+    activityCategory(id: ID!): ActivityCategory
+    activityFollowUp(id: ID!): ActivityFollowUp
+    activityFollowUps(activityId: ID, from: String, to: String, limit: Int): [ActivityFollowUp!]!
+    activityFollowUpsInDates(from: String!, to: String!): [ActivityFollowUpsDateGroup!]!
+    activityDayFollowUps(date: String!): [ActivityFollowUp!]!
   }
 
   extend type Mutation {
@@ -52,6 +96,12 @@ export const activityTypeDefs = gql`
     activityEdit(input: ActivityEditInput!): Activity!
     activityRemove(id: ID!): Boolean!
     activityComplete(id: ID!): Activity!
+    activityCategoryAdd(input: ActivityCategoryInput!): ActivityCategory!
+    activityCategoryEdit(input: ActivityCategoryEditInput!): ActivityCategory!
+    activityCategoryRemove(id: ID!): Boolean!
+    activityFollowUpAdd(input: ActivityFollowUpAddInput!): ActivityFollowUp!
+    activityFollowUpEdit(input: ActivityFollowUpEditInput!): ActivityFollowUp!
+    activityFollowUpRemove(id: ID!): Boolean!
   }
 
   input ActivityInput {
@@ -59,6 +109,7 @@ export const activityTypeDefs = gql`
     description: String
     status: ActivityStatus
     priority: ActivityPriority
+    categoryId: ID
     scheduledDate: DateTime
   }
 
@@ -68,6 +119,40 @@ export const activityTypeDefs = gql`
     description: String
     status: ActivityStatus
     priority: ActivityPriority
+    categoryId: ID
     scheduledDate: DateTime
+  }
+
+  input ActivityCategoryInput {
+    name: String!
+    description: String
+    icon: String
+    color: String
+    orderIndex: Int
+  }
+
+  input ActivityCategoryEditInput {
+    id: ID!
+    name: String
+    description: String
+    icon: String
+    color: String
+    orderIndex: Int
+  }
+
+  input ActivityFollowUpAddInput {
+    activityId: ID!
+    date: String!
+    startTime: String!
+    durationMinutes: Int!
+    notes: String
+  }
+
+  input ActivityFollowUpEditInput {
+    id: ID!
+    date: String
+    startTime: String
+    durationMinutes: Int
+    notes: String
   }
 `;
