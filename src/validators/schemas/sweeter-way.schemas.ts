@@ -2,6 +2,32 @@ import { z } from 'zod';
 
 const LIST_CATEGORIES = ['restaurant', 'travel', 'outdoor', 'entertainment', 'culture', 'other'] as const;
 
+/** Treats missing, null, or blank strings as null (optional GraphQL fields). */
+function optionalTrimmedString(maxLength: number) {
+  return z
+    .string()
+    .max(maxLength)
+    .nullish()
+    .transform((value) => {
+      if (value == null) return null;
+      const trimmed = value.trim();
+      return trimmed === '' ? null : trimmed;
+    });
+}
+
+/** Optional URL: omit, null, blank, or valid http(s) URL. */
+function optionalUrl() {
+  return z
+    .string()
+    .nullish()
+    .transform((value) => {
+      if (value == null) return null;
+      const trimmed = value.trim();
+      return trimmed === '' ? null : trimmed;
+    })
+    .pipe(z.union([z.null(), z.string().url('Invalid URL')]));
+}
+
 const swListInputFields = {
   title: z.string().min(2).max(100),
   description: z.string().max(500).nullish(),
@@ -17,15 +43,15 @@ const swListUpdateInputFields = {
 const swListItemInputFields = {
   title: z.string().min(2).max(100),
   description: z.string().max(500).nullish(),
-  address: z.string().max(500).nullish(),
-  url: z.string().url().nullish(),
+  address: optionalTrimmedString(500),
+  url: optionalUrl(),
 };
 
 const swListItemUpdateInputFields = {
   title: z.string().min(2).max(100).optional(),
   description: z.string().max(500).nullish(),
-  address: z.string().max(500).nullish(),
-  url: z.string().url().nullish(),
+  address: optionalTrimmedString(500),
+  url: optionalUrl(),
 };
 
 export const swSendCinnamonRequestSchema = z.object({

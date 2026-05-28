@@ -1,4 +1,4 @@
-import { requireAuth } from '../../utils/error-handler';
+import { requireAuth, type GraphQLContext } from '../../utils/error-handler';
 import { withValidatedResolver } from '../../utils/validation';
 import { swBondService } from '../../../services/sweeter-way-bond.service';
 import { swListService } from '../../../services/sweeter-way-list.service';
@@ -379,7 +379,7 @@ export const sweeterWayResolvers = {
   },
 
   CinnamonBond: {
-    partner: async (parent: CinnamonBond, _: unknown, context) => {
+    partner: async (parent: CinnamonBond, _: unknown, context: GraphQLContext) => {
       if (!context.user?.id) return null;
       return swBondService.getPartnerProfile(parent, uid(context));
     },

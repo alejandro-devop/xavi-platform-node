@@ -49,6 +49,23 @@ const GRAPHQL_URL = `${API_BASE_URL}/graphql`;
 
 La misma URL de Cloud Run sirve para **auth** y **GraphQL** (un solo servicio `xavi-api`).
 
+### CORS (frontends en otro origen)
+
+Orígenes permitidos **en código** (sin depender solo de env):
+
+| Origen | App |
+|--------|-----|
+| `https://sweeter-way-web.vercel.app` | Sweeter Way (prod) |
+| `https://xavi-habits-webapp.vercel.app` | Hábitos (prod) |
+| `http://localhost:5173` (y otros localhost) | Desarrollo local |
+| `https://<proyecto>-<hash>.vercel.app` | Previews de Vercel |
+
+Orígenes extra: variable `ALLOWED_ORIGINS` en Cloud Run (comma-separated).
+
+En el cliente, para login/GraphQL con Bearer **no uses** `credentials: 'include'` salvo cookies; con header `Authorization` basta el default (`omit`).
+
+Tras cambiar CORS en backend, **redespliega** Cloud Run. Si el error persiste en prod sin redeploy, el servicio sigue con la imagen anterior.
+
 ### Convenciones globales
 
 - **IDs de usuario** en GraphQL: tipo `ID`, valor string numérico (`"42"`).
@@ -1069,8 +1086,8 @@ mutation SwUpdatePreferences($input: SWUpdatePreferencesInput!) {
 | `addresseeEmail` (invitación) | Email válido (trim en servidor) |
 | `title` (lista/ítem) | 2–100 caracteres |
 | `description` | máx. 500 |
-| `address` | máx. 500 |
-| `url` | URL válida o omitir/null |
+| `address` (ítem) | Opcional; omitir, `null` o `""` → se guarda como `null`; máx. 500 si se envía |
+| `url` (ítem) | Opcional; omitir, `null` o `""` → `null`; si se envía, debe ser URL válida |
 | `comment` (log) | máx. 1000 |
 | `rating` | entero 1–5 |
 | UUIDs | UUID válido |
