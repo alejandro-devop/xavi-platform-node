@@ -82,6 +82,7 @@ export const habitTypeDefs = gql`
     isFailed: Boolean!
     createdAt: DateTime!
     updatedAt: DateTime!
+    habit: Habit
   }
 
   type HabitFollowUp {

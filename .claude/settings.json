@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run dev)",
+      "Bash(npm test)",
+      "Bash(npm run test:*)",
+      "Bash(npm run build)",
+      "Bash(npm run lint*)",
+      "Bash(npm run format)",
+      "Bash(npm run migrate)",
+      "Bash(npm run migrate:*)",
+      "Bash(npm run docker:*)",
+      "Bash(npm run stop)",
+      "Bash(node scripts/*.mjs)",
+      "Bash(grep -r*)",
+      "Bash(find . *)",
+      "Bash(ls *)",
+      "Bash(git status)",
+      "Bash(git diff*)",
+      "Bash(git log*)"
+    ]
+  }
+}

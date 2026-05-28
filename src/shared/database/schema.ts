@@ -1,5 +1,6 @@
 import {
   pgTable,
+  pgEnum,
   uuid,
   integer,
   varchar,
@@ -9,6 +10,7 @@ import {
   text,
   date,
   serial,
+  jsonb,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 import { generateUuidV7 } from './uuid';
@@ -366,3 +368,85 @@ export const walletBudgetClosuresRelations = relations(walletBudgetClosures, ({ 
     references: [users.id],
   }),
 }));
+
+// ============================================
+// SWEETER WAY MODULE
+// ============================================
+
+export const swBondStatusEnum = pgEnum('sw_bond_status', ['pending', 'accepted', 'rejected', 'dissolved']);
+export const swListCategoryEnum = pgEnum('sw_list_category', ['restaurant', 'travel', 'outdoor', 'entertainment', 'culture', 'other']);
+export const swItemStatusEnum = pgEnum('sw_item_status', ['pending', 'completed']);
+export const swNotificationTypeEnum = pgEnum('sw_notification_type', ['bond_requested', 'bond_accepted', 'item_added', 'item_completed', 'log_added']);
+export const swEntityTypeEnum = pgEnum('sw_entity_type', ['bond', 'list', 'item', 'log']);
+
+export const swCinnamonBonds = pgTable('sw_cinnamon_bonds', {
+  id: uuid('id').primaryKey().$defaultFn(() => generateUuidV7()),
+  requesterId: integer('requester_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  addresseeId: integer('addressee_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  status: swBondStatusEnum('status').notNull().default('pending'),
+  requestedAt: timestamp('requested_at').notNull().defaultNow(),
+  respondedAt: timestamp('responded_at'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+export const swLists = pgTable('sw_lists', {
+  id: uuid('id').primaryKey().$defaultFn(() => generateUuidV7()),
+  bondId: uuid('bond_id').notNull().references(() => swCinnamonBonds.id, { onDelete: 'cascade' }),
+  title: varchar('title', { length: 100 }).notNull(),
+  description: text('description'),
+  category: swListCategoryEnum('category').notNull().default('other'),
+  createdBy: integer('created_by').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+export const swListItems = pgTable('sw_list_items', {
+  id: uuid('id').primaryKey().$defaultFn(() => generateUuidV7()),
+  listId: uuid('list_id').notNull().references(() => swLists.id, { onDelete: 'cascade' }),
+  title: varchar('title', { length: 100 }).notNull(),
+  description: text('description'),
+  address: text('address'),
+  url: text('url'),
+  status: swItemStatusEnum('status').notNull().default('pending'),
+  completedAt: timestamp('completed_at'),
+  addedBy: integer('added_by').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  rating: integer('rating'),
+  wouldReturn: boolean('would_return'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+export const swItemLogs = pgTable('sw_item_logs', {
+  id: uuid('id').primaryKey().$defaultFn(() => generateUuidV7()),
+  itemId: uuid('item_id').notNull().references(() => swListItems.id, { onDelete: 'cascade' }),
+  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  comment: text('comment'),
+  liked: boolean('liked'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+export const swNotifications = pgTable('sw_notifications', {
+  id: uuid('id').primaryKey().$defaultFn(() => generateUuidV7()),
+  recipientId: integer('recipient_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  actorId: integer('actor_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  type: swNotificationTypeEnum('type').notNull(),
+  entityType: swEntityTypeEnum('entity_type').notNull(),
+  entityId: uuid('entity_id').notNull(),
+  readAt: timestamp('read_at'),
+  payload: jsonb('payload'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+export const swUserPreferences = pgTable('sw_user_preferences', {
+  id: uuid('id').primaryKey().$defaultFn(() => generateUuidV7()),
+  userId: integer('user_id').notNull().unique().references(() => users.id, { onDelete: 'cascade' }),
+  emailNotifications: boolean('email_notifications').notNull().default(true),
+  inAppNotifications: boolean('in_app_notifications').notNull().default(true),
+  pushToken: text('push_token'),
+  pushNotificationsEnabled: boolean('push_notifications_enabled').notNull().default(false),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
