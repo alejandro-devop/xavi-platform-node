@@ -1,6 +1,6 @@
 import { getDbPool } from '../shared/database/pool';
 import { BadRequestError, ConflictError, ForbiddenError, NotFoundError } from '../shared/errors';
-import { CinnamonBond, BondStatus } from '../types/services/sweeter-way.types';
+import { CinnamonBond, BondStatus, SWBondPartner } from '../types/services/sweeter-way.types';
 
 function mapBondRow(row: Record<string, unknown>): CinnamonBond {
   return {
@@ -28,6 +28,19 @@ export const swBondService = {
     return result.rows.length > 0 ? mapBondRow(result.rows[0]) : null;
   },
 
+  /** Pending bonds where the user is requester or addressee (newest first). */
+  async getMyPendingBondRequests(userId: number): Promise<CinnamonBond[]> {
+    const db = getDbPool();
+    const result = await db.query(
+      `SELECT * FROM sw_cinnamon_bonds
+       WHERE status = 'pending'
+         AND (requester_id = $1 OR addressee_id = $1)
+       ORDER BY requested_at DESC`,
+      [userId]
+    );
+    return result.rows.map(mapBondRow);
+  },
+
   async getBondById(bondId: string, userId: number): Promise<CinnamonBond> {
     const db = getDbPool();
     const result = await db.query('SELECT * FROM sw_cinnamon_bonds WHERE id = $1', [bondId]);
@@ -37,6 +50,31 @@ export const swBondService = {
       throw new ForbiddenError('You are not part of this bond');
     }
     return bond;
+  },
+
+  async sendCinnamonRequestByEmail(requesterId: number, addresseeEmail: string): Promise<CinnamonBond> {
+    const normalizedEmail = addresseeEmail.trim().toLowerCase();
+    const db = getDbPool();
+
+    const requesterResult = await db.query('SELECT email FROM users WHERE id = $1', [requesterId]);
+    if (requesterResult.rows.length === 0) {
+      throw new NotFoundError('User not found');
+    }
+
+    const requesterEmail = (requesterResult.rows[0].email as string).trim().toLowerCase();
+    if (requesterEmail === normalizedEmail) {
+      throw new BadRequestError('Cannot send a bond request to yourself');
+    }
+
+    const addresseeResult = await db.query(
+      'SELECT id FROM users WHERE LOWER(TRIM(email)) = $1',
+      [normalizedEmail]
+    );
+    if (addresseeResult.rows.length === 0) {
+      throw new NotFoundError('No user found with this email');
+    }
+
+    return this.sendCinnamonRequest(requesterId, addresseeResult.rows[0].id as number);
   },
 
   async sendCinnamonRequest(requesterId: number, addresseeId: number): Promise<CinnamonBond> {
@@ -130,8 +168,25 @@ export const swBondService = {
     return true;
   },
 
-  /** Returns the partner's userId for a given accepted bond. */
+  /** Returns the partner's userId for a given bond (the user who is not myUserId). */
   getCinnamonId(bond: CinnamonBond, myUserId: number): number {
     return bond.requesterId === myUserId ? bond.addresseeId : bond.requesterId;
+  },
+
+  async getPartnerProfile(bond: CinnamonBond, myUserId: number): Promise<SWBondPartner | null> {
+    const partnerId = this.getCinnamonId(bond, myUserId);
+    const db = getDbPool();
+    const result = await db.query(
+      'SELECT id, name, email FROM users WHERE id = $1',
+      [partnerId]
+    );
+    if (result.rows.length === 0) return null;
+
+    const row = result.rows[0];
+    return {
+      id: row.id as number,
+      name: (row.name as string | null) ?? '',
+      email: row.email as string,
+    };
   },
 };

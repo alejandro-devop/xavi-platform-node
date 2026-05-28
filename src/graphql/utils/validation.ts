@@ -33,14 +33,25 @@ export function withValidation<TSchema extends z.ZodType>(
 ) {
   return async (parent: any, args: any, context: GraphQLContext): Promise<any> => {
     try {
-      // Determine what to validate: args.input for mutations, args for queries
-      const dataToValidate = args.input !== undefined ? args.input : args;
+      // Mutations with only `input` validate the inner object (e.g. habitAdd).
+      // Mutations with `input` plus other args (e.g. swUpdateList id + input) validate all args.
+      const hasArgsBeyondInput =
+        args.input !== undefined &&
+        Object.keys(args).some((key) => key !== 'input' && args[key] !== undefined);
 
-      // Validate with Zod
+      const dataToValidate = hasArgsBeyondInput
+        ? args
+        : args.input !== undefined
+          ? args.input
+          : args;
+
       const validated = schema.parse(dataToValidate);
 
-      // Replace args with validated data
-      const validatedArgs = args.input !== undefined ? { ...args, input: validated } : validated;
+      const validatedArgs = hasArgsBeyondInput
+        ? validated
+        : args.input !== undefined
+          ? { ...args, input: validated }
+          : validated;
 
       // Execute resolver with validated data
       return await resolver(parent, validatedArgs, context);
@@ -104,14 +115,23 @@ export function withAsyncValidation<TSchema extends z.ZodType>(
 ) {
   return async (parent: any, args: any, context: GraphQLContext): Promise<any> => {
     try {
-      // Determine what to validate: args.input for mutations, args for queries
-      const dataToValidate = args.input !== undefined ? args.input : args;
+      const hasArgsBeyondInput =
+        args.input !== undefined &&
+        Object.keys(args).some((key) => key !== 'input' && args[key] !== undefined);
 
-      // Validate with Zod (async)
+      const dataToValidate = hasArgsBeyondInput
+        ? args
+        : args.input !== undefined
+          ? args.input
+          : args;
+
       const validated = await schema.parseAsync(dataToValidate);
 
-      // Replace args with validated data
-      const validatedArgs = args.input !== undefined ? { ...args, input: validated } : validated;
+      const validatedArgs = hasArgsBeyondInput
+        ? validated
+        : args.input !== undefined
+          ? { ...args, input: validated }
+          : validated;
 
       // Execute resolver with validated data
       return await resolver(parent, validatedArgs, context);

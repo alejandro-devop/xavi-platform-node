@@ -2,8 +2,34 @@ import { z } from 'zod';
 
 const LIST_CATEGORIES = ['restaurant', 'travel', 'outdoor', 'entertainment', 'culture', 'other'] as const;
 
+const swListInputFields = {
+  title: z.string().min(2).max(100),
+  description: z.string().max(500).nullish(),
+  category: z.enum(LIST_CATEGORIES),
+};
+
+const swListUpdateInputFields = {
+  title: z.string().min(2).max(100).optional(),
+  description: z.string().max(500).nullish(),
+  category: z.enum(LIST_CATEGORIES).optional(),
+};
+
+const swListItemInputFields = {
+  title: z.string().min(2).max(100),
+  description: z.string().max(500).nullish(),
+  address: z.string().max(500).nullish(),
+  url: z.string().url().nullish(),
+};
+
+const swListItemUpdateInputFields = {
+  title: z.string().min(2).max(100).optional(),
+  description: z.string().max(500).nullish(),
+  address: z.string().max(500).nullish(),
+  url: z.string().url().nullish(),
+};
+
 export const swSendCinnamonRequestSchema = z.object({
-  addresseeId: z.number().int().positive(),
+  addresseeEmail: z.string().trim().email('Invalid email format'),
 });
 
 export const swRespondCinnamonRequestSchema = z.object({
@@ -15,21 +41,12 @@ export const swDissolveBondSchema = z.object({
   bondId: z.string().uuid(),
 });
 
-export const swCreateListSchema = z.object({
-  input: z.object({
-    title: z.string().min(2).max(100),
-    description: z.string().max(500).nullish(),
-    category: z.enum(LIST_CATEGORIES),
-  }),
-});
+/** Validates GraphQL `input` for swCreateList (inner object only). */
+export const swCreateListSchema = z.object(swListInputFields);
 
 export const swUpdateListSchema = z.object({
   id: z.string().uuid(),
-  input: z.object({
-    title: z.string().min(2).max(100).optional(),
-    description: z.string().max(500).nullish(),
-    category: z.enum(LIST_CATEGORIES).optional(),
-  }),
+  input: z.object(swListUpdateInputFields),
 });
 
 export const swDeleteListSchema = z.object({
@@ -42,22 +59,12 @@ export const swListItemsSchema = z.object({
 
 export const swAddListItemSchema = z.object({
   listId: z.string().uuid(),
-  input: z.object({
-    title: z.string().min(2).max(100),
-    description: z.string().max(500).nullish(),
-    address: z.string().max(500).nullish(),
-    url: z.string().url().nullish(),
-  }),
+  input: z.object(swListItemInputFields),
 });
 
 export const swUpdateListItemSchema = z.object({
   id: z.string().uuid(),
-  input: z.object({
-    title: z.string().min(2).max(100).optional(),
-    description: z.string().max(500).nullish(),
-    address: z.string().max(500).nullish(),
-    url: z.string().url().nullish(),
-  }),
+  input: z.object(swListItemUpdateInputFields),
 });
 
 export const swCompleteListItemSchema = z.object({
@@ -90,11 +97,10 @@ export const swMarkNotificationsReadSchema = z.object({
   ids: z.array(z.string().uuid()).min(1),
 });
 
+/** Validates GraphQL `input` for swUpdatePreferences (inner object only). */
 export const swUpdatePreferencesSchema = z.object({
-  input: z.object({
-    emailNotifications: z.boolean().optional(),
-    inAppNotifications: z.boolean().optional(),
-    pushToken: z.string().nullish(),
-    pushNotificationsEnabled: z.boolean().optional(),
-  }),
+  emailNotifications: z.boolean().optional(),
+  inAppNotifications: z.boolean().optional(),
+  pushToken: z.string().nullish(),
+  pushNotificationsEnabled: z.boolean().optional(),
 });

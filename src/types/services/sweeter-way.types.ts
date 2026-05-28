@@ -1,7 +1,13 @@
 export type BondStatus = 'pending' | 'accepted' | 'rejected' | 'dissolved';
 export type ListCategory = 'restaurant' | 'travel' | 'outdoor' | 'entertainment' | 'culture' | 'other';
 export type ItemStatus = 'pending' | 'completed';
-export type NotificationType = 'bond_requested' | 'bond_accepted' | 'item_added' | 'item_completed' | 'log_added';
+export type NotificationType =
+  | 'bond_requested'
+  | 'bond_accepted'
+  | 'bond_rejected'
+  | 'item_added'
+  | 'item_completed'
+  | 'log_added';
 export type EntityType = 'bond' | 'list' | 'item' | 'log';
 
 export type CinnamonBond = {
@@ -13,6 +19,12 @@ export type CinnamonBond = {
   respondedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
+};
+
+export type SWBondPartner = {
+  id: number;
+  name: string;
+  email: string;
 };
 
 export type SweeterList = {

@@ -44,6 +44,17 @@ export const swEmailService = {
     await send(requesterEmail, '🎉 ¡Tu invitación fue aceptada! — Xavi', html);
   },
 
+  async sendBondRejected(
+    addresseeName: string,
+    requesterEmail: string,
+    requesterName: string
+  ): Promise<void> {
+    const html = `<p>Hola ${requesterName},</p>
+<p><strong>${addresseeName}</strong> rechazó tu invitación de cinnamon.</p>
+<p>Puedes invitar a otra persona desde la app cuando quieras.</p>`;
+    await send(requesterEmail, 'Invitación de cinnamon rechazada — Xavi', html);
+  },
+
   async sendItemAdded(
     actorName: string,
     cinnamonEmail: string,

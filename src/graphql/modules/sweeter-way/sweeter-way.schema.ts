@@ -75,6 +75,8 @@ export const sweeterWayTypeDefs = gql`
 
   extend type Query {
     swMyBond: CinnamonBond
+    """Pending bond requests involving the current user (sent or received)."""
+    swMyPendingBondRequests: [CinnamonBond!]!
     swMyLists: [SweeterList!]!
     swListItems(listId: ID!): [SWListItem!]!
     swItemLogs(itemId: ID!): [SWItemLog!]!
@@ -83,7 +85,7 @@ export const sweeterWayTypeDefs = gql`
   }
 
   extend type Mutation {
-    swSendCinnamonRequest(addresseeId: ID!): CinnamonBond!
+    swSendCinnamonRequest(addresseeEmail: String!): CinnamonBond!
     swRespondCinnamonRequest(bondId: ID!, accept: Boolean!): CinnamonBond!
     swDissolveBond(bondId: ID!): Boolean!
 

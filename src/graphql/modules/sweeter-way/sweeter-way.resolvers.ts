@@ -40,11 +40,13 @@ async function getUserInfo(userId: number): Promise<{ email: string; name: strin
 
 async function safeDispatchBondSideEffects(
   bond: CinnamonBond,
-  type: 'bond_requested' | 'bond_accepted'
+  type: 'bond_requested' | 'bond_accepted' | 'bond_rejected'
 ) {
   try {
-    const actorId = type === 'bond_requested' ? bond.requesterId : bond.addresseeId;
-    const recipientId = type === 'bond_requested' ? bond.addresseeId : bond.requesterId;
+    const actorId =
+      type === 'bond_requested' ? bond.requesterId : bond.addresseeId;
+    const recipientId =
+      type === 'bond_requested' ? bond.addresseeId : bond.requesterId;
 
     const prefs = await swNotificationService._getOrCreatePreferences(recipientId);
     if (prefs.inAppNotifications) {
@@ -62,8 +64,10 @@ async function safeDispatchBondSideEffects(
       const recipient = await getUserInfo(recipientId);
       if (type === 'bond_requested') {
         await swEmailService.sendBondRequested(actor.name, recipient.email, recipient.name);
-      } else {
+      } else if (type === 'bond_accepted') {
         await swEmailService.sendBondAccepted(actor.name, recipient.email, recipient.name);
+      } else {
+        await swEmailService.sendBondRejected(actor.name, recipient.email, recipient.name);
       }
     }
   } catch (err) {
@@ -168,6 +172,15 @@ export const sweeterWayResolvers = {
       'swMyBond'
     ),
 
+    swMyPendingBondRequests: withValidatedResolver(
+      emptySchema,
+      async (_: unknown, __: unknown, context) => {
+        requireAuth(context, 'swMyPendingBondRequests');
+        return swBondService.getMyPendingBondRequests(uid(context));
+      },
+      'swMyPendingBondRequests'
+    ),
+
     swMyLists: withValidatedResolver(
       emptySchema,
       async (_: unknown, __: unknown, context) => {
@@ -217,9 +230,9 @@ export const sweeterWayResolvers = {
   Mutation: {
     swSendCinnamonRequest: withValidatedResolver(
       swSendCinnamonRequestSchema,
-      async (_: unknown, { addresseeId }: { addresseeId: string }, context) => {
+      async (_: unknown, { addresseeEmail }: { addresseeEmail: string }, context) => {
         requireAuth(context, 'swSendCinnamonRequest');
-        const bond = await swBondService.sendCinnamonRequest(uid(context), Number(addresseeId));
+        const bond = await swBondService.sendCinnamonRequestByEmail(uid(context), addresseeEmail);
         void safeDispatchBondSideEffects(bond, 'bond_requested');
         return bond;
       },
@@ -231,7 +244,7 @@ export const sweeterWayResolvers = {
       async (_: unknown, { bondId, accept }: { bondId: string; accept: boolean }, context) => {
         requireAuth(context, 'swRespondCinnamonRequest');
         const bond = await swBondService.respondCinnamonRequest(bondId, uid(context), accept);
-        if (accept) void safeDispatchBondSideEffects(bond, 'bond_accepted');
+        void safeDispatchBondSideEffects(bond, accept ? 'bond_accepted' : 'bond_rejected');
         return bond;
       },
       'swRespondCinnamonRequest'

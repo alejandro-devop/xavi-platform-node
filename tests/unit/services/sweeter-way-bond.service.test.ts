@@ -51,6 +51,69 @@ describe('swBondService', () => {
     });
   });
 
+  // ─── getMyPendingBondRequests ────────────────────────────────────────────────
+
+  describe('getMyPendingBondRequests', () => {
+    it('returns empty array when no pending bonds', async () => {
+      mockDbPool.query.mockResolvedValueOnce({ rows: [] });
+      const result = await swBondService.getMyPendingBondRequests(USER_A);
+      expect(result).toEqual([]);
+    });
+
+    it('returns pending bonds for requester and addressee', async () => {
+      mockDbPool.query.mockResolvedValueOnce({
+        rows: [
+          makeBondRow({ id: 'bond-out', requester_id: USER_A, addressee_id: USER_B }),
+          makeBondRow({ id: 'bond-in', requester_id: USER_C, addressee_id: USER_A }),
+        ],
+      });
+      const result = await swBondService.getMyPendingBondRequests(USER_A);
+      expect(result).toHaveLength(2);
+      expect(result[0].status).toBe('pending');
+    });
+  });
+
+  // ─── sendCinnamonRequestByEmail ──────────────────────────────────────────────
+
+  describe('sendCinnamonRequestByEmail', () => {
+    it('throws BadRequestError when inviting own email', async () => {
+      mockDbPool.query.mockResolvedValueOnce({
+        rows: [{ email: 'user@example.com' }],
+      });
+      await expect(
+        swBondService.sendCinnamonRequestByEmail(USER_A, 'user@example.com')
+      ).rejects.toThrow(BadRequestError);
+    });
+
+    it('throws NotFoundError when no user matches the email', async () => {
+      mockDbPool.query.mockResolvedValueOnce({
+        rows: [{ email: 'user-a@example.com' }],
+      });
+      mockDbPool.query.mockResolvedValueOnce({ rows: [] });
+      await expect(
+        swBondService.sendCinnamonRequestByEmail(USER_A, 'unknown@example.com')
+      ).rejects.toThrow(NotFoundError);
+    });
+
+    it('resolves addressee by email and creates bond request', async () => {
+      const newBond = makeBondRow();
+      mockDbPool.query.mockResolvedValueOnce({
+        rows: [{ email: 'user-a@example.com' }],
+      });
+      mockDbPool.query.mockResolvedValueOnce({ rows: [{ id: USER_B }] });
+      mockDbPool.query.mockResolvedValueOnce({ rows: [] });
+      mockDbPool.query.mockResolvedValueOnce({ rows: [] });
+      mockDbPool.query.mockResolvedValueOnce({ rows: [newBond] });
+
+      const bond = await swBondService.sendCinnamonRequestByEmail(
+        USER_A,
+        '  Partner@Example.COM  '
+      );
+      expect(bond.status).toBe('pending');
+      expect(bond.addresseeId).toBe(USER_B);
+    });
+  });
+
   // ─── sendCinnamonRequest ─────────────────────────────────────────────────────
 
   describe('sendCinnamonRequest', () => {

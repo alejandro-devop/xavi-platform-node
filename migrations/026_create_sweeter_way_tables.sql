@@ -10,7 +10,7 @@ CREATE TYPE sw_entity_type AS ENUM ('bond', 'list', 'item', 'log');
 
 -- Vínculo entre dos usuarios (pareja)
 CREATE TABLE sw_cinnamon_bonds (
-  id             UUID PRIMARY KEY DEFAULT generate_uuidv7(),
+  id             UUID PRIMARY KEY DEFAULT uuid_generate_v7(),
   requester_id   INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   addressee_id   INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   status         sw_bond_status NOT NULL DEFAULT 'pending',
@@ -29,7 +29,7 @@ CREATE UNIQUE INDEX sw_bonds_unique_addressee_accepted
 
 -- Listas compartidas de la pareja
 CREATE TABLE sw_lists (
-  id          UUID PRIMARY KEY DEFAULT generate_uuidv7(),
+  id          UUID PRIMARY KEY DEFAULT uuid_generate_v7(),
   bond_id     UUID NOT NULL REFERENCES sw_cinnamon_bonds(id) ON DELETE CASCADE,
   title       VARCHAR(100) NOT NULL,
   description TEXT,
@@ -41,7 +41,7 @@ CREATE TABLE sw_lists (
 
 -- Elementos dentro de una lista
 CREATE TABLE sw_list_items (
-  id           UUID PRIMARY KEY DEFAULT generate_uuidv7(),
+  id           UUID PRIMARY KEY DEFAULT uuid_generate_v7(),
   list_id      UUID NOT NULL REFERENCES sw_lists(id) ON DELETE CASCADE,
   title        VARCHAR(100) NOT NULL,
   description  TEXT,
@@ -58,7 +58,7 @@ CREATE TABLE sw_list_items (
 
 -- Log emocional por elemento completado (uno por usuario por ítem)
 CREATE TABLE sw_item_logs (
-  id         UUID PRIMARY KEY DEFAULT generate_uuidv7(),
+  id         UUID PRIMARY KEY DEFAULT uuid_generate_v7(),
   item_id    UUID NOT NULL REFERENCES sw_list_items(id) ON DELETE CASCADE,
   user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   comment    TEXT,
@@ -70,7 +70,7 @@ CREATE TABLE sw_item_logs (
 
 -- Notificaciones in-app del módulo
 CREATE TABLE sw_notifications (
-  id           UUID PRIMARY KEY DEFAULT generate_uuidv7(),
+  id           UUID PRIMARY KEY DEFAULT uuid_generate_v7(),
   recipient_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   actor_id     INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   type         sw_notification_type NOT NULL,
@@ -84,7 +84,7 @@ CREATE TABLE sw_notifications (
 
 -- Preferencias de notificación por usuario
 CREATE TABLE sw_user_preferences (
-  id                       UUID PRIMARY KEY DEFAULT generate_uuidv7(),
+  id                       UUID PRIMARY KEY DEFAULT uuid_generate_v7(),
   user_id                  INTEGER NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
   email_notifications      BOOLEAN NOT NULL DEFAULT TRUE,
   in_app_notifications     BOOLEAN NOT NULL DEFAULT TRUE,
