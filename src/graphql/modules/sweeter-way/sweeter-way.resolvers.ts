@@ -378,6 +378,13 @@ export const sweeterWayResolvers = {
     ),
   },
 
+  CinnamonBond: {
+    partner: async (parent: CinnamonBond, _: unknown, context) => {
+      if (!context.user?.id) return null;
+      return swBondService.getPartnerProfile(parent, uid(context));
+    },
+  },
+
   SWNotification: {
     payload: (parent: SWNotification) =>
       parent.payload ? JSON.stringify(parent.payload) : null,

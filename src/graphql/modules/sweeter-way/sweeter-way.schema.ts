@@ -1,6 +1,12 @@
 import { gql } from 'graphql-tag';
 
 export const sweeterWayTypeDefs = gql`
+  type SWBondPartner {
+    id: ID!
+    name: String!
+    email: String!
+  }
+
   type CinnamonBond {
     id: ID!
     requesterId: ID!
@@ -10,6 +16,8 @@ export const sweeterWayTypeDefs = gql`
     respondedAt: DateTime
     createdAt: DateTime!
     updatedAt: DateTime!
+    """The other user in the bond, relative to the authenticated viewer."""
+    partner: SWBondPartner
   }
 
   type SweeterList {

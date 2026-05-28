@@ -244,6 +244,32 @@ describe('swBondService', () => {
 
   // ─── getCinnamonId ───────────────────────────────────────────────────────────
 
+  describe('getPartnerProfile', () => {
+    it('returns the other user profile when caller is requester', async () => {
+      mockDbPool.query.mockResolvedValueOnce({
+        rows: [{ id: USER_B, name: 'Partner', email: 'partner@example.com' }],
+      });
+      const partner = await swBondService.getPartnerProfile(
+        { requesterId: USER_A, addresseeId: USER_B } as never,
+        USER_A
+      );
+      expect(partner).toEqual({
+        id: USER_B,
+        name: 'Partner',
+        email: 'partner@example.com',
+      });
+    });
+
+    it('returns null when partner user no longer exists', async () => {
+      mockDbPool.query.mockResolvedValueOnce({ rows: [] });
+      const partner = await swBondService.getPartnerProfile(
+        { requesterId: USER_A, addresseeId: USER_B } as never,
+        USER_A
+      );
+      expect(partner).toBeNull();
+    });
+  });
+
   describe('getCinnamonId', () => {
     it('returns addresseeId when caller is the requester', () => {
       const bond = swBondService.getCinnamonId(

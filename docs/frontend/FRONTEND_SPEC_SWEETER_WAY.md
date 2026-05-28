@@ -541,6 +541,18 @@ type EntityType = 'bond' | 'list' | 'item' | 'log';
 
 ## 7. Sweeter Way — tipos GraphQL
 
+### `SWBondPartner`
+
+Usuario “del otro lado” del vínculo, resuelto según el JWT del viewer.
+
+```graphql
+type SWBondPartner {
+  id: ID!
+  name: String!
+  email: String!
+}
+```
+
 ### `CinnamonBond`
 
 ```graphql
@@ -553,8 +565,11 @@ type CinnamonBond {
   respondedAt: DateTime
   createdAt: DateTime!
   updatedAt: DateTime!
+  partner: SWBondPartner
 }
 ```
+
+`partner` es el **otro** usuario (no el logueado). Funciona en `swMyBond`, `swMyPendingBondRequests` y en mutaciones que devuelven `CinnamonBond` si pides el campo en la query.
 
 ### `SweeterList`
 
@@ -660,22 +675,16 @@ query SwMyBond {
     status
     requestedAt
     respondedAt
+    partner {
+      id
+      name
+      email
+    }
   }
 }
 ```
 
-**Compañero (partner):**
-
-```typescript
-function getPartnerId(
-  bond: { requesterId: string; addresseeId: string },
-  myUserId: number
-): number {
-  const req = Number(bond.requesterId);
-  const add = Number(bond.addresseeId);
-  return req === myUserId ? add : req;
-}
-```
+No hace falta calcular el partner en cliente si pides `partner { id name email }`.
 
 ---
 
@@ -693,9 +702,11 @@ query SwMyPendingBondRequests {
     addresseeId
     status
     requestedAt
-    respondedAt
-    createdAt
-    updatedAt
+    partner {
+      id
+      name
+      email
+    }
   }
 }
 ```
@@ -1100,16 +1111,15 @@ stateDiagram-v2
 query SwHome {
   swMyBond {
     id
-    requesterId
-    addresseeId
     status
+    partner { id name email }
   }
   swMyPendingBondRequests {
     id
     requesterId
-    addresseeId
     status
     requestedAt
+    partner { id name email }
   }
   swMyLists {
     id
