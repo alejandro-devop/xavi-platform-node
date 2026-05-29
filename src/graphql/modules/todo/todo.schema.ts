@@ -30,6 +30,15 @@ export const todoTypeDefs = gql`
     completed: Int!
   }
 
+  type TodoTag {
+    id: ID!
+    userId: Int!
+    name: String!
+    color: String!
+    createdAt: DateTime!
+    updatedAt: DateTime!
+  }
+
   type Todo {
     id: ID!
     userId: Int!
@@ -43,6 +52,7 @@ export const todoTypeDefs = gql`
     updatedAt: DateTime!
     subtasks: [TodoSubtask!]!
     subtasksCount: TodoSubtasksCount!
+    tags: [TodoTag!]!
   }
 
   type TodoCollection {
@@ -59,9 +69,12 @@ export const todoTypeDefs = gql`
       priority: TodoPriority
       dueBefore: DateTime
       dueAfter: DateTime
+      tagId: ID
       page: Int
       limit: Int
     ): TodoCollection!
+    todoTags: [TodoTag!]!
+    todoTag(id: ID!): TodoTag
   }
 
   extend type Mutation {
@@ -72,6 +85,9 @@ export const todoTypeDefs = gql`
     todoSubtaskAdd(input: TodoSubtaskInput!): TodoSubtask!
     todoSubtaskEdit(input: TodoSubtaskEditInput!): TodoSubtask!
     todoSubtaskRemove(input: TodoSubtaskRemoveInput!): Boolean!
+    todoTagAdd(input: TodoTagInput!): TodoTag!
+    todoTagEdit(input: TodoTagEditInput!): TodoTag!
+    todoTagRemove(id: ID!): Boolean!
   }
 
   input TodoInput {
@@ -80,6 +96,7 @@ export const todoTypeDefs = gql`
     status: TodoStatus
     priority: TodoPriority
     dueDate: DateTime
+    tagIds: [ID!]
   }
 
   input TodoEditInput {
@@ -89,6 +106,18 @@ export const todoTypeDefs = gql`
     status: TodoStatus
     priority: TodoPriority
     dueDate: DateTime
+    tagIds: [ID!]
+  }
+
+  input TodoTagInput {
+    name: String!
+    color: String!
+  }
+
+  input TodoTagEditInput {
+    id: ID!
+    name: String
+    color: String
   }
 
   input TodoSubtaskInput {

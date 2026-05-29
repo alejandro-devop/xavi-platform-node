@@ -1,3 +1,5 @@
+import type { TodoTag } from './todo-tag.types';
+
 export type TodoStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';
 
 export type TodoPriority = 'low' | 'medium' | 'high' | 'urgent';
@@ -30,6 +32,7 @@ export interface Todo {
   updatedAt: Date;
   subtasks?: TodoSubtask[];
   subtasksCount?: TodoSubtasksCount;
+  tags?: TodoTag[];
 }
 
 export interface TodoCollection {
@@ -45,6 +48,7 @@ export interface CreateTodoInput {
   status?: TodoStatus;
   priority?: TodoPriority;
   dueDate?: Date | string | null;
+  tagIds?: string[];
 }
 
 export interface UpdateTodoInput {
@@ -53,6 +57,7 @@ export interface UpdateTodoInput {
   status?: TodoStatus;
   priority?: TodoPriority;
   dueDate?: Date | string | null;
+  tagIds?: string[];
 }
 
 export interface ListTodosOptions {
@@ -60,6 +65,7 @@ export interface ListTodosOptions {
   priority?: TodoPriority;
   dueBefore?: Date | string;
   dueAfter?: Date | string;
+  tagId?: string;
   page?: number;
   limit?: number;
 }

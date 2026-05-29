@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { tagIdsArraySchema } from './todo-tag.schemas';
 
 const todoIdString = z.string().regex(/^\d+$/, 'Invalid todo ID');
 const subtaskIdString = z.string().regex(/^\d+$/, 'Invalid subtask ID');
@@ -10,12 +11,15 @@ export const todoIdArgSchema = z.object({
   id: todoIdString,
 });
 
+const tagIdFilter = z.string().regex(/^\d+$/, 'Invalid tag ID').nullish();
+
 export const todosListArgsSchema = z
   .object({
     status: todoStatus.nullish(),
     priority: todoPriority.nullish(),
     dueBefore: z.coerce.date().nullish(),
     dueAfter: z.coerce.date().nullish(),
+    tagId: tagIdFilter,
     page: z.number().int().positive().nullish(),
     limit: z.number().int().positive().max(100).nullish(),
   })
@@ -24,6 +28,7 @@ export const todosListArgsSchema = z
     priority: d.priority ?? undefined,
     dueBefore: d.dueBefore ?? undefined,
     dueAfter: d.dueAfter ?? undefined,
+    tagId: d.tagId ?? undefined,
     page: d.page ?? 1,
     limit: d.limit ?? 20,
   }));
@@ -34,6 +39,7 @@ export const todoAddInputSchema = z.object({
   status: todoStatus.optional(),
   priority: todoPriority.optional(),
   dueDate: z.coerce.date().nullable().optional(),
+  tagIds: tagIdsArraySchema,
 });
 
 export const todoEditInputSchema = z
@@ -44,6 +50,7 @@ export const todoEditInputSchema = z
     status: todoStatus.optional(),
     priority: todoPriority.optional(),
     dueDate: z.coerce.date().nullable().optional(),
+    tagIds: tagIdsArraySchema,
   })
   .refine(
     (d) =>
@@ -51,7 +58,8 @@ export const todoEditInputSchema = z
       d.description !== undefined ||
       d.status !== undefined ||
       d.priority !== undefined ||
-      d.dueDate !== undefined,
+      d.dueDate !== undefined ||
+      d.tagIds !== undefined,
     { message: 'At least one field is required to update' }
   );
 

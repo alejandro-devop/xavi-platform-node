@@ -1,7 +1,13 @@
 import { todoService } from '../../../services/todo.service';
+import { todoTagService } from '../../../services/todo-tag.service';
 import type { Todo } from '../../../types/services/todo.types';
 import { requireAuth } from '../../utils/error-handler';
 import { withValidatedResolver } from '../../utils/validation';
+import {
+  todoTagAddInputSchema,
+  todoTagEditInputSchema,
+  todoTagIdArgSchema,
+} from '../../../validators/schemas/todo-tag.schemas';
 import {
   todoAddInputSchema,
   todoEditInputSchema,
@@ -34,6 +40,12 @@ export const todoResolvers = {
       }
       return { total: 0, completed: 0 };
     },
+
+    tags: async (parent: Todo, _args: unknown, context: { user?: { id: string | number } | null }) => {
+      requireAuth(context, 'Todo.tags');
+      if (parent.tags) return parent.tags;
+      return await todoTagService.listTagsForTodo(parseInt(parent.id, 10));
+    },
   },
 
   Query: {
@@ -53,6 +65,20 @@ export const todoResolvers = {
         return await todoService.listTodos(uid(context), args);
       },
       'todos'
+    ),
+
+    todoTags: async (_parent: unknown, _args: unknown, context) => {
+      requireAuth(context, 'todoTags');
+      return await todoTagService.listTags(uid(context));
+    },
+
+    todoTag: withValidatedResolver(
+      todoTagIdArgSchema,
+      async (_parent, { id }: { id: string }, context) => {
+        requireAuth(context, 'todoTag');
+        return await todoTagService.getTagById(id, uid(context));
+      },
+      'todoTag'
     ),
   },
 
@@ -121,6 +147,34 @@ export const todoResolvers = {
         return await todoService.deleteSubtask(todoId, subtaskId, uid(context));
       },
       'todoSubtaskRemove'
+    ),
+
+    todoTagAdd: withValidatedResolver(
+      todoTagAddInputSchema,
+      async (_parent, { input }, context) => {
+        requireAuth(context, 'todoTagAdd');
+        return await todoTagService.createTag(uid(context), input);
+      },
+      'todoTagAdd'
+    ),
+
+    todoTagEdit: withValidatedResolver(
+      todoTagEditInputSchema,
+      async (_parent, { input }, context) => {
+        requireAuth(context, 'todoTagEdit');
+        const { id, ...fields } = input;
+        return await todoTagService.updateTag(id, uid(context), fields);
+      },
+      'todoTagEdit'
+    ),
+
+    todoTagRemove: withValidatedResolver(
+      todoTagIdArgSchema,
+      async (_parent, { id }: { id: string }, context) => {
+        requireAuth(context, 'todoTagRemove');
+        return await todoTagService.deleteTag(id, uid(context));
+      },
+      'todoTagRemove'
     ),
   },
 };

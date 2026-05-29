@@ -59,6 +59,18 @@ query Todo($id: ID!) {
 }
 ```
 
+### `TodoTags`
+
+```graphql
+query TodoTags {
+  todoTags {
+    id
+    name
+    color
+  }
+}
+```
+
 ---
 
 ## Mutations
@@ -72,6 +84,23 @@ query Todo($id: ID!) {
 | `todoSubtaskAdd` | `POST /api/todo/:id/subtasks` |
 | `todoSubtaskEdit` | `PUT /api/todo/:id/subtasks/:subtaskId` |
 | `todoSubtaskRemove` | `DELETE /api/todo/:id/subtasks/:subtaskId` |
+| `todoTagAdd` | — |
+| `todoTagEdit` | — |
+| `todoTagRemove` | — |
+
+### `TodoTagAdd`
+
+```graphql
+mutation TodoTagAdd($input: TodoTagInput!) {
+  todoTagAdd(input: $input) {
+    id
+    name
+    color
+  }
+}
+```
+
+Variables: `{ "input": { "name": "Work", "color": "#2563EB" } }`
 
 ### `TodoAdd`
 
@@ -94,10 +123,13 @@ Variables:
   "input": {
     "title": "Buy groceries",
     "priority": "high",
-    "dueDate": "2024-06-15T18:00:00.000Z"
+    "dueDate": "2024-06-15T18:00:00.000Z",
+    "tagIds": ["1", "2"]
   }
 }
 ```
+
+List filter by tag: `todos(tagId: "1", page: 1, limit: 20)`.
 
 ### `TodoComplete`
 

@@ -55,7 +55,8 @@ describe('TodoService', () => {
     it('returns todo with subtasks for owner', async () => {
       mockDbPool.query
         .mockResolvedValueOnce({ rows: [createTodoRow()] })
-        .mockResolvedValueOnce({ rows: [createSubtaskRow()] });
+        .mockResolvedValueOnce({ rows: [createSubtaskRow()] })
+        .mockResolvedValueOnce({ rows: [] });
 
       const todo = await todoService.getTodoById(String(TODO_ID), USER_ID);
 
@@ -82,7 +83,8 @@ describe('TodoService', () => {
         .mockResolvedValueOnce({ rows: [createTodoRow()] })
         .mockResolvedValueOnce({
           rows: [{ todo_id: TODO_ID, total: '2', completed: '1' }],
-        });
+        })
+        .mockResolvedValueOnce({ rows: [] });
 
       const collection = await todoService.listTodos(USER_ID);
 

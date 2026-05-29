@@ -1,3 +1,4 @@
+import { todoTagService } from './todo-tag.service';
 import { getDbPool } from '../shared/database/pool';
 import { BadRequestError, ForbiddenError, NotFoundError } from '../shared/errors';
 import type {
@@ -38,7 +39,12 @@ type SubtaskRow = {
 const TODO_RETURNING = `id, user_id, title, description, status, priority, due_date, completed_at, created_at, updated_at`;
 const SUBTASK_RETURNING = `id, todo_id, title, is_completed, order_index, created_at, updated_at`;
 
-function mapTodo(row: TodoRow, extras?: { subtasksCount?: TodoSubtasksCount }): Todo {
+import type { TodoTag } from '../types/services/todo-tag.types';
+
+function mapTodo(
+  row: TodoRow,
+  extras?: { subtasksCount?: TodoSubtasksCount; tags?: TodoTag[] }
+): Todo {
   return {
     id: String(row.id),
     userId: row.user_id,
@@ -51,6 +57,7 @@ function mapTodo(row: TodoRow, extras?: { subtasksCount?: TodoSubtasksCount }): 
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     subtasksCount: extras?.subtasksCount,
+    tags: extras?.tags,
   };
 }
 
@@ -142,7 +149,15 @@ async function createTodo(userId: number, input: CreateTodoInput): Promise<Todo>
       input.dueDate ?? null,
     ]
   );
-  return mapTodo(result.rows[0], { subtasksCount: { total: 0, completed: 0 } });
+  const row = result.rows[0];
+  if (input.tagIds !== undefined) {
+    await todoTagService.setTodoTags(row.id, userId, input.tagIds);
+  }
+  const tags =
+    input.tagIds !== undefined && input.tagIds.length > 0
+      ? await todoTagService.listTagsForTodo(row.id)
+      : [];
+  return mapTodo(row, { subtasksCount: { total: 0, completed: 0 }, tags });
 }
 
 async function listTodos(userId: number, options: ListTodosOptions = {}): Promise<TodoCollection> {
@@ -175,6 +190,15 @@ async function listTodos(userId: number, options: ListTodosOptions = {}): Promis
     params.push(options.dueAfter as string);
     paramIndex++;
   }
+  if (options.tagId) {
+    const tagId = parseInt(options.tagId, 10);
+    if (Number.isNaN(tagId)) throw new BadRequestError('Invalid tag ID');
+    whereClause += ` AND EXISTS (
+      SELECT 1 FROM todo_tag_assignments a WHERE a.todo_id = todos.id AND a.tag_id = $${paramIndex}
+    )`;
+    params.push(tagId);
+    paramIndex++;
+  }
 
   const countResult = await db.query<{ count: string }>(
     `SELECT COUNT(*)::text AS count FROM todos ${whereClause}`,
@@ -190,12 +214,16 @@ async function listTodos(userId: number, options: ListTodosOptions = {}): Promis
   );
 
   const todoIds = result.rows.map((r) => r.id);
-  const counts = await loadSubtasksCounts(todoIds);
+  const [counts, tagsByTodo] = await Promise.all([
+    loadSubtasksCounts(todoIds),
+    todoTagService.loadTagsForTodoIds(todoIds),
+  ]);
 
   return {
     todos: result.rows.map((row) =>
       mapTodo(row, {
         subtasksCount: counts.get(row.id) ?? { total: 0, completed: 0 },
+        tags: tagsByTodo.get(row.id) ?? [],
       })
     ),
     page,
@@ -207,10 +235,13 @@ async function listTodos(userId: number, options: ListTodosOptions = {}): Promis
 async function getTodoById(id: string, userId: number): Promise<Todo> {
   const todoId = parseTodoId(id);
   const row = await getOwnedTodoOrThrow(todoId, userId);
-  const subtasks = await listSubtasksForTodo(todoId);
+  const [subtasks, tags] = await Promise.all([
+    listSubtasksForTodo(todoId),
+    todoTagService.listTagsForTodo(todoId),
+  ]);
   const completed = subtasks.filter((s) => s.isCompleted).length;
   return {
-    ...mapTodo(row),
+    ...mapTodo(row, { tags }),
     subtasks,
     subtasksCount: { total: subtasks.length, completed },
   };
@@ -250,17 +281,25 @@ async function updateTodo(id: string, userId: number, input: UpdateTodoInput): P
     paramIndex++;
   }
 
+  const db = getDbPool();
+
+  if (input.tagIds !== undefined) {
+    await todoTagService.setTodoTags(todoId, userId, input.tagIds);
+  }
+
   if (updates.length === 0) {
-    return mapTodo(await getTodoRowOrThrow(todoId));
+    const row = await getTodoRowOrThrow(todoId);
+    const tags = await todoTagService.listTagsForTodo(todoId);
+    return mapTodo(row, { tags });
   }
 
   params.push(todoId);
-  const db = getDbPool();
   const result = await db.query<TodoRow>(
     `UPDATE todos SET ${updates.join(', ')} WHERE id = $${paramIndex} RETURNING ${TODO_RETURNING}`,
     params
   );
-  return mapTodo(result.rows[0]);
+  const tags = await todoTagService.listTagsForTodo(todoId);
+  return mapTodo(result.rows[0], { tags });
 }
 
 async function deleteTodo(id: string, userId: number): Promise<boolean> {
