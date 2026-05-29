@@ -39,6 +39,17 @@ export const todoTypeDefs = gql`
     updatedAt: DateTime!
   }
 
+  type TodoFolder {
+    id: ID!
+    userId: Int!
+    name: String!
+    color: String!
+    orderIndex: Int!
+    todoCount: Int!
+    createdAt: DateTime!
+    updatedAt: DateTime!
+  }
+
   type Todo {
     id: ID!
     userId: Int!
@@ -53,6 +64,8 @@ export const todoTypeDefs = gql`
     subtasks: [TodoSubtask!]!
     subtasksCount: TodoSubtasksCount!
     tags: [TodoTag!]!
+    folderId: ID
+    folder: TodoFolder
   }
 
   type TodoCollection {
@@ -70,11 +83,15 @@ export const todoTypeDefs = gql`
       dueBefore: DateTime
       dueAfter: DateTime
       tagId: ID
+      folderId: ID
+      withoutFolder: Boolean
       page: Int
       limit: Int
     ): TodoCollection!
     todoTags: [TodoTag!]!
     todoTag(id: ID!): TodoTag
+    todoFolders: [TodoFolder!]!
+    todoFolder(id: ID!): TodoFolder
   }
 
   extend type Mutation {
@@ -88,6 +105,9 @@ export const todoTypeDefs = gql`
     todoTagAdd(input: TodoTagInput!): TodoTag!
     todoTagEdit(input: TodoTagEditInput!): TodoTag!
     todoTagRemove(id: ID!): Boolean!
+    todoFolderAdd(input: TodoFolderInput!): TodoFolder!
+    todoFolderEdit(input: TodoFolderEditInput!): TodoFolder!
+    todoFolderRemove(id: ID!): Boolean!
   }
 
   input TodoInput {
@@ -97,6 +117,7 @@ export const todoTypeDefs = gql`
     priority: TodoPriority
     dueDate: DateTime
     tagIds: [ID!]
+    folderId: ID
   }
 
   input TodoEditInput {
@@ -107,6 +128,20 @@ export const todoTypeDefs = gql`
     priority: TodoPriority
     dueDate: DateTime
     tagIds: [ID!]
+    folderId: ID
+  }
+
+  input TodoFolderInput {
+    name: String!
+    color: String!
+    orderIndex: Int
+  }
+
+  input TodoFolderEditInput {
+    id: ID!
+    name: String
+    color: String
+    orderIndex: Int
   }
 
   input TodoTagInput {

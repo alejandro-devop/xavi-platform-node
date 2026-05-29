@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { optionalFolderIdSchema, folderIdString } from './todo-folder.schemas';
 import { tagIdsArraySchema } from './todo-tag.schemas';
 
 const todoIdString = z.string().regex(/^\d+$/, 'Invalid todo ID');
@@ -20,6 +21,8 @@ export const todosListArgsSchema = z
     dueBefore: z.coerce.date().nullish(),
     dueAfter: z.coerce.date().nullish(),
     tagId: tagIdFilter,
+    folderId: folderIdString.nullish(),
+    withoutFolder: z.boolean().nullish(),
     page: z.number().int().positive().nullish(),
     limit: z.number().int().positive().max(100).nullish(),
   })
@@ -29,6 +32,8 @@ export const todosListArgsSchema = z
     dueBefore: d.dueBefore ?? undefined,
     dueAfter: d.dueAfter ?? undefined,
     tagId: d.tagId ?? undefined,
+    folderId: d.folderId ?? undefined,
+    withoutFolder: d.withoutFolder ?? undefined,
     page: d.page ?? 1,
     limit: d.limit ?? 20,
   }));
@@ -40,6 +45,7 @@ export const todoAddInputSchema = z.object({
   priority: todoPriority.optional(),
   dueDate: z.coerce.date().nullable().optional(),
   tagIds: tagIdsArraySchema,
+  folderId: optionalFolderIdSchema,
 });
 
 export const todoEditInputSchema = z
@@ -51,6 +57,7 @@ export const todoEditInputSchema = z
     priority: todoPriority.optional(),
     dueDate: z.coerce.date().nullable().optional(),
     tagIds: tagIdsArraySchema,
+    folderId: optionalFolderIdSchema,
   })
   .refine(
     (d) =>
@@ -59,7 +66,8 @@ export const todoEditInputSchema = z
       d.status !== undefined ||
       d.priority !== undefined ||
       d.dueDate !== undefined ||
-      d.tagIds !== undefined,
+      d.tagIds !== undefined ||
+      d.folderId !== undefined,
     { message: 'At least one field is required to update' }
   );
 

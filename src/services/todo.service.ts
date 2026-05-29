@@ -1,3 +1,4 @@
+import { todoFolderService } from './todo-folder.service';
 import { todoTagService } from './todo-tag.service';
 import { getDbPool } from '../shared/database/pool';
 import { BadRequestError, ForbiddenError, NotFoundError } from '../shared/errors';
@@ -16,6 +17,7 @@ import type {
 type TodoRow = {
   id: number;
   user_id: number;
+  folder_id: number | null;
   title: string;
   description: string | null;
   status: string;
@@ -36,7 +38,7 @@ type SubtaskRow = {
   updated_at: Date;
 };
 
-const TODO_RETURNING = `id, user_id, title, description, status, priority, due_date, completed_at, created_at, updated_at`;
+const TODO_RETURNING = `id, user_id, folder_id, title, description, status, priority, due_date, completed_at, created_at, updated_at`;
 const SUBTASK_RETURNING = `id, todo_id, title, is_completed, order_index, created_at, updated_at`;
 
 import type { TodoTag } from '../types/services/todo-tag.types';
@@ -56,6 +58,7 @@ function mapTodo(
     completedAt: row.completed_at,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+    folderId: row.folder_id != null ? String(row.folder_id) : null,
     subtasksCount: extras?.subtasksCount,
     tags: extras?.tags,
   };
@@ -135,13 +138,19 @@ async function listSubtasksForTodo(todoId: number): Promise<TodoSubtask[]> {
 }
 
 async function createTodo(userId: number, input: CreateTodoInput): Promise<Todo> {
+  const resolvedFolderId = await todoFolderService.resolveFolderIdForTodo(
+    userId,
+    input.folderId
+  );
+
   const db = getDbPool();
   const result = await db.query<TodoRow>(
-    `INSERT INTO todos (user_id, title, description, status, priority, due_date)
-     VALUES ($1, $2, $3, $4, $5, $6)
+    `INSERT INTO todos (user_id, folder_id, title, description, status, priority, due_date)
+     VALUES ($1, $2, $3, $4, $5, $6, $7)
      RETURNING ${TODO_RETURNING}`,
     [
       userId,
+      resolvedFolderId ?? null,
       input.title,
       input.description ?? null,
       input.status ?? 'pending',
@@ -161,6 +170,10 @@ async function createTodo(userId: number, input: CreateTodoInput): Promise<Todo>
 }
 
 async function listTodos(userId: number, options: ListTodosOptions = {}): Promise<TodoCollection> {
+  if (options.folderId && options.withoutFolder) {
+    throw new BadRequestError('Cannot use folderId and withoutFolder filters together');
+  }
+
   const db = getDbPool();
   const page = options.page ?? 1;
   const limit = options.limit ?? 20;
@@ -198,6 +211,16 @@ async function listTodos(userId: number, options: ListTodosOptions = {}): Promis
     )`;
     params.push(tagId);
     paramIndex++;
+  }
+  if (options.folderId) {
+    const folderId = parseInt(options.folderId, 10);
+    if (Number.isNaN(folderId)) throw new BadRequestError('Invalid folder ID');
+    whereClause += ` AND folder_id = $${paramIndex}`;
+    params.push(folderId);
+    paramIndex++;
+  }
+  if (options.withoutFolder) {
+    whereClause += ' AND folder_id IS NULL';
   }
 
   const countResult = await db.query<{ count: string }>(
@@ -278,6 +301,15 @@ async function updateTodo(id: string, userId: number, input: UpdateTodoInput): P
   if (input.dueDate !== undefined) {
     updates.push(`due_date = $${paramIndex}`);
     params.push(input.dueDate);
+    paramIndex++;
+  }
+  if (input.folderId !== undefined) {
+    const resolvedFolderId = await todoFolderService.resolveFolderIdForTodo(
+      userId,
+      input.folderId
+    );
+    updates.push(`folder_id = $${paramIndex}`);
+    params.push(resolvedFolderId);
     paramIndex++;
   }
 

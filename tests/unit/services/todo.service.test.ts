@@ -19,6 +19,7 @@ function createTodoRow(overrides: Record<string, unknown> = {}) {
   return {
     id: TODO_ID,
     user_id: USER_ID,
+    folder_id: null,
     title: 'Buy groceries',
     description: null,
     status: 'pending',

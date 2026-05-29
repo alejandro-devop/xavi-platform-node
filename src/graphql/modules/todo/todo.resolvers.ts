@@ -1,8 +1,14 @@
 import { todoService } from '../../../services/todo.service';
+import { todoFolderService } from '../../../services/todo-folder.service';
 import { todoTagService } from '../../../services/todo-tag.service';
 import type { Todo } from '../../../types/services/todo.types';
-import { requireAuth } from '../../utils/error-handler';
+import { requireAuth, type GraphQLContext } from '../../utils/error-handler';
 import { withValidatedResolver } from '../../utils/validation';
+import {
+  todoFolderAddInputSchema,
+  todoFolderEditInputSchema,
+  todoFolderIdArgSchema,
+} from '../../../validators/schemas/todo-folder.schemas';
 import {
   todoTagAddInputSchema,
   todoTagEditInputSchema,
@@ -46,6 +52,13 @@ export const todoResolvers = {
       if (parent.tags) return parent.tags;
       return await todoTagService.listTagsForTodo(parseInt(parent.id, 10));
     },
+
+    folder: async (parent: Todo, _args: unknown, context: GraphQLContext) => {
+      requireAuth(context, 'Todo.folder');
+      if (parent.folder) return parent.folder;
+      if (!parent.folderId) return null;
+      return await todoFolderService.getFolderById(parent.folderId, uid(context));
+    },
   },
 
   Query: {
@@ -67,7 +80,7 @@ export const todoResolvers = {
       'todos'
     ),
 
-    todoTags: async (_parent: unknown, _args: unknown, context) => {
+    todoTags: async (_parent: unknown, _args: unknown, context: GraphQLContext) => {
       requireAuth(context, 'todoTags');
       return await todoTagService.listTags(uid(context));
     },
@@ -79,6 +92,20 @@ export const todoResolvers = {
         return await todoTagService.getTagById(id, uid(context));
       },
       'todoTag'
+    ),
+
+    todoFolders: async (_parent: unknown, _args: unknown, context: GraphQLContext) => {
+      requireAuth(context, 'todoFolders');
+      return await todoFolderService.listFolders(uid(context));
+    },
+
+    todoFolder: withValidatedResolver(
+      todoFolderIdArgSchema,
+      async (_parent, { id }: { id: string }, context) => {
+        requireAuth(context, 'todoFolder');
+        return await todoFolderService.getFolderById(id, uid(context));
+      },
+      'todoFolder'
     ),
   },
 
@@ -175,6 +202,34 @@ export const todoResolvers = {
         return await todoTagService.deleteTag(id, uid(context));
       },
       'todoTagRemove'
+    ),
+
+    todoFolderAdd: withValidatedResolver(
+      todoFolderAddInputSchema,
+      async (_parent, { input }, context) => {
+        requireAuth(context, 'todoFolderAdd');
+        return await todoFolderService.createFolder(uid(context), input);
+      },
+      'todoFolderAdd'
+    ),
+
+    todoFolderEdit: withValidatedResolver(
+      todoFolderEditInputSchema,
+      async (_parent, { input }, context) => {
+        requireAuth(context, 'todoFolderEdit');
+        const { id, ...fields } = input;
+        return await todoFolderService.updateFolder(id, uid(context), fields);
+      },
+      'todoFolderEdit'
+    ),
+
+    todoFolderRemove: withValidatedResolver(
+      todoFolderIdArgSchema,
+      async (_parent, { id }: { id: string }, context) => {
+        requireAuth(context, 'todoFolderRemove');
+        return await todoFolderService.deleteFolder(id, uid(context));
+      },
+      'todoFolderRemove'
     ),
   },
 };
