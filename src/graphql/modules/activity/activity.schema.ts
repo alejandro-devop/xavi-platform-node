@@ -62,6 +62,7 @@ export const activityTypeDefs = gql`
     createdAt: DateTime!
     updatedAt: DateTime!
     category: ActivityCategory
+    todoFolders: [TodoFolder!]!
     followUps(limit: Int, from: String, to: String): [ActivityFollowUp!]!
   }
 
@@ -89,6 +90,7 @@ export const activityTypeDefs = gql`
     activityFollowUps(activityId: ID, from: String, to: String, limit: Int): [ActivityFollowUp!]!
     activityFollowUpsInDates(from: String!, to: String!): [ActivityFollowUpsDateGroup!]!
     activityDayFollowUps(date: String!): [ActivityFollowUp!]!
+    activityPendingTodos(activityId: ID!, limit: Int): [Todo!]!
   }
 
   extend type Mutation {
@@ -111,6 +113,7 @@ export const activityTypeDefs = gql`
     priority: ActivityPriority
     categoryId: ID
     scheduledDate: DateTime
+    todoFolderIds: [ID!]
   }
 
   input ActivityEditInput {
@@ -121,6 +124,7 @@ export const activityTypeDefs = gql`
     priority: ActivityPriority
     categoryId: ID
     scheduledDate: DateTime
+    todoFolderIds: [ID!]
   }
 
   input ActivityCategoryInput {

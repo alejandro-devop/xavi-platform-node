@@ -8,6 +8,7 @@ import type {
   UpdateActivityInput,
 } from '../types/services/activity.types';
 import { activityCategoryService } from './activity-category.service';
+import { activityTodoFoldersService } from './activity-todo-folders.service';
 
 type ActivityRow = {
   id: number;
@@ -98,7 +99,11 @@ async function createActivity(userId: number, input: CreateActivityInput): Promi
       input.scheduledDate ?? null,
     ]
   );
-  return mapActivity(result.rows[0]);
+  const activity = mapActivity(result.rows[0]);
+  if (input.todoFolderIds !== undefined) {
+    await activityTodoFoldersService.syncFolders(parseActivityId(activity.id), userId, input.todoFolderIds);
+  }
+  return activity;
 }
 
 async function listActivities(
@@ -211,17 +216,29 @@ async function updateActivity(
     paramIndex++;
   }
 
-  if (updates.length === 0) {
+  const db = getDbPool();
+
+  if (updates.length === 0 && input.todoFolderIds === undefined) {
     return mapActivity(await getActivityRowOrThrow(activityId));
   }
 
-  params.push(activityId);
-  const db = getDbPool();
-  const result = await db.query<ActivityRow>(
-    `UPDATE activities SET ${updates.join(', ')} WHERE id = $${paramIndex} RETURNING ${ACTIVITY_RETURNING}`,
-    params
-  );
-  return mapActivity(result.rows[0]);
+  let activity: Activity;
+  if (updates.length === 0) {
+    activity = mapActivity(await getActivityRowOrThrow(activityId));
+  } else {
+    params.push(activityId);
+    const result = await db.query<ActivityRow>(
+      `UPDATE activities SET ${updates.join(', ')} WHERE id = $${paramIndex} RETURNING ${ACTIVITY_RETURNING}`,
+      params
+    );
+    activity = mapActivity(result.rows[0]);
+  }
+
+  if (input.todoFolderIds !== undefined) {
+    await activityTodoFoldersService.syncFolders(activityId, userId, input.todoFolderIds);
+  }
+
+  return activity;
 }
 
 async function deleteActivity(id: string, userId: number): Promise<boolean> {

@@ -1,6 +1,8 @@
 import { z } from 'zod';
 
 const activityIdString = z.string().regex(/^\d+$/, 'Invalid activity ID');
+const todoFolderIdString = z.string().regex(/^\d+$/, 'Invalid todo folder ID');
+const todoFolderIdsArray = z.array(todoFolderIdString).max(50).optional();
 const followUpIdString = z.string().regex(/^\d+$/, 'Invalid follow-up ID');
 const uuidString = z.string().uuid('Invalid UUID');
 const dateString = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format (use YYYY-MM-DD)');
@@ -42,6 +44,7 @@ export const activityAddInputSchema = z.object({
   priority: activityPriority.optional(),
   categoryId: uuidString.nullable().optional(),
   scheduledDate: z.coerce.date().nullable().optional(),
+  todoFolderIds: todoFolderIdsArray,
 });
 
 export const activityEditInputSchema = z
@@ -53,6 +56,7 @@ export const activityEditInputSchema = z
     priority: activityPriority.optional(),
     categoryId: uuidString.nullable().optional(),
     scheduledDate: z.coerce.date().nullable().optional(),
+    todoFolderIds: todoFolderIdsArray,
   })
   .refine(
     (d) =>
@@ -61,9 +65,20 @@ export const activityEditInputSchema = z
       d.status !== undefined ||
       d.priority !== undefined ||
       d.categoryId !== undefined ||
-      d.scheduledDate !== undefined,
+      d.scheduledDate !== undefined ||
+      d.todoFolderIds !== undefined,
     { message: 'At least one field is required to update' }
   );
+
+export const activityPendingTodosArgsSchema = z
+  .object({
+    activityId: activityIdString,
+    limit: z.number().int().positive().max(100).nullish(),
+  })
+  .transform((d) => ({
+    activityId: d.activityId,
+    limit: d.limit ?? 50,
+  }));
 
 export const activityCategoryIdArgSchema = z.object({
   id: uuidString,

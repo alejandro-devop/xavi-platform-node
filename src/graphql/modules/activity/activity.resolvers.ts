@@ -1,6 +1,7 @@
 import { activityCategoryService } from '../../../services/activity-category.service';
 import { activityFollowUpService } from '../../../services/activity-follow-up.service';
 import { activityService } from '../../../services/activity.service';
+import { activityTodoFoldersService } from '../../../services/activity-todo-folders.service';
 import type { Activity } from '../../../types/services/activity.types';
 import {
   activityAddInputSchema,
@@ -16,6 +17,7 @@ import {
   activityFollowUpsFieldArgsSchema,
   activityFollowUpsInDatesArgsSchema,
   activityIdArgSchema,
+  activityPendingTodosArgsSchema,
   activitiesListArgsSchema,
 } from '../../../validators/schemas/activity.schemas';
 import { requireAuth } from '../../utils/error-handler';
@@ -54,6 +56,18 @@ export const activityResolvers = {
     spentTimeMinutes: async (parent: Activity) => {
       return await activityFollowUpService.sumSpentTimeMinutes(
         activityService.parseActivityId(parent.id)
+      );
+    },
+
+    todoFolders: async (
+      parent: Activity,
+      _args: unknown,
+      context: { user?: { id: string | number } | null }
+    ) => {
+      requireAuth(context, 'Activity.todoFolders');
+      return await activityTodoFoldersService.getFoldersForActivity(
+        activityService.parseActivityId(parent.id),
+        uid(context)
       );
     },
   },
@@ -140,6 +154,19 @@ export const activityResolvers = {
         return await activityFollowUpService.listDayFollowUps(uid(context), date);
       },
       'activityDayFollowUps'
+    ),
+
+    activityPendingTodos: withValidatedResolver(
+      activityPendingTodosArgsSchema,
+      async (_parent, { activityId, limit }, context) => {
+        requireAuth(context, 'activityPendingTodos');
+        return await activityTodoFoldersService.listPendingTodosForActivity(
+          activityId,
+          uid(context),
+          limit
+        );
+      },
+      'activityPendingTodos'
     ),
   },
 

@@ -30,6 +30,7 @@ export interface CreateActivityInput {
   priority?: ActivityPriority;
   categoryId?: string | null;
   scheduledDate?: Date | string | null;
+  todoFolderIds?: string[];
 }
 
 export interface UpdateActivityInput {
@@ -39,6 +40,7 @@ export interface UpdateActivityInput {
   priority?: ActivityPriority;
   categoryId?: string | null;
   scheduledDate?: Date | string | null;
+  todoFolderIds?: string[];
 }
 
 export interface ListActivitiesOptions {
