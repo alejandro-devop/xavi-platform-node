@@ -71,6 +71,22 @@ query TodoTags {
 }
 ```
 
+### `TodoFolders`
+
+```graphql
+query TodoFolders {
+  todoFolders {
+    id
+    name
+    color
+    orderIndex
+    todoCount
+  }
+}
+```
+
+Filter todos: `todos(folderId: "2")` or `todos(withoutFolder: true)`.
+
 ---
 
 ## Mutations
@@ -87,6 +103,27 @@ query TodoTags {
 | `todoTagAdd` | — |
 | `todoTagEdit` | — |
 | `todoTagRemove` | — |
+| `todoFolderAdd` | — |
+| `todoFolderEdit` | — |
+| `todoFolderRemove` | — |
+
+### `TodoFolderAdd`
+
+```graphql
+mutation TodoFolderAdd($input: TodoFolderInput!) {
+  todoFolderAdd(input: $input) {
+    id
+    name
+    color
+    orderIndex
+    todoCount
+  }
+}
+```
+
+Variables: `{ "input": { "name": "Personal", "color": "#10B981" } }`
+
+Deleting a folder (`todoFolderRemove`) leaves tasks uncategorized (`folder_id` null).
 
 ### `TodoTagAdd`
 
@@ -124,12 +161,13 @@ Variables:
     "title": "Buy groceries",
     "priority": "high",
     "dueDate": "2024-06-15T18:00:00.000Z",
-    "tagIds": ["1", "2"]
+    "tagIds": ["1", "2"],
+    "folderId": "2"
   }
 }
 ```
 
-List filter by tag: `todos(tagId: "1", page: 1, limit: 20)`.
+List filters: `todos(tagId: "1")`, `todos(folderId: "2")`, `todos(withoutFolder: true)`.
 
 ### `TodoComplete`
 
