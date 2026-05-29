@@ -33,14 +33,17 @@ export const activityTypeDefs = gql`
     userId: Int!
     date: String!
     startTime: String!
-    durationMinutes: Int!
-    endTime: String!
-    endDate: String!
-    endDateTime: String!
+    durationMinutes: Int
+    isOpen: Boolean!
+    endTime: String
+    endDate: String
+    endDateTime: String
     notes: String
+    linkedTodoId: ID
     createdAt: DateTime!
     updatedAt: DateTime!
     activity: Activity
+    linkedTodo: Todo
   }
 
   type ActivityFollowUpsDateGroup {
@@ -90,6 +93,7 @@ export const activityTypeDefs = gql`
     activityFollowUps(activityId: ID, from: String, to: String, limit: Int): [ActivityFollowUp!]!
     activityFollowUpsInDates(from: String!, to: String!): [ActivityFollowUpsDateGroup!]!
     activityDayFollowUps(date: String!): [ActivityFollowUp!]!
+    activityOpenFollowUp: ActivityFollowUp
     activityPendingTodos(activityId: ID!, limit: Int): [Todo!]!
   }
 
@@ -102,6 +106,7 @@ export const activityTypeDefs = gql`
     activityCategoryEdit(input: ActivityCategoryEditInput!): ActivityCategory!
     activityCategoryRemove(id: ID!): Boolean!
     activityFollowUpAdd(input: ActivityFollowUpAddInput!): ActivityFollowUp!
+    activityFollowUpStart(input: ActivityFollowUpStartInput!): ActivityFollowUp!
     activityFollowUpEdit(input: ActivityFollowUpEditInput!): ActivityFollowUp!
     activityFollowUpRemove(id: ID!): Boolean!
   }
@@ -150,6 +155,14 @@ export const activityTypeDefs = gql`
     startTime: String!
     durationMinutes: Int!
     notes: String
+  }
+
+  input ActivityFollowUpStartInput {
+    activityId: ID!
+    date: String!
+    startTime: String!
+    notes: String
+    linkedTodoId: ID
   }
 
   input ActivityFollowUpEditInput {

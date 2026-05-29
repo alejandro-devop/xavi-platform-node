@@ -2,6 +2,7 @@ import { activityCategoryService } from '../../../services/activity-category.ser
 import { activityFollowUpService } from '../../../services/activity-follow-up.service';
 import { activityService } from '../../../services/activity.service';
 import { activityTodoFoldersService } from '../../../services/activity-todo-folders.service';
+import { todoService } from '../../../services/todo.service';
 import type { Activity } from '../../../types/services/activity.types';
 import {
   activityAddInputSchema,
@@ -11,6 +12,7 @@ import {
   activityDayFollowUpsArgsSchema,
   activityEditInputSchema,
   activityFollowUpAddInputSchema,
+  activityFollowUpStartInputSchema,
   activityFollowUpEditInputSchema,
   activityFollowUpIdArgSchema,
   activityFollowUpsArgsSchema,
@@ -80,6 +82,16 @@ export const activityResolvers = {
     ) => {
       requireAuth(context, 'ActivityFollowUp.activity');
       return await activityService.getActivityById(parent.activityId, uid(context));
+    },
+
+    linkedTodo: async (
+      parent: { linkedTodoId: string | null },
+      _args: unknown,
+      context: { user?: { id: string | number } | null }
+    ) => {
+      if (!parent.linkedTodoId) return null;
+      requireAuth(context, 'ActivityFollowUp.linkedTodo');
+      return await todoService.getTodoById(parent.linkedTodoId, uid(context));
     },
   },
 
@@ -155,6 +167,15 @@ export const activityResolvers = {
       },
       'activityDayFollowUps'
     ),
+
+    activityOpenFollowUp: async (
+      _parent: unknown,
+      _args: unknown,
+      context: { user?: { id: string | number } | null }
+    ) => {
+      requireAuth(context, 'activityOpenFollowUp');
+      return await activityFollowUpService.getOpenFollowUp(uid(context));
+    },
 
     activityPendingTodos: withValidatedResolver(
       activityPendingTodosArgsSchema,
@@ -243,6 +264,15 @@ export const activityResolvers = {
         return await activityFollowUpService.createFollowUp(uid(context), input);
       },
       'activityFollowUpAdd'
+    ),
+
+    activityFollowUpStart: withValidatedResolver(
+      activityFollowUpStartInputSchema,
+      async (_parent, { input }, context) => {
+        requireAuth(context, 'activityFollowUpStart');
+        return await activityFollowUpService.startFollowUp(uid(context), input);
+      },
+      'activityFollowUpStart'
     ),
 
     activityFollowUpEdit: withValidatedResolver(

@@ -4,13 +4,23 @@ export interface ActivityFollowUp {
   userId: number;
   date: string;
   startTime: string;
-  durationMinutes: number;
-  endTime: string;
-  endDate: string;
-  endDateTime: string;
+  durationMinutes: number | null;
+  isOpen: boolean;
+  endTime: string | null;
+  endDate: string | null;
+  endDateTime: string | null;
   notes: string | null;
+  linkedTodoId: string | null;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface StartActivityFollowUpInput {
+  activityId: string;
+  date: string;
+  startTime: string;
+  notes?: string | null;
+  linkedTodoId?: string | null;
 }
 
 export interface CreateActivityFollowUpInput {

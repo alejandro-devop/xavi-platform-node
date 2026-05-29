@@ -1,4 +1,4 @@
-import { ForbiddenError } from '../../../src/shared/errors';
+import { BadRequestError, ForbiddenError } from '../../../src/shared/errors';
 import { activityFollowUpService } from '../../../src/services/activity-follow-up.service';
 import { mockDbPool, resetAllMocks } from '../../helpers/mocks';
 
@@ -6,9 +6,24 @@ jest.mock('../../../src/shared/database/pool', () => ({
   getDbPool: jest.fn(),
 }));
 
+jest.mock('../../../src/services/activity.service', () => ({
+  activityService: {
+    parseActivityId: (id: string) => parseInt(id, 10),
+    getActivityById: jest.fn().mockResolvedValue({ id: '7' }),
+  },
+}));
+
+jest.mock('../../../src/services/todo.service', () => ({
+  todoService: {
+    getTodoById: jest.fn().mockResolvedValue({ id: '12', title: 'Task' }),
+  },
+}));
+
 import { getDbPool } from '../../../src/shared/database/pool';
+import { activityService } from '../../../src/services/activity.service';
 
 const mockGetDbPool = getDbPool as jest.MockedFunction<typeof getDbPool>;
+const mockGetActivityById = activityService.getActivityById as jest.Mock;
 
 const USER_ID = 1;
 const ACTIVITY_ID = 7;
@@ -24,6 +39,7 @@ function createFollowUpRow(overrides: Record<string, unknown> = {}) {
     start_time: '09:00:00',
     duration_minutes: 60,
     notes: null,
+    linked_todo_id: null,
     created_at: now,
     updated_at: now,
     ...overrides,
@@ -34,6 +50,7 @@ describe('ActivityFollowUpService', () => {
   beforeEach(() => {
     resetAllMocks();
     mockGetDbPool.mockReturnValue(mockDbPool as never);
+    mockGetActivityById.mockResolvedValue({ id: String(ACTIVITY_ID) });
   });
 
   it('returns follow-up with computed end time', async () => {
@@ -43,8 +60,22 @@ describe('ActivityFollowUpService', () => {
 
     expect(followUp.startTime).toBe('09:00:00');
     expect(followUp.durationMinutes).toBe(60);
+    expect(followUp.isOpen).toBe(false);
     expect(followUp.endTime).toBe('10:00:00');
     expect(followUp.endDate).toBe('2024-06-01');
+  });
+
+  it('maps open follow-up without end fields', async () => {
+    mockDbPool.query.mockResolvedValueOnce({
+      rows: [createFollowUpRow({ duration_minutes: null, linked_todo_id: 12 })],
+    });
+
+    const followUp = await activityFollowUpService.getFollowUpById(String(FOLLOW_UP_ID), USER_ID);
+
+    expect(followUp.isOpen).toBe(true);
+    expect(followUp.durationMinutes).toBeNull();
+    expect(followUp.endTime).toBeNull();
+    expect(followUp.linkedTodoId).toBe('12');
   });
 
   it('throws ForbiddenError for non-owner', async () => {
@@ -55,5 +86,44 @@ describe('ActivityFollowUpService', () => {
     await expect(
       activityFollowUpService.getFollowUpById(String(FOLLOW_UP_ID), USER_ID)
     ).rejects.toThrow(ForbiddenError);
+  });
+
+  it('getOpenFollowUp returns null when none', async () => {
+    mockDbPool.query.mockResolvedValueOnce({ rows: [] });
+
+    const open = await activityFollowUpService.getOpenFollowUp(USER_ID);
+
+    expect(open).toBeNull();
+  });
+
+  it('startFollowUp rejects when open session exists', async () => {
+    mockDbPool.query.mockResolvedValueOnce({ rows: [{ id: 99 }] });
+
+    await expect(
+      activityFollowUpService.startFollowUp(USER_ID, {
+        activityId: String(ACTIVITY_ID),
+        date: '2024-06-01',
+        startTime: '09:00:00',
+      })
+    ).rejects.toThrow(BadRequestError);
+
+    expect(mockGetActivityById).not.toHaveBeenCalled();
+  });
+
+  it('startFollowUp inserts open row', async () => {
+    mockDbPool.query
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [createFollowUpRow({ duration_minutes: null })] });
+
+    const followUp = await activityFollowUpService.startFollowUp(USER_ID, {
+      activityId: String(ACTIVITY_ID),
+      date: '2024-06-01',
+      startTime: '09:00:00',
+      notes: 'focus',
+      linkedTodoId: '12',
+    });
+
+    expect(followUp.isOpen).toBe(true);
+    expect(mockDbPool.query).toHaveBeenCalledTimes(2);
   });
 });

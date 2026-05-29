@@ -4,6 +4,7 @@ const activityIdString = z.string().regex(/^\d+$/, 'Invalid activity ID');
 const todoFolderIdString = z.string().regex(/^\d+$/, 'Invalid todo folder ID');
 const todoFolderIdsArray = z.array(todoFolderIdString).max(50).optional();
 const followUpIdString = z.string().regex(/^\d+$/, 'Invalid follow-up ID');
+const todoIdString = z.string().regex(/^\d+$/, 'Invalid todo ID');
 const uuidString = z.string().uuid('Invalid UUID');
 const dateString = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format (use YYYY-MM-DD)');
 const timeString = z
@@ -156,6 +157,14 @@ export const activityFollowUpAddInputSchema = z.object({
   startTime: timeString,
   durationMinutes: z.number().int().positive().max(24 * 60),
   notes: z.string().nullable().optional(),
+});
+
+export const activityFollowUpStartInputSchema = z.object({
+  activityId: activityIdString,
+  date: dateString,
+  startTime: timeString,
+  notes: z.string().nullable().optional(),
+  linkedTodoId: todoIdString.nullable().optional(),
 });
 
 export const activityFollowUpEditInputSchema = z

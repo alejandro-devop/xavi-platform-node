@@ -1,5 +1,5 @@
 import { getDbPool } from '../shared/database/pool';
-import { ForbiddenError, NotFoundError } from '../shared/errors';
+import { BadRequestError, ForbiddenError, NotFoundError } from '../shared/errors';
 import {
   computeActivityFollowUpEnd,
   formatStartTimeForApi,
@@ -9,9 +9,11 @@ import type {
   ActivityFollowUpsDateGroup,
   CreateActivityFollowUpInput,
   ListActivityFollowUpsOptions,
+  StartActivityFollowUpInput,
   UpdateActivityFollowUpInput,
 } from '../types/services/activity-follow-up.types';
 import { activityService } from './activity.service';
+import { todoService } from './todo.service';
 
 type FollowUpRow = {
   id: number;
@@ -19,11 +21,14 @@ type FollowUpRow = {
   activity_id: number;
   date: Date | string;
   start_time: string | Date;
-  duration_minutes: number;
+  duration_minutes: number | null;
   notes: string | null;
+  linked_todo_id: number | null;
   created_at: Date;
   updated_at: Date;
 };
+
+const CLOSED_FOLLOW_UP_FILTER = 'af.duration_minutes IS NOT NULL';
 
 function formatDateForApi(value: Date | string): string {
   if (typeof value === 'string') {
@@ -35,7 +40,28 @@ function formatDateForApi(value: Date | string): string {
 function mapFollowUp(row: FollowUpRow): ActivityFollowUp {
   const date = formatDateForApi(row.date);
   const startTime = formatStartTimeForApi(row.start_time);
-  const end = computeActivityFollowUpEnd(date, startTime, row.duration_minutes);
+  const isOpen = row.duration_minutes === null;
+
+  if (isOpen) {
+    return {
+      id: String(row.id),
+      activityId: String(row.activity_id),
+      userId: row.user_id,
+      date,
+      startTime,
+      durationMinutes: null,
+      isOpen: true,
+      endTime: null,
+      endDate: null,
+      endDateTime: null,
+      notes: row.notes,
+      linkedTodoId: row.linked_todo_id !== null ? String(row.linked_todo_id) : null,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+    };
+  }
+
+  const end = computeActivityFollowUpEnd(date, startTime, row.duration_minutes!);
   return {
     id: String(row.id),
     activityId: String(row.activity_id),
@@ -43,10 +69,12 @@ function mapFollowUp(row: FollowUpRow): ActivityFollowUp {
     date,
     startTime,
     durationMinutes: row.duration_minutes,
+    isOpen: false,
     endTime: end.endTime,
     endDate: end.endDate,
     endDateTime: end.endDateTime,
     notes: row.notes,
+    linkedTodoId: row.linked_todo_id !== null ? String(row.linked_todo_id) : null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -83,11 +111,33 @@ async function getOwnedFollowUpOrThrow(
   return row;
 }
 
+async function assertNoOpenFollowUp(userId: number): Promise<void> {
+  const db = getDbPool();
+  const result = await db.query<{ id: number }>(
+    `SELECT id FROM activity_follow_ups
+     WHERE user_id = $1 AND duration_minutes IS NULL
+     LIMIT 1`,
+    [userId]
+  );
+  if (result.rows.length > 0) {
+    throw new BadRequestError(
+      'You already have an activity in progress. Finish or cancel it before starting another.'
+    );
+  }
+}
+
+async function validateLinkedTodo(linkedTodoId: string | null | undefined, userId: number): Promise<void> {
+  if (linkedTodoId === undefined || linkedTodoId === null) {
+    return;
+  }
+  await todoService.getTodoById(linkedTodoId, userId);
+}
+
 async function sumSpentTimeMinutes(activityId: number): Promise<number> {
   const db = getDbPool();
   const result = await db.query<{ total: string }>(
     `SELECT COALESCE(SUM(duration_minutes), 0)::text AS total
-     FROM activity_follow_ups WHERE activity_id = $1`,
+     FROM activity_follow_ups WHERE activity_id = $1 AND duration_minutes IS NOT NULL`,
     [activityId]
   );
   return parseInt(result.rows[0].total, 10);
@@ -107,6 +157,48 @@ async function createFollowUp(
      RETURNING *`,
     [userId, activityId, input.date, input.startTime, input.durationMinutes, input.notes ?? null]
   );
+  return mapFollowUp(result.rows[0]);
+}
+
+async function startFollowUp(
+  userId: number,
+  input: StartActivityFollowUpInput
+): Promise<ActivityFollowUp> {
+  await assertNoOpenFollowUp(userId);
+  await validateLinkedTodo(input.linkedTodoId, userId);
+
+  const activityId = activityService.parseActivityId(input.activityId);
+  await activityService.getActivityById(String(activityId), userId);
+
+  const linkedTodoId =
+    input.linkedTodoId !== undefined && input.linkedTodoId !== null
+      ? parseInt(input.linkedTodoId, 10)
+      : null;
+
+  const db = getDbPool();
+  const result = await db.query<FollowUpRow>(
+    `INSERT INTO activity_follow_ups (
+       user_id, activity_id, date, start_time, duration_minutes, notes, linked_todo_id
+     )
+     VALUES ($1, $2, $3::date, $4::time, NULL, $5, $6)
+     RETURNING *`,
+    [userId, activityId, input.date, input.startTime, input.notes ?? null, linkedTodoId]
+  );
+  return mapFollowUp(result.rows[0]);
+}
+
+async function getOpenFollowUp(userId: number): Promise<ActivityFollowUp | null> {
+  const db = getDbPool();
+  const result = await db.query<FollowUpRow>(
+    `SELECT * FROM activity_follow_ups
+     WHERE user_id = $1 AND duration_minutes IS NULL
+     ORDER BY created_at DESC
+     LIMIT 1`,
+    [userId]
+  );
+  if (result.rows.length === 0) {
+    return null;
+  }
   return mapFollowUp(result.rows[0]);
 }
 
@@ -131,6 +223,9 @@ async function updateFollowUp(
     params.push(input.startTime);
   }
   if (input.durationMinutes !== undefined) {
+    if (input.durationMinutes < 1) {
+      throw new BadRequestError('Duration must be at least 1 minute');
+    }
     updates.push(`duration_minutes = $${i++}`);
     params.push(input.durationMinutes);
   }
@@ -171,7 +266,7 @@ async function listFollowUps(
 ): Promise<ActivityFollowUp[]> {
   let query = `SELECT af.* FROM activity_follow_ups af
     INNER JOIN activities a ON a.id = af.activity_id
-    WHERE a.user_id = $1`;
+    WHERE a.user_id = $1 AND ${CLOSED_FOLLOW_UP_FILTER}`;
   const params: (number | string)[] = [userId];
   let paramIndex = 2;
 
@@ -224,6 +319,8 @@ async function listDayFollowUps(userId: number, date: string): Promise<ActivityF
 
 export const activityFollowUpService = {
   createFollowUp,
+  startFollowUp,
+  getOpenFollowUp,
   updateFollowUp,
   deleteFollowUp,
   getFollowUpById,

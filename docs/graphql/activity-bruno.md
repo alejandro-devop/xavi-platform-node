@@ -111,6 +111,8 @@ query ActivityFollowUps($activityId: ID, $from: String, $to: String) {
 
 ### `ActivityDayFollowUps`
 
+Solo follow-ups **cerrados** (con duración). Los abiertos no aparecen en el día hasta finalizar.
+
 ```graphql
 query ActivityDayFollowUps($date: String!) {
   activityDayFollowUps(date: $date) {
@@ -119,6 +121,30 @@ query ActivityDayFollowUps($date: String!) {
     durationMinutes
     endDateTime
     activity { id title }
+  }
+}
+```
+
+### `ActivityOpenFollowUp`
+
+Sesión en curso del usuario (máximo una). `durationMinutes` es `null` mientras está abierta.
+
+```graphql
+query ActivityOpenFollowUp {
+  activityOpenFollowUp {
+    id
+    activityId
+    date
+    startTime
+    isOpen
+    notes
+    linkedTodoId
+    activity {
+      id
+      title
+      category { id name color icon }
+    }
+    linkedTodo { id title }
   }
 }
 ```
@@ -189,7 +215,38 @@ mutation ActivityCategoryRemove($id: ID!) {
 
 ## Mutations — Follow-ups
 
-La hora de fin **no se persiste**; el API devuelve `endTime`, `endDate` y `endDateTime` calculados.
+La hora de fin **no se persiste** en registros cerrados; el API devuelve `endTime`, `endDate` y `endDateTime` calculados.
+
+### `ActivityFollowUpStart` (iniciar cronómetro)
+
+Crea un follow-up abierto (`durationMinutes: null`). Falla si ya hay otro abierto para el usuario.
+
+```graphql
+mutation ActivityFollowUpStart($input: ActivityFollowUpStartInput!) {
+  activityFollowUpStart(input: $input) {
+    id
+    date
+    startTime
+    isOpen
+    linkedTodoId
+    activity { id title }
+  }
+}
+```
+
+```json
+{
+  "input": {
+    "activityId": "7",
+    "date": "2026-05-20",
+    "startTime": "09:30",
+    "notes": "En curso",
+    "linkedTodoId": "42"
+  }
+}
+```
+
+### `ActivityFollowUpAdd` (tiempo pasado)
 
 ```graphql
 mutation ActivityFollowUpAdd($input: ActivityFollowUpAddInput!) {
@@ -216,11 +273,16 @@ mutation ActivityFollowUpAdd($input: ActivityFollowUpAddInput!) {
 }
 ```
 
+### `ActivityFollowUpEdit` (finalizar abierto o editar cerrado)
+
+Enviar `durationMinutes` cierra un follow-up abierto.
+
 ```graphql
 mutation ActivityFollowUpEdit($input: ActivityFollowUpEditInput!) {
   activityFollowUpEdit(input: $input) {
     id
     durationMinutes
+    isOpen
     endTime
   }
 }
