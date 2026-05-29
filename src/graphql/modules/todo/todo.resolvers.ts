@@ -20,6 +20,7 @@ import {
   todoIdArgSchema,
   todoSubtaskAddInputSchema,
   todoSubtaskEditInputSchema,
+  todoReorderInputSchema,
   todoSubtaskRemoveInputSchema,
   todosListArgsSchema,
 } from '../../../validators/schemas/todo.schemas';
@@ -230,6 +231,15 @@ export const todoResolvers = {
         return await todoFolderService.deleteFolder(id, uid(context));
       },
       'todoFolderRemove'
+    ),
+
+    todoReorder: withValidatedResolver(
+      todoReorderInputSchema,
+      async (_parent, { input }, context) => {
+        requireAuth(context, 'todoReorder');
+        return await todoService.reorderTodosInFolder(uid(context), input);
+      },
+      'todoReorder'
     ),
   },
 };

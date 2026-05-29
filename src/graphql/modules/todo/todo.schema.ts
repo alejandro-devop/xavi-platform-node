@@ -66,6 +66,7 @@ export const todoTypeDefs = gql`
     tags: [TodoTag!]!
     folderId: ID
     folder: TodoFolder
+    orderIndex: Int!
   }
 
   type TodoCollection {
@@ -108,6 +109,7 @@ export const todoTypeDefs = gql`
     todoFolderAdd(input: TodoFolderInput!): TodoFolder!
     todoFolderEdit(input: TodoFolderEditInput!): TodoFolder!
     todoFolderRemove(id: ID!): Boolean!
+    todoReorder(input: TodoReorderInput!): [Todo!]!
   }
 
   input TodoInput {
@@ -118,6 +120,12 @@ export const todoTypeDefs = gql`
     dueDate: DateTime
     tagIds: [ID!]
     folderId: ID
+    orderIndex: Int
+  }
+
+  input TodoReorderInput {
+    folderId: ID
+    todoIds: [ID!]!
   }
 
   input TodoEditInput {
@@ -129,6 +137,7 @@ export const todoTypeDefs = gql`
     dueDate: DateTime
     tagIds: [ID!]
     folderId: ID
+    orderIndex: Int
   }
 
   input TodoFolderInput {

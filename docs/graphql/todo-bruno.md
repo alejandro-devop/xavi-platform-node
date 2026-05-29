@@ -169,6 +169,24 @@ Variables:
 
 List filters: `todos(tagId: "1")`, `todos(folderId: "2")`, `todos(withoutFolder: true)`.
 
+Folder lists sort by `orderIndex` ascending.
+
+### `TodoReorder`
+
+```graphql
+mutation TodoReorder($input: TodoReorderInput!) {
+  todoReorder(input: $input) {
+    id
+    orderIndex
+    folderId
+  }
+}
+```
+
+Variables: `{ "input": { "folderId": "2", "todoIds": ["10", "12", "11"] } }`
+
+Use `folderId: null` for uncategorized todos.
+
 ### `TodoComplete`
 
 ```graphql

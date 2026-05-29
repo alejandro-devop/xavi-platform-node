@@ -46,6 +46,12 @@ export const todoAddInputSchema = z.object({
   dueDate: z.coerce.date().nullable().optional(),
   tagIds: tagIdsArraySchema,
   folderId: optionalFolderIdSchema,
+  orderIndex: z.number().int().min(0).optional(),
+});
+
+export const todoReorderInputSchema = z.object({
+  folderId: z.union([folderIdString, z.null()]),
+  todoIds: z.array(todoIdString).min(1).max(500),
 });
 
 export const todoEditInputSchema = z
@@ -58,6 +64,7 @@ export const todoEditInputSchema = z
     dueDate: z.coerce.date().nullable().optional(),
     tagIds: tagIdsArraySchema,
     folderId: optionalFolderIdSchema,
+    orderIndex: z.number().int().min(0).optional(),
   })
   .refine(
     (d) =>
@@ -67,7 +74,8 @@ export const todoEditInputSchema = z
       d.priority !== undefined ||
       d.dueDate !== undefined ||
       d.tagIds !== undefined ||
-      d.folderId !== undefined,
+      d.folderId !== undefined ||
+      d.orderIndex !== undefined,
     { message: 'At least one field is required to update' }
   );
 

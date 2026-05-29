@@ -20,6 +20,7 @@ function createTodoRow(overrides: Record<string, unknown> = {}) {
     id: TODO_ID,
     user_id: USER_ID,
     folder_id: null,
+    order_index: 0,
     title: 'Buy groceries',
     description: null,
     status: 'pending',
@@ -124,6 +125,24 @@ describe('TodoService', () => {
 
       expect(subtask.title).toBe('Milk');
       expect(subtask.todoId).toBe(String(TODO_ID));
+    });
+  });
+
+  describe('reorderTodosInFolder', () => {
+    it('updates order_index for uncategorized todos', async () => {
+      mockDbPool.query
+        .mockResolvedValueOnce({ rows: [{ id: TODO_ID }] })
+        .mockResolvedValueOnce({ rows: [] })
+        .mockResolvedValueOnce({ rows: [createTodoRow({ order_index: 0 })] })
+        .mockResolvedValueOnce({ rows: [] });
+
+      const todos = await todoService.reorderTodosInFolder(USER_ID, {
+        folderId: null,
+        todoIds: [String(TODO_ID)],
+      });
+
+      expect(todos).toHaveLength(1);
+      expect(todos[0].orderIndex).toBe(0);
     });
   });
 

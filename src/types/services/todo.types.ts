@@ -36,6 +36,7 @@ export interface Todo {
   tags?: TodoTag[];
   folderId?: string | null;
   folder?: TodoFolder | null;
+  orderIndex: number;
 }
 
 export interface TodoCollection {
@@ -53,6 +54,7 @@ export interface CreateTodoInput {
   dueDate?: Date | string | null;
   tagIds?: string[];
   folderId?: string | null;
+  orderIndex?: number;
 }
 
 export interface UpdateTodoInput {
@@ -63,6 +65,12 @@ export interface UpdateTodoInput {
   dueDate?: Date | string | null;
   tagIds?: string[];
   folderId?: string | null;
+  orderIndex?: number;
+}
+
+export interface ReorderTodosInFolderInput {
+  folderId: string | null;
+  todoIds: string[];
 }
 
 export interface ListTodosOptions {

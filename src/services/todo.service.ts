@@ -10,14 +10,18 @@ import type {
   TodoCollection,
   TodoSubtask,
   TodoSubtasksCount,
+  ReorderTodosInFolderInput,
   UpdateTodoInput,
   UpdateTodoSubtaskInput,
 } from '../types/services/todo.types';
+
+type FolderIdKey = number | null;
 
 type TodoRow = {
   id: number;
   user_id: number;
   folder_id: number | null;
+  order_index: number;
   title: string;
   description: string | null;
   status: string;
@@ -38,7 +42,7 @@ type SubtaskRow = {
   updated_at: Date;
 };
 
-const TODO_RETURNING = `id, user_id, folder_id, title, description, status, priority, due_date, completed_at, created_at, updated_at`;
+const TODO_RETURNING = `id, user_id, folder_id, order_index, title, description, status, priority, due_date, completed_at, created_at, updated_at`;
 const SUBTASK_RETURNING = `id, todo_id, title, is_completed, order_index, created_at, updated_at`;
 
 import type { TodoTag } from '../types/services/todo-tag.types';
@@ -59,6 +63,7 @@ function mapTodo(
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     folderId: row.folder_id != null ? String(row.folder_id) : null,
+    orderIndex: row.order_index,
     subtasksCount: extras?.subtasksCount,
     tags: extras?.tags,
   };
@@ -128,6 +133,24 @@ async function loadSubtasksCounts(todoIds: number[]): Promise<Map<number, TodoSu
   return map;
 }
 
+async function getNextOrderIndexInFolder(userId: number, folderId: FolderIdKey): Promise<number> {
+  const db = getDbPool();
+  const result = await db.query<{ max: string | null }>(
+    `SELECT MAX(order_index)::text AS max FROM todos
+     WHERE user_id = $1 AND folder_id IS NOT DISTINCT FROM $2`,
+    [userId, folderId]
+  );
+  const max = result.rows[0]?.max;
+  return max != null ? parseInt(max, 10) + 1 : 0;
+}
+
+function listOrderClause(options: ListTodosOptions): string {
+  if (options.folderId || options.withoutFolder) {
+    return 'ORDER BY order_index ASC, created_at DESC';
+  }
+  return 'ORDER BY due_date ASC NULLS LAST, priority DESC, created_at DESC';
+}
+
 async function listSubtasksForTodo(todoId: number): Promise<TodoSubtask[]> {
   const db = getDbPool();
   const result = await db.query<SubtaskRow>(
@@ -142,15 +165,22 @@ async function createTodo(userId: number, input: CreateTodoInput): Promise<Todo>
     userId,
     input.folderId
   );
+  const folderKey: FolderIdKey = resolvedFolderId ?? null;
+
+  let orderIndex = input.orderIndex;
+  if (orderIndex === undefined) {
+    orderIndex = await getNextOrderIndexInFolder(userId, folderKey);
+  }
 
   const db = getDbPool();
   const result = await db.query<TodoRow>(
-    `INSERT INTO todos (user_id, folder_id, title, description, status, priority, due_date)
-     VALUES ($1, $2, $3, $4, $5, $6, $7)
+    `INSERT INTO todos (user_id, folder_id, order_index, title, description, status, priority, due_date)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
      RETURNING ${TODO_RETURNING}`,
     [
       userId,
-      resolvedFolderId ?? null,
+      folderKey,
+      orderIndex,
       input.title,
       input.description ?? null,
       input.status ?? 'pending',
@@ -231,7 +261,7 @@ async function listTodos(userId: number, options: ListTodosOptions = {}): Promis
   const listParams = [...params, limit, offset];
   const result = await db.query<TodoRow>(
     `SELECT * FROM todos ${whereClause}
-     ORDER BY due_date ASC NULLS LAST, priority DESC, created_at DESC
+     ${listOrderClause(options)}
      LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`,
     listParams
   );
@@ -272,11 +302,12 @@ async function getTodoById(id: string, userId: number): Promise<Todo> {
 
 async function updateTodo(id: string, userId: number, input: UpdateTodoInput): Promise<Todo> {
   const todoId = parseTodoId(id);
-  await getOwnedTodoOrThrow(todoId, userId);
+  const existing = await getOwnedTodoOrThrow(todoId, userId);
 
   const updates: string[] = [];
   const params: unknown[] = [];
   let paramIndex = 1;
+  let resolvedFolderId: FolderIdKey | undefined;
 
   if (input.title !== undefined) {
     updates.push(`title = $${paramIndex}`);
@@ -304,12 +335,23 @@ async function updateTodo(id: string, userId: number, input: UpdateTodoInput): P
     paramIndex++;
   }
   if (input.folderId !== undefined) {
-    const resolvedFolderId = await todoFolderService.resolveFolderIdForTodo(
+    resolvedFolderId = (await todoFolderService.resolveFolderIdForTodo(
       userId,
       input.folderId
-    );
+    )) as FolderIdKey;
     updates.push(`folder_id = $${paramIndex}`);
     params.push(resolvedFolderId);
+    paramIndex++;
+  }
+
+  if (input.orderIndex !== undefined) {
+    updates.push(`order_index = $${paramIndex}`);
+    params.push(input.orderIndex);
+    paramIndex++;
+  } else if (resolvedFolderId !== undefined && resolvedFolderId !== existing.folder_id) {
+    const nextIndex = await getNextOrderIndexInFolder(userId, resolvedFolderId);
+    updates.push(`order_index = $${paramIndex}`);
+    params.push(nextIndex);
     paramIndex++;
   }
 
@@ -332,6 +374,44 @@ async function updateTodo(id: string, userId: number, input: UpdateTodoInput): P
   );
   const tags = await todoTagService.listTagsForTodo(todoId);
   return mapTodo(result.rows[0], { tags });
+}
+
+async function reorderTodosInFolder(
+  userId: number,
+  input: ReorderTodosInFolderInput
+): Promise<Todo[]> {
+  const folderKey: FolderIdKey =
+    input.folderId === null
+      ? null
+      : (await todoFolderService.resolveFolderIdForTodo(userId, input.folderId))!;
+
+  const uniqueIds = [...new Set(input.todoIds)];
+  const numericTodoIds = uniqueIds.map(parseTodoId);
+
+  const db = getDbPool();
+  const check = await db.query<{ id: number }>(
+    `SELECT id FROM todos
+     WHERE user_id = $1 AND folder_id IS NOT DISTINCT FROM $2 AND id = ANY($3)`,
+    [userId, folderKey, numericTodoIds]
+  );
+
+  if (check.rows.length !== numericTodoIds.length) {
+    throw new BadRequestError('All todos must belong to you and the specified folder');
+  }
+
+  for (let i = 0; i < numericTodoIds.length; i++) {
+    await db.query('UPDATE todos SET order_index = $1 WHERE id = $2', [i, numericTodoIds[i]]);
+  }
+
+  const result = await db.query<TodoRow>(
+    `SELECT * FROM todos WHERE id = ANY($1) ORDER BY order_index ASC`,
+    [numericTodoIds]
+  );
+
+  const tagsByTodo = await todoTagService.loadTagsForTodoIds(numericTodoIds);
+  return result.rows.map((row) =>
+    mapTodo(row, { tags: tagsByTodo.get(row.id) ?? [], subtasksCount: { total: 0, completed: 0 } })
+  );
 }
 
 async function deleteTodo(id: string, userId: number): Promise<boolean> {
@@ -439,6 +519,7 @@ export const todoService = {
   listTodos,
   getTodoById,
   updateTodo,
+  reorderTodosInFolder,
   deleteTodo,
   completeTodo,
   createSubtask,
