@@ -29,6 +29,7 @@ export interface Todo {
   priority: TodoPriority;
   dueDate: Date | null;
   completedAt: Date | null;
+  selectedToday: boolean;
   createdAt: Date;
   updatedAt: Date;
   subtasks?: TodoSubtask[];
@@ -52,6 +53,7 @@ export interface CreateTodoInput {
   status?: TodoStatus;
   priority?: TodoPriority;
   dueDate?: Date | string | null;
+  selectedToday?: boolean;
   tagIds?: string[];
   folderId?: string | null;
   orderIndex?: number;
@@ -63,6 +65,7 @@ export interface UpdateTodoInput {
   status?: TodoStatus;
   priority?: TodoPriority;
   dueDate?: Date | string | null;
+  selectedToday?: boolean;
   tagIds?: string[];
   folderId?: string | null;
   orderIndex?: number;
@@ -81,6 +84,8 @@ export interface ListTodosOptions {
   tagId?: string;
   folderId?: string;
   withoutFolder?: boolean;
+  selectedToday?: boolean;
+  pendingOnly?: boolean;
   page?: number;
   limit?: number;
 }

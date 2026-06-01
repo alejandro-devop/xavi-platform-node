@@ -59,6 +59,7 @@ export const todoTypeDefs = gql`
     priority: TodoPriority!
     dueDate: DateTime
     completedAt: DateTime
+    selectedToday: Boolean!
     createdAt: DateTime!
     updatedAt: DateTime!
     subtasks: [TodoSubtask!]!
@@ -86,6 +87,8 @@ export const todoTypeDefs = gql`
       tagId: ID
       folderId: ID
       withoutFolder: Boolean
+      selectedToday: Boolean
+      pendingOnly: Boolean
       page: Int
       limit: Int
     ): TodoCollection!
@@ -118,6 +121,7 @@ export const todoTypeDefs = gql`
     status: TodoStatus
     priority: TodoPriority
     dueDate: DateTime
+    selectedToday: Boolean
     tagIds: [ID!]
     folderId: ID
     orderIndex: Int
@@ -135,6 +139,7 @@ export const todoTypeDefs = gql`
     status: TodoStatus
     priority: TodoPriority
     dueDate: DateTime
+    selectedToday: Boolean
     tagIds: [ID!]
     folderId: ID
     orderIndex: Int

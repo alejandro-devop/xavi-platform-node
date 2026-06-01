@@ -11,6 +11,7 @@ import { shoppingResolvers } from './modules/shopping/shopping.resolvers';
 import { activityResolvers } from './modules/activity/activity.resolvers';
 import { habitResolvers } from './modules/habit/habit.resolvers';
 import { routineResolvers } from './modules/routine/routine.resolvers';
+import { weeklyRoutineResolvers } from './modules/weekly-routine/weekly-routine.resolvers';
 import { todoResolvers } from './modules/todo/todo.resolvers';
 import { sleepResolvers } from './modules/sleep/sleep.resolvers';
 import { learningResolvers } from './modules/learning/learning.resolvers';
@@ -31,6 +32,7 @@ export const resolvers = mergeResolvers([
   activityResolvers,
   habitResolvers,
   routineResolvers,
+  weeklyRoutineResolvers,
   todoResolvers,
   sleepResolvers,
   learningResolvers,

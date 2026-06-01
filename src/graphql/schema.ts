@@ -12,6 +12,7 @@ import { shoppingTypeDefs } from './modules/shopping/shopping.schema';
 import { activityTypeDefs } from './modules/activity/activity.schema';
 import { habitTypeDefs } from './modules/habit/habit.schema';
 import { routineTypeDefs } from './modules/routine/routine.schema';
+import { weeklyRoutineTypeDefs } from './modules/weekly-routine/weekly-routine.schema';
 import { todoTypeDefs } from './modules/todo/todo.schema';
 import { sleepTypeDefs } from './modules/sleep/sleep.schema';
 import { learningTypeDefs } from './modules/learning/learning.schema';
@@ -45,6 +46,7 @@ export const typeDefs = [
   activityTypeDefs,
   habitTypeDefs,
   routineTypeDefs,
+  weeklyRoutineTypeDefs,
   todoTypeDefs,
   sleepTypeDefs,
   learningTypeDefs,

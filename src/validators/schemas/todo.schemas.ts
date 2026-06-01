@@ -8,6 +8,15 @@ const subtaskIdString = z.string().regex(/^\d+$/, 'Invalid subtask ID');
 const todoStatus = z.enum(['pending', 'in_progress', 'completed', 'cancelled']);
 const todoPriority = z.enum(['low', 'medium', 'high', 'urgent']);
 
+/** Markdown descriptions — aligns with PostgreSQL TEXT practical limit for API payloads */
+export const TODO_DESCRIPTION_MAX_LENGTH = 32_768;
+
+const todoDescriptionSchema = z
+  .string()
+  .max(TODO_DESCRIPTION_MAX_LENGTH)
+  .nullable()
+  .optional();
+
 export const todoIdArgSchema = z.object({
   id: todoIdString,
 });
@@ -23,6 +32,8 @@ export const todosListArgsSchema = z
     tagId: tagIdFilter,
     folderId: folderIdString.nullish(),
     withoutFolder: z.boolean().nullish(),
+    selectedToday: z.boolean().nullish(),
+    pendingOnly: z.boolean().nullish(),
     page: z.number().int().positive().nullish(),
     limit: z.number().int().positive().max(100).nullish(),
   })
@@ -34,16 +45,19 @@ export const todosListArgsSchema = z
     tagId: d.tagId ?? undefined,
     folderId: d.folderId ?? undefined,
     withoutFolder: d.withoutFolder ?? undefined,
+    selectedToday: d.selectedToday ?? undefined,
+    pendingOnly: d.pendingOnly ?? undefined,
     page: d.page ?? 1,
     limit: d.limit ?? 20,
   }));
 
 export const todoAddInputSchema = z.object({
   title: z.string().min(1).max(255),
-  description: z.string().nullable().optional(),
+  description: todoDescriptionSchema,
   status: todoStatus.optional(),
   priority: todoPriority.optional(),
   dueDate: z.coerce.date().nullable().optional(),
+  selectedToday: z.boolean().optional(),
   tagIds: tagIdsArraySchema,
   folderId: optionalFolderIdSchema,
   orderIndex: z.number().int().min(0).optional(),
@@ -58,10 +72,11 @@ export const todoEditInputSchema = z
   .object({
     id: todoIdString,
     title: z.string().min(1).max(255).optional(),
-    description: z.string().nullable().optional(),
+    description: todoDescriptionSchema,
     status: todoStatus.optional(),
     priority: todoPriority.optional(),
     dueDate: z.coerce.date().nullable().optional(),
+    selectedToday: z.boolean().optional(),
     tagIds: tagIdsArraySchema,
     folderId: optionalFolderIdSchema,
     orderIndex: z.number().int().min(0).optional(),
@@ -73,6 +88,7 @@ export const todoEditInputSchema = z
       d.status !== undefined ||
       d.priority !== undefined ||
       d.dueDate !== undefined ||
+      d.selectedToday !== undefined ||
       d.tagIds !== undefined ||
       d.folderId !== undefined ||
       d.orderIndex !== undefined,

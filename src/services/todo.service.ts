@@ -28,6 +28,7 @@ type TodoRow = {
   priority: string;
   due_date: Date | null;
   completed_at: Date | null;
+  selected_today: boolean;
   created_at: Date;
   updated_at: Date;
 };
@@ -42,7 +43,7 @@ type SubtaskRow = {
   updated_at: Date;
 };
 
-const TODO_RETURNING = `id, user_id, folder_id, order_index, title, description, status, priority, due_date, completed_at, created_at, updated_at`;
+const TODO_RETURNING = `id, user_id, folder_id, order_index, title, description, status, priority, due_date, completed_at, selected_today, created_at, updated_at`;
 const SUBTASK_RETURNING = `id, todo_id, title, is_completed, order_index, created_at, updated_at`;
 
 import type { TodoTag } from '../types/services/todo-tag.types';
@@ -60,6 +61,7 @@ function mapTodo(
     priority: row.priority as Todo['priority'],
     dueDate: row.due_date,
     completedAt: row.completed_at,
+    selectedToday: row.selected_today,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     folderId: row.folder_id != null ? String(row.folder_id) : null,
@@ -174,8 +176,8 @@ async function createTodo(userId: number, input: CreateTodoInput): Promise<Todo>
 
   const db = getDbPool();
   const result = await db.query<TodoRow>(
-    `INSERT INTO todos (user_id, folder_id, order_index, title, description, status, priority, due_date)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+    `INSERT INTO todos (user_id, folder_id, order_index, title, description, status, priority, due_date, selected_today)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
      RETURNING ${TODO_RETURNING}`,
     [
       userId,
@@ -186,6 +188,7 @@ async function createTodo(userId: number, input: CreateTodoInput): Promise<Todo>
       input.status ?? 'pending',
       input.priority ?? 'medium',
       input.dueDate ?? null,
+      input.selectedToday ?? false,
     ]
   );
   const row = result.rows[0];
@@ -210,7 +213,7 @@ async function listTodos(userId: number, options: ListTodosOptions = {}): Promis
   const offset = (page - 1) * limit;
 
   let whereClause = 'WHERE user_id = $1';
-  const params: (number | string)[] = [userId];
+  const params: unknown[] = [userId];
   let paramIndex = 2;
 
   if (options.status) {
@@ -251,6 +254,14 @@ async function listTodos(userId: number, options: ListTodosOptions = {}): Promis
   }
   if (options.withoutFolder) {
     whereClause += ' AND folder_id IS NULL';
+  }
+  if (options.selectedToday !== undefined) {
+    whereClause += ` AND selected_today = $${paramIndex}`;
+    params.push(options.selectedToday);
+    paramIndex++;
+  }
+  if (options.pendingOnly) {
+    whereClause += ` AND status != 'completed'`;
   }
 
   const countResult = await db.query<{ count: string }>(
@@ -332,6 +343,11 @@ async function updateTodo(id: string, userId: number, input: UpdateTodoInput): P
   if (input.dueDate !== undefined) {
     updates.push(`due_date = $${paramIndex}`);
     params.push(input.dueDate);
+    paramIndex++;
+  }
+  if (input.selectedToday !== undefined) {
+    updates.push(`selected_today = $${paramIndex}`);
+    params.push(input.selectedToday);
     paramIndex++;
   }
   if (input.folderId !== undefined) {
