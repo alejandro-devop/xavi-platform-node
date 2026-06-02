@@ -95,6 +95,20 @@ export const quarterTypeDefs = gql`
     project: Project
   }
 
+  type WeekScheduleSlot {
+    id: ID!
+    quarterId: ID!
+    projectId: ID!
+    userId: Int!
+    dayOfWeek: String!
+    startTime: String
+    hours: Float!
+    notes: String
+    createdAt: DateTime!
+    updatedAt: DateTime!
+    project: Project
+  }
+
   extend type Query {
     projects: [Project!]!
     project(id: ID!): Project!
@@ -103,6 +117,7 @@ export const quarterTypeDefs = gql`
     activeQuarter: Quarter
     sessionLogs(quarterId: ID!, projectId: ID): [SessionLog!]!
     projectSessionLogs(projectId: ID!): [SessionLog!]!
+    weekScheduleSlots(quarterId: ID!): [WeekScheduleSlot!]!
   }
 
   extend type Mutation {
@@ -126,6 +141,10 @@ export const quarterTypeDefs = gql`
     sessionLogAdd(input: SessionLogAddInput!): SessionLog!
     sessionLogEdit(input: SessionLogEditInput!): SessionLog!
     sessionLogRemove(id: ID!): Boolean!
+
+    weekScheduleSlotAdd(input: WeekScheduleSlotAddInput!): WeekScheduleSlot!
+    weekScheduleSlotEdit(input: WeekScheduleSlotEditInput!): WeekScheduleSlot!
+    weekScheduleSlotRemove(id: ID!): Boolean!
   }
 
   input ProjectAddInput {
@@ -200,5 +219,21 @@ export const quarterTypeDefs = gql`
   input SessionLogEditInput {
     id: ID!
     content: String
+  }
+
+  input WeekScheduleSlotAddInput {
+    quarterId: ID!
+    projectId: ID!
+    dayOfWeek: String!
+    startTime: String
+    hours: Float!
+    notes: String
+  }
+
+  input WeekScheduleSlotEditInput {
+    id: ID!
+    startTime: String
+    hours: Float
+    notes: String
   }
 `;

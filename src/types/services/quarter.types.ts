@@ -73,6 +73,37 @@ export type SessionLog = {
   project?: Project;
 };
 
+export type DayOfWeek = 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday';
+
+export type WeekScheduleSlot = {
+  id: string;
+  quarterId: string;
+  projectId: string;
+  userId: number;
+  dayOfWeek: DayOfWeek;
+  startTime: string | null;
+  hours: number;
+  notes: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  project?: Project;
+};
+
+export type CreateWeekScheduleSlotInput = {
+  quarterId: string;
+  projectId: string;
+  dayOfWeek: DayOfWeek;
+  startTime?: string;
+  hours: number;
+  notes?: string;
+};
+
+export type UpdateWeekScheduleSlotInput = {
+  startTime?: string | null;
+  hours?: number;
+  notes?: string | null;
+};
+
 export type CreateProjectInput = {
   name: string;
   description?: string;

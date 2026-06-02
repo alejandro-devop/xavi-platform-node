@@ -7,6 +7,7 @@ import type {
   Quarter,
   QuarterProject,
   SessionLog,
+  WeekScheduleSlot,
   CreateProjectInput,
   UpdateProjectInput,
   CreateObjectiveInput,
@@ -17,6 +18,8 @@ import type {
   UpdateQuarterProjectInput,
   CreateSessionLogInput,
   UpdateSessionLogInput,
+  CreateWeekScheduleSlotInput,
+  UpdateWeekScheduleSlotInput,
 } from '../types/services/quarter.types';
 
 // ─── Row types ────────────────────────────────────────────────────────────────
@@ -169,6 +172,19 @@ function mapSessionLog(row: SessionLogRow, extras?: { project?: Project }): Sess
     project: extras?.project,
   };
 }
+
+type WeekScheduleSlotRow = {
+  id: string;
+  quarter_id: string;
+  project_id: string;
+  user_id: number;
+  day_of_week: string;
+  start_time: string | null;
+  hours: string;
+  notes: string | null;
+  created_at: Date;
+  updated_at: Date;
+};
 
 // ─── Auth helpers ─────────────────────────────────────────────────────────────
 
@@ -568,6 +584,99 @@ async function deleteSessionLog(id: string, userId: number): Promise<boolean> {
   return true;
 }
 
+// ─── Week schedule slots ──────────────────────────────────────────────────────
+
+function mapWeekScheduleSlot(row: WeekScheduleSlotRow, extras?: { project?: Project }): WeekScheduleSlot {
+  return {
+    id: row.id,
+    quarterId: row.quarter_id,
+    projectId: row.project_id,
+    userId: row.user_id,
+    dayOfWeek: row.day_of_week as WeekScheduleSlot['dayOfWeek'],
+    startTime: row.start_time,
+    hours: parseFloat(row.hours),
+    notes: row.notes,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    project: extras?.project,
+  };
+}
+
+async function listWeekScheduleSlots(quarterId: string, userId: number): Promise<WeekScheduleSlot[]> {
+  await assertQuarterOwnership(quarterId, userId);
+  const db = getDbPool();
+  const result = await db.query<WeekScheduleSlotRow & { proj_id: string; proj_name: string; proj_description: string | null; proj_priority: number; proj_status: string; proj_created_at: Date; proj_updated_at: Date }>(
+    `SELECT s.*, p.id AS proj_id, p.name AS proj_name, p.description AS proj_description,
+            p.priority AS proj_priority, p.status AS proj_status,
+            p.created_at AS proj_created_at, p.updated_at AS proj_updated_at
+     FROM week_schedule_slots s
+     JOIN projects p ON p.id = s.project_id
+     WHERE s.quarter_id = $1
+     ORDER BY
+       CASE s.day_of_week
+         WHEN 'monday' THEN 1 WHEN 'tuesday' THEN 2 WHEN 'wednesday' THEN 3
+         WHEN 'thursday' THEN 4 WHEN 'friday' THEN 5 WHEN 'saturday' THEN 6
+         WHEN 'sunday' THEN 7 END,
+       s.start_time NULLS LAST`,
+    [quarterId],
+  );
+  return result.rows.map((row) => {
+    const project: Project = {
+      id: row.proj_id, userId: row.user_id, name: row.proj_name,
+      description: row.proj_description, priority: row.proj_priority,
+      status: row.proj_status as Project['status'],
+      createdAt: row.proj_created_at, updatedAt: row.proj_updated_at,
+      objectives: [], members: [],
+    };
+    return mapWeekScheduleSlot(row, { project });
+  });
+}
+
+async function createWeekScheduleSlot(userId: number, input: CreateWeekScheduleSlotInput): Promise<WeekScheduleSlot> {
+  await assertQuarterOwnership(input.quarterId, userId);
+  await assertProjectAccess(input.projectId, userId);
+  const db = getDbPool();
+  const result = await db.query<WeekScheduleSlotRow>(
+    `INSERT INTO week_schedule_slots (quarter_id, project_id, user_id, day_of_week, start_time, hours, notes)
+     VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+    [input.quarterId, input.projectId, userId, input.dayOfWeek, input.startTime ?? null, input.hours, input.notes ?? null],
+  );
+  const row = result.rows[0];
+  const projectResult = await db.query<ProjectRow>(`SELECT * FROM projects WHERE id = $1`, [row.project_id]);
+  return mapWeekScheduleSlot(row, { project: mapProject(projectResult.rows[0]) });
+}
+
+async function updateWeekScheduleSlot(id: string, userId: number, input: UpdateWeekScheduleSlotInput): Promise<WeekScheduleSlot> {
+  const db = getDbPool();
+  const existing = await db.query<WeekScheduleSlotRow>(`SELECT * FROM week_schedule_slots WHERE id = $1`, [id]);
+  if (existing.rows.length === 0) throw new NotFoundError('Schedule slot not found');
+  if (existing.rows[0].user_id !== userId) throw new ForbiddenError('You can only edit your own schedule slots');
+
+  const setClauses: string[] = [];
+  const values: unknown[] = [];
+  let idx = 1;
+  if (input.startTime !== undefined) { setClauses.push(`start_time = $${idx++}`); values.push(input.startTime); }
+  if (input.hours !== undefined) { setClauses.push(`hours = $${idx++}`); values.push(input.hours); }
+  if (input.notes !== undefined) { setClauses.push(`notes = $${idx++}`); values.push(input.notes); }
+
+  if (setClauses.length > 0) {
+    await db.query(`UPDATE week_schedule_slots SET ${setClauses.join(', ')} WHERE id = $${idx}`, [...values, id]);
+  }
+
+  const updated = await db.query<WeekScheduleSlotRow>(`SELECT * FROM week_schedule_slots WHERE id = $1`, [id]);
+  const projectResult = await db.query<ProjectRow>(`SELECT * FROM projects WHERE id = $1`, [updated.rows[0].project_id]);
+  return mapWeekScheduleSlot(updated.rows[0], { project: mapProject(projectResult.rows[0]) });
+}
+
+async function deleteWeekScheduleSlot(id: string, userId: number): Promise<boolean> {
+  const db = getDbPool();
+  const existing = await db.query<WeekScheduleSlotRow>(`SELECT * FROM week_schedule_slots WHERE id = $1`, [id]);
+  if (existing.rows.length === 0) throw new NotFoundError('Schedule slot not found');
+  if (existing.rows[0].user_id !== userId) throw new ForbiddenError('You can only delete your own schedule slots');
+  await db.query(`DELETE FROM week_schedule_slots WHERE id = $1`, [id]);
+  return true;
+}
+
 export const quarterService = {
   // Projects
   listProjects,
@@ -601,4 +710,9 @@ export const quarterService = {
   createSessionLog,
   updateSessionLog,
   deleteSessionLog,
+  // Week Schedule Slots
+  listWeekScheduleSlots,
+  createWeekScheduleSlot,
+  updateWeekScheduleSlot,
+  deleteWeekScheduleSlot,
 };

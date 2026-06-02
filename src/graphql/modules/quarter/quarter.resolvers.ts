@@ -21,6 +21,10 @@ import {
   sessionLogIdArgSchema,
   sessionLogsListArgsSchema,
   projectSessionLogsArgsSchema,
+  weekScheduleSlotAddInputSchema,
+  weekScheduleSlotEditInputSchema,
+  weekScheduleSlotIdArgSchema,
+  weekScheduleSlotsListArgsSchema,
 } from '../../../validators/schemas/quarter.schemas';
 import type { Project, Quarter } from '../../../types/services/quarter.types';
 
@@ -97,6 +101,11 @@ export const quarterResolvers = {
       requireAuth(context, 'projectSessionLogs');
       return quarterService.listSessionLogsByProject(projectId, uid(context));
     }, 'projectSessionLogs'),
+
+    weekScheduleSlots: withValidatedResolver(weekScheduleSlotsListArgsSchema, async (_: unknown, { quarterId }: { quarterId: string }, context: GraphQLContext) => {
+      requireAuth(context, 'weekScheduleSlots');
+      return quarterService.listWeekScheduleSlots(quarterId, uid(context));
+    }, 'weekScheduleSlots'),
   },
 
   Mutation: {
@@ -185,5 +194,21 @@ export const quarterResolvers = {
       requireAuth(context, 'sessionLogRemove');
       return quarterService.deleteSessionLog(id, uid(context));
     }, 'sessionLogRemove'),
+
+    weekScheduleSlotAdd: withValidatedResolver(weekScheduleSlotAddInputSchema, async (_: unknown, { input }: { input: any }, context: GraphQLContext) => {
+      requireAuth(context, 'weekScheduleSlotAdd');
+      return quarterService.createWeekScheduleSlot(uid(context), input);
+    }, 'weekScheduleSlotAdd'),
+
+    weekScheduleSlotEdit: withValidatedResolver(weekScheduleSlotEditInputSchema, async (_: unknown, { input }: { input: any }, context: GraphQLContext) => {
+      requireAuth(context, 'weekScheduleSlotEdit');
+      const { id, ...rest } = input;
+      return quarterService.updateWeekScheduleSlot(id, uid(context), rest);
+    }, 'weekScheduleSlotEdit'),
+
+    weekScheduleSlotRemove: withValidatedResolver(weekScheduleSlotIdArgSchema, async (_: unknown, { id }: { id: string }, context: GraphQLContext) => {
+      requireAuth(context, 'weekScheduleSlotRemove');
+      return quarterService.deleteWeekScheduleSlot(id, uid(context));
+    }, 'weekScheduleSlotRemove'),
   },
 };
