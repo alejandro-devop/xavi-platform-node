@@ -18,6 +18,8 @@ import { sleepTypeDefs } from './modules/sleep/sleep.schema';
 import { learningTypeDefs } from './modules/learning/learning.schema';
 import { courseTypeDefs } from './modules/course/course.schema';
 import { sweeterWayTypeDefs } from './modules/sweeter-way/sweeter-way.schema';
+import { noteTypeDefs } from './modules/note/note.schema';
+import { quarterTypeDefs } from './modules/quarter/quarter.schema';
 
 // Base Query and Mutation types
 const baseTypeDefs = gql`
@@ -52,4 +54,6 @@ export const typeDefs = [
   learningTypeDefs,
   courseTypeDefs,
   sweeterWayTypeDefs,
+  noteTypeDefs,
+  quarterTypeDefs,
 ];

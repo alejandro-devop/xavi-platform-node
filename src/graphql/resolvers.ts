@@ -17,6 +17,8 @@ import { sleepResolvers } from './modules/sleep/sleep.resolvers';
 import { learningResolvers } from './modules/learning/learning.resolvers';
 import { courseResolvers } from './modules/course/course.resolvers';
 import { sweeterWayResolvers } from './modules/sweeter-way/sweeter-way.resolvers';
+import { noteResolvers } from './modules/note/note.resolvers';
+import { quarterResolvers } from './modules/quarter/quarter.resolvers';
 
 // Merge all resolvers
 export const resolvers = mergeResolvers([
@@ -38,4 +40,6 @@ export const resolvers = mergeResolvers([
   learningResolvers,
   courseResolvers,
   sweeterWayResolvers,
+  noteResolvers,
+  quarterResolvers,
 ]);

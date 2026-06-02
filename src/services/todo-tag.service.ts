@@ -64,6 +64,15 @@ async function getTagById(id: string, userId: number): Promise<TodoTag> {
   return mapTag(row);
 }
 
+async function findTagByName(userId: number, name: string): Promise<TodoTag | null> {
+  const db = getDbPool();
+  const result = await db.query<TagRow>(
+    `SELECT ${TAG_RETURNING} FROM todo_tags WHERE user_id = $1 AND LOWER(name) = LOWER($2)`,
+    [userId, name.trim()]
+  );
+  return result.rows.length > 0 ? mapTag(result.rows[0]) : null;
+}
+
 async function createTag(userId: number, input: CreateTodoTagInput): Promise<TodoTag> {
   const db = getDbPool();
   try {
@@ -199,6 +208,7 @@ async function loadTagsForTodoIds(todoIds: number[]): Promise<Map<number, TodoTa
 export const todoTagService = {
   listTags,
   getTagById,
+  findTagByName,
   createTag,
   updateTag,
   deleteTag,
