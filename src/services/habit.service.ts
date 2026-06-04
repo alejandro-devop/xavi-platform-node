@@ -14,11 +14,13 @@ import type {
   CreateHabitInput,
   Habit,
   HabitCollection,
+  HabitDayEntry,
   HabitFollowUp,
   HabitLog,
   HabitFollowUpsDateGroup,
   HabitMyDayEntry,
   HabitStats,
+  HabitWeekView,
   ListHabitFollowUpsOptions,
   ListHabitLogsOptions,
   ListHabitsOptions,
@@ -41,10 +43,6 @@ type HabitRow = {
   end_date: Date | string | null;
   should_avoid: boolean;
   should_keep: boolean;
-  is_counter: boolean;
-  is_timer: boolean;
-  is_incremental: boolean;
-  is_decremental: boolean;
   days: number;
   streak: number;
   max_streak: number;
@@ -83,8 +81,8 @@ type HabitLogRow = {
 };
 
 const HABIT_RETURNING = `id, user_id, name, description, frequency, target_count, icon, color, is_active,
-  order_index, start_date, end_date, should_avoid, should_keep, is_counter, is_timer,
-  is_incremental, is_decremental, days, streak, max_streak, daily_goal, timer_goal, times_goal,
+  order_index, start_date, end_date, should_avoid, should_keep,
+  days, streak, max_streak, daily_goal, timer_goal, times_goal,
   step, category_id, measure_id, activity_id,
   habit_type, period_days, restart_count, weekly_lifelines, status,
   created_at, updated_at`;
@@ -114,10 +112,6 @@ function mapHabit(row: HabitRow): Habit {
     endDate: formatDate(row.end_date),
     shouldAvoid: row.should_avoid ?? false,
     shouldKeep: row.should_keep ?? true,
-    isCounter: row.is_counter ?? true,
-    isTimer: row.is_timer ?? false,
-    isIncremental: row.is_incremental ?? false,
-    isDecremental: row.is_decremental ?? false,
     days: row.days ?? 0,
     streak: row.streak ?? 0,
     maxStreak: row.max_streak ?? 0,
@@ -345,12 +339,21 @@ async function createHabit(userId: number, input: CreateHabitInput): Promise<Hab
   await verifyActivityId(userId, input.activityId);
 
   const dailyGoal = input.dailyGoal ?? input.targetCount ?? 1;
+
+  let periodDays = 0;
+  if (input.startDate && input.endDate) {
+    periodDays = Math.round(
+      (new Date(input.endDate).getTime() - new Date(input.startDate).getTime()) / 86400000
+    );
+  }
+
   const db = getDbPool();
   const result = await db.query<HabitRow>(
     `INSERT INTO habits (
       user_id, name, description, frequency, target_count, icon, color,
       category_id, measure_id, activity_id, start_date, end_date,
-      should_avoid, should_keep, is_counter, is_timer, is_incremental, is_decremental,
+      should_avoid, should_keep,
+      habit_type, weekly_lifelines, period_days, status,
       daily_goal, timer_goal, times_goal, step, order_index
     ) VALUES (
       $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12,
@@ -371,10 +374,10 @@ async function createHabit(userId: number, input: CreateHabitInput): Promise<Hab
       input.endDate ?? null,
       input.shouldAvoid ?? false,
       input.shouldKeep ?? true,
-      input.isCounter ?? true,
-      input.isTimer ?? false,
-      input.isIncremental ?? false,
-      input.isDecremental ?? false,
+      input.habitType ?? 'boolean',
+      input.weeklyLifelines ?? 0,
+      periodDays,
+      'active',
       dailyGoal,
       input.timerGoal ?? 0,
       input.timesGoal ?? 0,
@@ -394,9 +397,12 @@ async function listHabits(userId: number, options: ListHabitsOptions = {}): Prom
   let whereClause = 'WHERE user_id = $1';
   const params: (number | boolean | string)[] = [userId];
 
-  if (options.isActive !== undefined) {
-    params.push(options.isActive);
-    whereClause += ` AND is_active = $${params.length}`;
+  if (options.status !== undefined) {
+    params.push(options.status);
+    whereClause += ` AND status = $${params.length}`;
+  } else if (options.isActive !== undefined) {
+    params.push(options.isActive ? 'active' : 'archived');
+    whereClause += ` AND status = $${params.length}`;
   }
   if (options.categoryId) {
     params.push(options.categoryId);
@@ -453,16 +459,27 @@ async function updateHabit(id: string, userId: number, input: UpdateHabitInput):
     end_date: 'endDate',
     should_avoid: 'shouldAvoid',
     should_keep: 'shouldKeep',
-    is_counter: 'isCounter',
-    is_timer: 'isTimer',
-    is_incremental: 'isIncremental',
-    is_decremental: 'isDecremental',
+    habit_type: 'habitType',
+    weekly_lifelines: 'weeklyLifelines',
+    status: 'status',
     daily_goal: 'dailyGoal',
     timer_goal: 'timerGoal',
     times_goal: 'timesGoal',
     step: 'step',
     order_index: 'orderIndex',
   };
+
+  const db = getDbPool();
+
+  if (input.startDate !== undefined || input.endDate !== undefined) {
+    const followUpCheck = await db.query<{ cnt: string }>(
+      `SELECT COUNT(*)::text AS cnt FROM habit_logs WHERE habit_id = $1 AND archived = FALSE`,
+      [habitId]
+    );
+    if (parseInt(followUpCheck.rows[0].cnt, 10) > 0) {
+      throw new ConflictError('Cannot change dates after follow-ups have been recorded');
+    }
+  }
 
   const updates: string[] = [];
   const params: unknown[] = [];
@@ -477,12 +494,25 @@ async function updateHabit(id: string, userId: number, input: UpdateHabitInput):
     }
   }
 
+  if (input.startDate !== undefined || input.endDate !== undefined) {
+    const habitRow = await getHabitRowOrThrow(habitId);
+    const startDate = input.startDate ?? formatDate(habitRow.start_date);
+    const endDate = input.endDate ?? formatDate(habitRow.end_date);
+    if (startDate && endDate) {
+      const periodDays = Math.round(
+        (new Date(endDate).getTime() - new Date(startDate).getTime()) / 86400000
+      );
+      updates.push(`period_days = $${paramIndex}`);
+      params.push(periodDays);
+      paramIndex++;
+    }
+  }
+
   if (updates.length === 0) {
     return mapHabit(await getHabitRowOrThrow(habitId));
   }
 
   params.push(habitId);
-  const db = getDbPool();
   const result = await db.query<HabitRow>(
     `UPDATE habits SET ${updates.join(', ')} WHERE id = $${paramIndex} RETURNING ${HABIT_RETURNING}`,
     params
@@ -796,31 +826,52 @@ async function getHabitMyDay(userId: number, date: string): Promise<HabitMyDayEn
     log_updated_at: Date | null;
   };
 
-  const result = await db.query<HabitMyDayRow>(
-    `SELECT h.*,
-            hl.id AS log_id, hl.completed_date, hl.count, hl.time,
-            hl.notes, hl.story, hl.archived, hl.is_accomplished, hl.is_failed,
-            hl.difficulty, hl.is_lifeline,
-            hl.created_at AS log_created_at, hl.updated_at AS log_updated_at
-     FROM habits h
-     LEFT JOIN habit_logs hl
-       ON hl.habit_id = h.id
-       AND hl.completed_date = $2::date
-       AND hl.archived = FALSE
-       AND hl.is_lifeline = FALSE
-     WHERE h.user_id = $1
-       AND h.status = 'active'
-     ORDER BY h.order_index ASC`,
-    [userId, date]
-  );
+  const [habitsResult, lifelinesResult] = await Promise.all([
+    db.query<HabitMyDayRow>(
+      `SELECT h.*,
+              hl.id AS log_id, hl.completed_date, hl.count, hl.time,
+              hl.notes, hl.story, hl.archived, hl.is_accomplished, hl.is_failed,
+              hl.difficulty, hl.is_lifeline,
+              hl.created_at AS log_created_at, hl.updated_at AS log_updated_at
+       FROM habits h
+       LEFT JOIN habit_logs hl
+         ON hl.habit_id = h.id
+         AND hl.completed_date = $2::date
+         AND hl.archived = FALSE
+         AND hl.is_lifeline = FALSE
+       WHERE h.user_id = $1
+         AND h.status = 'active'
+       ORDER BY h.order_index ASC`,
+      [userId, date]
+    ),
+    db.query<{ habit_id: number; cnt: number }>(
+      `SELECT hl.habit_id, COUNT(*)::int AS cnt
+       FROM habit_logs hl
+       INNER JOIN habits h ON h.id = hl.habit_id
+       WHERE h.user_id = $1
+         AND hl.is_lifeline = TRUE
+         AND DATE_TRUNC('week', hl.completed_date) = DATE_TRUNC('week', CURRENT_DATE)
+         AND hl.archived = FALSE
+       GROUP BY hl.habit_id`,
+      [userId]
+    ),
+  ]);
 
-  return result.rows.map((row) => {
+  const lifelinesMap = new Map<number, number>();
+  for (const row of lifelinesResult.rows) {
+    lifelinesMap.set(row.habit_id, row.cnt);
+  }
+
+  return habitsResult.rows.map((row) => {
     const habit = mapHabit(row);
+    const habitId = parseInt(habit.id, 10);
+    const lifelinesUsedThisWeek = lifelinesMap.get(habitId) ?? 0;
+    const lifelinesRemaining = Math.max(0, habit.weeklyLifelines - lifelinesUsedThisWeek);
     const followUp =
       row.log_id != null
         ? mapHabitLog({
             id: row.log_id,
-            habit_id: parseInt(habit.id, 10),
+            habit_id: habitId,
             user_id: row.user_id,
             completed_date: row.completed_date!,
             count: row.count ?? 0,
@@ -836,8 +887,84 @@ async function getHabitMyDay(userId: number, date: string): Promise<HabitMyDayEn
             updated_at: row.log_updated_at ?? row.log_created_at!,
           })
         : null;
-    return { habit, followUp };
+    return { habit, followUp, lifelinesUsedThisWeek, lifelinesRemaining };
   });
+}
+
+async function getHabitWeekView(
+  habitIdStr: string,
+  weekStart: string,
+  userId: number
+): Promise<HabitWeekView> {
+  const habitId = parseHabitId(habitIdStr);
+  const habitRow = await getOwnedHabitOrThrow(habitId, userId);
+  const habit = mapHabit(habitRow);
+
+  const dates: string[] = [];
+  for (let i = 0; i < 7; i++) {
+    dates.push(addDaysToDateString(weekStart, i));
+  }
+  const weekEnd = dates[6];
+
+  const db = getDbPool();
+  const logsResult = await db.query<HabitLogRow>(
+    `SELECT ${LOG_RETURNING}
+     FROM habit_logs
+     WHERE habit_id = $1
+       AND completed_date >= $2::date
+       AND completed_date <= $3::date
+       AND archived = FALSE`,
+    [habitId, weekStart, weekEnd]
+  );
+
+  const logMap = new Map<string, HabitLogRow>();
+  for (const row of logsResult.rows) {
+    const dateKey = formatDate(row.completed_date)!;
+    logMap.set(dateKey, row);
+  }
+
+  const days: HabitDayEntry[] = dates.map((date) => {
+    const logRow = logMap.get(date);
+    if (!logRow) {
+      return { date, status: 'empty', followUp: null };
+    }
+    let status: HabitDayEntry['status'];
+    if (logRow.is_lifeline) status = 'lifeline';
+    else if (logRow.is_failed) status = 'failed';
+    else if (logRow.is_accomplished) status = 'accomplished';
+    else status = 'empty';
+    return { date, status, followUp: mapHabitLog(logRow) };
+  });
+
+  const lifelinesUsedResult = await db.query<{ cnt: number }>(
+    `SELECT COUNT(*)::int AS cnt
+     FROM habit_logs
+     WHERE habit_id = $1
+       AND is_lifeline = TRUE
+       AND archived = FALSE
+       AND DATE_TRUNC('week', completed_date) = DATE_TRUNC('week', $2::date)`,
+    [habitId, weekStart]
+  );
+  const lifelinesUsed = lifelinesUsedResult.rows[0].cnt;
+  const lifelinesRemaining = Math.max(0, habit.weeklyLifelines - lifelinesUsed);
+
+  return { habit, days, lifelinesRemaining };
+}
+
+async function completeHabit(id: string, userId: number): Promise<Habit> {
+  const habitId = parseHabitId(id);
+  const habitRow = await getOwnedHabitOrThrow(habitId, userId);
+
+  if (habitRow.status !== 'active') {
+    throw new ConflictError('Habit is not active');
+  }
+
+  const db = getDbPool();
+  const result = await db.query<HabitRow>(
+    `UPDATE habits SET status = 'completed', is_active = FALSE WHERE id = $1 RETURNING ${HABIT_RETURNING}`,
+    [habitId]
+  );
+  return mapHabit(result.rows[0]);
 }
 
 async function getHabitStats(habitIdStr: string, userId: number): Promise<HabitStats> {
@@ -880,6 +1007,8 @@ export const habitService = {
   listHabitFollowUps,
   listHabitFollowUpsInDates,
   getHabitMyDay,
+  getHabitWeekView,
+  completeHabit,
   getHabitStats,
   syncHabitStreakFromLogs,
   calculateCurrentStreak,

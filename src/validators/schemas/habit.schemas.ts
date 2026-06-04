@@ -16,10 +16,8 @@ const legacyHabitFields = {
   endDate: dateString.nullish(),
   shouldAvoid: z.boolean().optional(),
   shouldKeep: z.boolean().optional(),
-  isCounter: z.boolean().optional(),
-  isTimer: z.boolean().optional(),
-  isIncremental: z.boolean().optional(),
-  isDecremental: z.boolean().optional(),
+  habitType: z.enum(['boolean', 'count', 'time']).optional(),
+  weeklyLifelines: z.number().int().min(0).optional(),
   dailyGoal: z.number().int().min(0).optional(),
   timerGoal: z.number().int().min(0).optional(),
   timesGoal: z.number().int().min(0).optional(),
@@ -131,10 +129,8 @@ const habitEditFields = [
   'endDate',
   'shouldAvoid',
   'shouldKeep',
-  'isCounter',
-  'isTimer',
-  'isIncremental',
-  'isDecremental',
+  'habitType',
+  'weeklyLifelines',
   'dailyGoal',
   'timerGoal',
   'timesGoal',
@@ -167,6 +163,8 @@ export const habitLogAddInputSchema = z.object({
   story: z.string().nullable().optional(),
   isAccomplished: z.boolean().optional(),
   isFailed: z.boolean().optional(),
+  isLifeline: z.boolean().optional(),
+  difficulty: z.number().int().min(0).max(4).nullable().optional(),
 });
 
 export const habitFollowUpAddInputSchema = z.object({
@@ -178,6 +176,8 @@ export const habitFollowUpAddInputSchema = z.object({
   story: z.string().nullable().optional(),
   isAccomplished: z.boolean().optional(),
   isFailed: z.boolean().optional(),
+  isLifeline: z.boolean().optional(),
+  difficulty: z.number().int().min(0).max(4).nullable().optional(),
 });
 
 export const habitFollowUpEditInputSchema = z
@@ -190,6 +190,7 @@ export const habitFollowUpEditInputSchema = z
     isAccomplished: z.boolean().optional(),
     isFailed: z.boolean().optional(),
     archived: z.boolean().optional(),
+    difficulty: z.number().int().min(0).max(4).nullable().optional(),
   })
   .refine(
     (d) =>
@@ -199,9 +200,22 @@ export const habitFollowUpEditInputSchema = z
       d.story !== undefined ||
       d.isAccomplished !== undefined ||
       d.isFailed !== undefined ||
-      d.archived !== undefined,
+      d.archived !== undefined ||
+      d.difficulty !== undefined,
     { message: 'At least one field is required to update' }
   );
+
+export const habitWeekViewArgsSchema = z
+  .object({
+    habitId: habitIdString,
+    weekStart: dateString,
+  })
+  .refine(
+    (d) => new Date(d.weekStart + 'T00:00:00Z').getUTCDay() === 1,
+    { message: 'weekStart must be a Monday (ISO week start)' }
+  );
+
+export const habitCompleteArgSchema = z.object({ id: habitIdString });
 
 export const habitFollowUpRemoveIdSchema = z.object({
   id: followUpIdString,

@@ -7,6 +7,25 @@ export const habitTypeDefs = gql`
     custom
   }
 
+  enum HabitType {
+    boolean
+    count
+    time
+  }
+
+  enum HabitStatus {
+    active
+    completed
+    archived
+  }
+
+  enum HabitDayStatus {
+    empty
+    accomplished
+    failed
+    lifeline
+  }
+
   type HabitCategory {
     id: ID!
     userId: Int!
@@ -44,10 +63,11 @@ export const habitTypeDefs = gql`
     endDate: String
     shouldAvoid: Boolean!
     shouldKeep: Boolean!
-    isCounter: Boolean!
-    isTimer: Boolean!
-    isIncremental: Boolean!
-    isDecremental: Boolean!
+    habitType: HabitType!
+    periodDays: Int!
+    restartCount: Int!
+    weeklyLifelines: Int!
+    status: HabitStatus!
     days: Int!
     streak: Int!
     maxStreak: Int!
@@ -80,6 +100,8 @@ export const habitTypeDefs = gql`
     archived: Boolean!
     isAccomplished: Boolean!
     isFailed: Boolean!
+    difficulty: Int
+    isLifeline: Boolean!
     createdAt: DateTime!
     updatedAt: DateTime!
     habit: Habit
@@ -97,6 +119,8 @@ export const habitTypeDefs = gql`
     archived: Boolean!
     isAccomplished: Boolean!
     isFailed: Boolean!
+    difficulty: Int
+    isLifeline: Boolean!
     createdAt: DateTime!
     updatedAt: DateTime!
     habit: Habit
@@ -118,9 +142,23 @@ export const habitTypeDefs = gql`
     total: Int!
   }
 
+  type HabitDayEntry {
+    date: String!
+    status: HabitDayStatus!
+    followUp: HabitFollowUp
+  }
+
+  type HabitWeekView {
+    habit: Habit!
+    days: [HabitDayEntry!]!
+    lifelinesRemaining: Int!
+  }
+
   type HabitMyDayEntry {
     habit: Habit!
     followUp: HabitFollowUp
+    lifelinesUsedThisWeek: Int!
+    lifelinesRemaining: Int!
   }
 
   type HabitFollowUpsDateGroup {
@@ -146,6 +184,7 @@ export const habitTypeDefs = gql`
     ): [HabitFollowUp!]!
     habitMyDay(date: String!): [HabitMyDayEntry!]!
     habitFollowUpsInDates(from: String!, to: String!): [HabitFollowUpsDateGroup!]!
+    habitWeekView(habitId: ID!, weekStart: String!): HabitWeekView!
   }
 
   extend type Mutation {
@@ -156,6 +195,7 @@ export const habitTypeDefs = gql`
     habitFollowUpAdd(input: HabitFollowUpAddInput!): HabitFollowUp!
     habitFollowUpEdit(input: HabitFollowUpEditInput!): HabitFollowUp!
     habitFollowUpRemove(id: ID!): Boolean!
+    habitComplete(id: ID!): Habit!
     habitCategoryAdd(input: HabitCategoryInput!): HabitCategory!
     habitCategoryEdit(input: HabitCategoryEditInput!): HabitCategory!
     habitCategoryRemove(id: ID!): Boolean!
@@ -178,10 +218,8 @@ export const habitTypeDefs = gql`
     endDate: String
     shouldAvoid: Boolean
     shouldKeep: Boolean
-    isCounter: Boolean
-    isTimer: Boolean
-    isIncremental: Boolean
-    isDecremental: Boolean
+    habitType: HabitType
+    weeklyLifelines: Int
     dailyGoal: Int
     timerGoal: Int
     timesGoal: Int
@@ -205,10 +243,8 @@ export const habitTypeDefs = gql`
     endDate: String
     shouldAvoid: Boolean
     shouldKeep: Boolean
-    isCounter: Boolean
-    isTimer: Boolean
-    isIncremental: Boolean
-    isDecremental: Boolean
+    habitType: HabitType
+    weeklyLifelines: Int
     dailyGoal: Int
     timerGoal: Int
     timesGoal: Int
@@ -236,6 +272,8 @@ export const habitTypeDefs = gql`
     story: String
     isAccomplished: Boolean
     isFailed: Boolean
+    isLifeline: Boolean
+    difficulty: Int
   }
 
   input HabitFollowUpEditInput {
@@ -247,6 +285,7 @@ export const habitTypeDefs = gql`
     isAccomplished: Boolean
     isFailed: Boolean
     archived: Boolean
+    difficulty: Int
   }
 
   input HabitCategoryInput {

@@ -2,6 +2,9 @@ import type { HabitCategory } from './habit-category.types';
 import type { HabitMeasure } from './habit-measure.types';
 
 export type HabitFrequency = 'daily' | 'weekly' | 'custom';
+export type HabitType = 'boolean' | 'count' | 'time';
+export type HabitStatus = 'active' | 'completed' | 'archived';
+export type HabitDayStatus = 'empty' | 'accomplished' | 'failed' | 'lifeline';
 
 export interface Habit {
   id: string;
@@ -18,10 +21,6 @@ export interface Habit {
   endDate: string | null;
   shouldAvoid: boolean;
   shouldKeep: boolean;
-  isCounter: boolean;
-  isTimer: boolean;
-  isIncremental: boolean;
-  isDecremental: boolean;
   days: number;
   streak: number;
   maxStreak: number;
@@ -32,11 +31,11 @@ export interface Habit {
   categoryId: string | null;
   measureId: string | null;
   activityId: number | null;
-  habitType: 'boolean' | 'count' | 'time';
+  habitType: HabitType;
   periodDays: number;
   restartCount: number;
   weeklyLifelines: number;
-  status: 'active' | 'completed' | 'archived';
+  status: HabitStatus;
   createdAt: Date;
   updatedAt: Date;
   category?: HabitCategory | null;
@@ -83,6 +82,20 @@ export interface HabitCollection {
 export interface HabitMyDayEntry {
   habit: Habit;
   followUp: HabitFollowUp | null;
+  lifelinesUsedThisWeek: number;
+  lifelinesRemaining: number;
+}
+
+export interface HabitDayEntry {
+  date: string;
+  status: HabitDayStatus;
+  followUp: HabitFollowUp | null;
+}
+
+export interface HabitWeekView {
+  habit: Habit;
+  days: HabitDayEntry[];
+  lifelinesRemaining: number;
 }
 
 export interface HabitFollowUpsDateGroup {
@@ -106,10 +119,8 @@ export interface CreateHabitInput {
   endDate?: string | null;
   shouldAvoid?: boolean;
   shouldKeep?: boolean;
-  isCounter?: boolean;
-  isTimer?: boolean;
-  isIncremental?: boolean;
-  isDecremental?: boolean;
+  habitType?: HabitType;
+  weeklyLifelines?: number;
   dailyGoal?: number;
   timerGoal?: number;
   timesGoal?: number;
@@ -132,10 +143,9 @@ export interface UpdateHabitInput {
   endDate?: string | null;
   shouldAvoid?: boolean;
   shouldKeep?: boolean;
-  isCounter?: boolean;
-  isTimer?: boolean;
-  isIncremental?: boolean;
-  isDecremental?: boolean;
+  habitType?: HabitType;
+  weeklyLifelines?: number;
+  status?: HabitStatus;
   dailyGoal?: number;
   timerGoal?: number;
   timesGoal?: number;
@@ -145,6 +155,7 @@ export interface UpdateHabitInput {
 
 export interface ListHabitsOptions {
   isActive?: boolean;
+  status?: HabitStatus;
   categoryId?: string;
   page?: number;
   limit?: number;

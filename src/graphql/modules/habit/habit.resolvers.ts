@@ -10,6 +10,7 @@ import {
   habitCategoryAddInputSchema,
   habitCategoryEditInputSchema,
   habitCategoryIdArgSchema,
+  habitCompleteArgSchema,
   habitEditInputSchema,
   habitFollowUpAddInputSchema,
   habitFollowUpEditInputSchema,
@@ -26,6 +27,7 @@ import {
   habitMeasureIdArgSchema,
   habitMyDayArgsSchema,
   habitStatsArgsSchema,
+  habitWeekViewArgsSchema,
   habitsListArgsSchema,
 } from '../../../validators/schemas/habit.schemas';
 
@@ -232,6 +234,15 @@ export const habitResolvers = {
       },
       'habitFollowUpsInDates'
     ),
+
+    habitWeekView: withValidatedResolver(
+      habitWeekViewArgsSchema,
+      async (_parent, { habitId, weekStart }, context) => {
+        requireAuth(context, 'habitWeekView');
+        return habitService.getHabitWeekView(habitId, weekStart, uid(context));
+      },
+      'habitWeekView'
+    ),
   },
 
   Mutation: {
@@ -285,7 +296,7 @@ export const habitResolvers = {
       habitFollowUpAddInputSchema,
       async (_parent, { input }, context) => {
         requireAuth(context, 'habitFollowUpAdd');
-        const { habitId, date, count, time, notes, story, isAccomplished, isFailed } = input;
+        const { habitId, date, count, time, notes, story, isAccomplished, isFailed, isLifeline, difficulty } = input;
         const log = await habitService.addHabitLog(habitId, uid(context), {
           completedDate: date,
           count,
@@ -294,6 +305,8 @@ export const habitResolvers = {
           story,
           isAccomplished,
           isFailed,
+          isLifeline,
+          difficulty,
         });
         return toFollowUp(log);
       },
@@ -304,8 +317,8 @@ export const habitResolvers = {
       habitFollowUpEditInputSchema,
       async (_parent, { input }, context) => {
         requireAuth(context, 'habitFollowUpEdit');
-        const { id, ...fields } = input;
-        const log = await habitService.updateHabitFollowUp(id, uid(context), fields);
+        const { id, difficulty, ...fields } = input;
+        const log = await habitService.updateHabitFollowUp(id, uid(context), { ...fields, difficulty });
         return toFollowUp(log);
       },
       'habitFollowUpEdit'
@@ -374,6 +387,15 @@ export const habitResolvers = {
         return await habitMeasureService.deleteMeasure(id, uid(context));
       },
       'habitMeasureRemove'
+    ),
+
+    habitComplete: withValidatedResolver(
+      habitCompleteArgSchema,
+      async (_parent, { id }, context) => {
+        requireAuth(context, 'habitComplete');
+        return habitService.completeHabit(id, uid(context));
+      },
+      'habitComplete'
     ),
   },
 };
