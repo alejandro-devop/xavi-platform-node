@@ -450,3 +450,19 @@ export const swUserPreferences = pgTable('sw_user_preferences', {
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
+
+// ============================================
+// TODO DAILY TEMPLATES
+// ============================================
+export const todoDailyTemplates = pgTable('todo_daily_templates', {
+  id: uuid('id').primaryKey().$defaultFn(() => generateUuidV7()),
+  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  title: varchar('title', { length: 200 }).notNull(),
+  description: text('description'),
+  priority: varchar('priority', { length: 20 }).notNull().default('medium'),
+  folderId: integer('folder_id'),
+  days: integer('days').array().notNull().default([]),
+  orderIndex: integer('order_index').notNull().default(0),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+});

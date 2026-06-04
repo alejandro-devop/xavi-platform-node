@@ -187,4 +187,47 @@ export const todoTypeDefs = gql`
     todoId: ID!
     subtaskId: ID!
   }
+
+  type TodoDailyTemplate {
+    id: ID!
+    userId: Int!
+    title: String!
+    description: String
+    priority: TodoPriority!
+    folderId: ID
+    days: [Int!]!
+    orderIndex: Int!
+    createdAt: DateTime!
+    updatedAt: DateTime!
+  }
+
+  extend type Query {
+    todoDailyTemplates: [TodoDailyTemplate!]!
+    todoDailyTemplatesByDay(day: Int!): [TodoDailyTemplate!]!
+  }
+
+  extend type Mutation {
+    todoDailyTemplateAdd(input: TodoDailyTemplateInput!): TodoDailyTemplate!
+    todoDailyTemplateEdit(input: TodoDailyTemplateEditInput!): TodoDailyTemplate!
+    todoDailyTemplateRemove(id: ID!): Boolean!
+  }
+
+  input TodoDailyTemplateInput {
+    title: String!
+    description: String
+    priority: TodoPriority
+    folderId: ID
+    days: [Int!]!
+    orderIndex: Int
+  }
+
+  input TodoDailyTemplateEditInput {
+    id: ID!
+    title: String
+    description: String
+    priority: TodoPriority
+    folderId: ID
+    days: [Int!]
+    orderIndex: Int
+  }
 `;

@@ -1,6 +1,7 @@
 import { todoService } from '../../../services/todo.service';
 import { todoFolderService } from '../../../services/todo-folder.service';
 import { todoTagService } from '../../../services/todo-tag.service';
+import { todoDailyTemplateService } from '../../../services/todo-daily-template.service';
 import type { Todo } from '../../../types/services/todo.types';
 import { requireAuth, type GraphQLContext } from '../../utils/error-handler';
 import { withValidatedResolver } from '../../utils/validation';
@@ -24,6 +25,12 @@ import {
   todoSubtaskRemoveInputSchema,
   todosListArgsSchema,
 } from '../../../validators/schemas/todo.schemas';
+import {
+  todoDailyTemplateAddInputSchema,
+  todoDailyTemplateEditInputSchema,
+  todoDailyTemplateIdArgSchema,
+  todoDailyTemplatesDayArgSchema,
+} from '../../../validators/schemas/todo-daily-template.schemas';
 
 function uid(context: { user?: { id: string | number } | null }): number {
   return Number(context.user!.id);
@@ -107,6 +114,20 @@ export const todoResolvers = {
         return await todoFolderService.getFolderById(id, uid(context));
       },
       'todoFolder'
+    ),
+
+    todoDailyTemplates: async (_parent: unknown, _args: unknown, context: GraphQLContext) => {
+      requireAuth(context, 'todoDailyTemplates');
+      return await todoDailyTemplateService.list(uid(context));
+    },
+
+    todoDailyTemplatesByDay: withValidatedResolver(
+      todoDailyTemplatesDayArgSchema,
+      async (_parent, { day }: { day: number }, context) => {
+        requireAuth(context, 'todoDailyTemplatesByDay');
+        return await todoDailyTemplateService.listByDay(uid(context), day);
+      },
+      'todoDailyTemplatesByDay'
     ),
   },
 
@@ -241,5 +262,33 @@ export const todoResolvers = {
       },
       'todoReorder'
     ),
+
+    todoDailyTemplateAdd: withValidatedResolver(
+      todoDailyTemplateAddInputSchema,
+      async (_parent, { input }, context) => {
+        requireAuth(context, 'todoDailyTemplateAdd');
+        return await todoDailyTemplateService.create(uid(context), input);
+      },
+      'todoDailyTemplateAdd'
+    ),
+
+    todoDailyTemplateEdit: withValidatedResolver(
+      todoDailyTemplateEditInputSchema,
+      async (_parent, { input }, context) => {
+        requireAuth(context, 'todoDailyTemplateEdit');
+        return await todoDailyTemplateService.update(uid(context), input);
+      },
+      'todoDailyTemplateEdit'
+    ),
+
+    todoDailyTemplateRemove: withValidatedResolver(
+      todoDailyTemplateIdArgSchema,
+      async (_parent, { id }: { id: string }, context) => {
+        requireAuth(context, 'todoDailyTemplateRemove');
+        return await todoDailyTemplateService.remove(uid(context), id);
+      },
+      'todoDailyTemplateRemove'
+    ),
   },
+
 };
