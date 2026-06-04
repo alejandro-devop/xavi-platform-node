@@ -217,6 +217,8 @@ export const habitResolvers = {
         return entries.map((e) => ({
           habit: e.habit,
           followUp: e.followUp ? toFollowUp(e.followUp) : null,
+          lifelinesUsedThisWeek: e.lifelinesUsedThisWeek,
+          lifelinesRemaining: e.lifelinesRemaining,
         }));
       },
       'habitMyDay'

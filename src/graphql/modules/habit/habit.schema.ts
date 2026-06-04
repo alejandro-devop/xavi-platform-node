@@ -250,6 +250,7 @@ export const habitTypeDefs = gql`
     timesGoal: Int
     step: Int
     orderIndex: Int
+    status: HabitStatus
   }
 
   input HabitLogAddInput {

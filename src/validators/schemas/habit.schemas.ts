@@ -138,7 +138,10 @@ const habitEditFields = [
   'timesGoal',
   'step',
   'orderIndex',
+  'status',
 ] as const;
+
+const habitStatus = z.enum(['active', 'completed', 'archived']);
 
 export const habitEditInputSchema = z
   .object({
@@ -150,6 +153,7 @@ export const habitEditInputSchema = z
     icon: z.string().max(50).nullable().optional(),
     color: z.string().max(20).nullable().optional(),
     isActive: z.boolean().optional(),
+    status: habitStatus.optional(),
     ...legacyHabitFields,
   })
   .refine((d) => habitEditFields.some((k) => d[k as keyof typeof d] !== undefined), {
