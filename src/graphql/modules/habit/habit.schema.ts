@@ -168,7 +168,7 @@ export const habitTypeDefs = gql`
 
   extend type Query {
     habit(id: ID!): Habit
-    habits(isActive: Boolean, categoryId: ID, page: Int, limit: Int): HabitCollection!
+    habits(isActive: Boolean, status: HabitStatus, categoryId: ID, page: Int, limit: Int): HabitCollection!
     habitLogs(habitId: ID!, startDate: String, endDate: String, limit: Int, isArchived: Boolean): [HabitLog!]!
     habitStats(habitId: ID!): HabitStats!
     habitCategories: [HabitCategory!]!

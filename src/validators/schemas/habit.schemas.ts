@@ -19,8 +19,8 @@ const legacyHabitFields = {
   habitType: z.enum(['boolean', 'count', 'time']).optional(),
   weeklyLifelines: z.number().int().min(0).optional(),
   dailyGoal: z.number().int().min(0).optional(),
-  timerGoal: z.number().int().min(0).optional(),
-  timesGoal: z.number().int().min(0).optional(),
+  timerGoal: z.number().int().min(0).nullable().optional(),
+  timesGoal: z.number().int().min(0).nullable().optional(),
   step: z.number().int().nullable().optional(),
   orderIndex: z.number().int().min(0).optional(),
 };
@@ -36,12 +36,14 @@ export const habitCategoryIdArgSchema = z.object({
 export const habitsListArgsSchema = z
   .object({
     isActive: z.boolean().nullish(),
+    status: z.enum(['active', 'completed', 'archived']).nullish(),
     categoryId: uuidString.nullish(),
     page: z.number().int().positive().nullish(),
     limit: z.number().int().positive().max(100).nullish(),
   })
   .transform((d) => ({
     isActive: d.isActive ?? undefined,
+    status: d.status ?? undefined,
     categoryId: d.categoryId ?? undefined,
     page: d.page ?? 1,
     limit: d.limit ?? 50,
