@@ -32,6 +32,11 @@ export interface Habit {
   categoryId: string | null;
   measureId: string | null;
   activityId: number | null;
+  habitType: 'boolean' | 'count' | 'time';
+  periodDays: number;
+  restartCount: number;
+  weeklyLifelines: number;
+  status: 'active' | 'completed' | 'archived';
   createdAt: Date;
   updatedAt: Date;
   category?: HabitCategory | null;
@@ -50,6 +55,8 @@ export interface HabitLog {
   archived: boolean;
   isAccomplished: boolean;
   isFailed: boolean;
+  difficulty: number | null;
+  isLifeline: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -158,6 +165,8 @@ export interface AddHabitLogInput {
   story?: string | null;
   isAccomplished?: boolean;
   isFailed?: boolean;
+  isLifeline?: boolean;
+  difficulty?: number | null;
 }
 
 export interface UpdateHabitFollowUpInput {
@@ -168,6 +177,7 @@ export interface UpdateHabitFollowUpInput {
   isAccomplished?: boolean;
   isFailed?: boolean;
   archived?: boolean;
+  difficulty?: number | null;
 }
 
 export interface ListHabitFollowUpsOptions {
