@@ -311,7 +311,7 @@ async function applyStreakAfterFollowUp(
     const failed = applyFailedStreak(habit, date);
     await db.query(
       `UPDATE habit_logs SET archived = TRUE
-       WHERE habit_id = $1 AND completed_date <= $2::date AND archived = FALSE`,
+       WHERE habit_id = $1 AND completed_date < $2::date AND archived = FALSE`,
       [habit.id, date]
     );
     await db.query(
