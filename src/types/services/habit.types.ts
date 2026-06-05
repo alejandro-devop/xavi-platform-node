@@ -31,6 +31,7 @@ export interface Habit {
   categoryId: string | null;
   measureId: string | null;
   activityId: number | null;
+  purposeId: number | null;
   habitType: HabitType;
   periodDays: number;
   restartCount: number;
@@ -115,6 +116,7 @@ export interface CreateHabitInput {
   categoryId?: string | null;
   measureId?: string | null;
   activityId?: number | null;
+  purposeId?: string | null;
   startDate?: string | null;
   endDate?: string | null;
   shouldAvoid?: boolean;
@@ -139,6 +141,7 @@ export interface UpdateHabitInput {
   categoryId?: string | null;
   measureId?: string | null;
   activityId?: number | null;
+  purposeId?: string | null;
   startDate?: string | null;
   endDate?: string | null;
   shouldAvoid?: boolean;

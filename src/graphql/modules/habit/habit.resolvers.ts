@@ -1,6 +1,7 @@
 import { activityService } from '../../../services/activity.service';
 import { habitCategoryService } from '../../../services/habit-category.service';
 import { habitMeasureService } from '../../../services/habit-measure.service';
+import { habitPurposeService } from '../../../services/habit-purpose.service';
 import { habitService } from '../../../services/habit.service';
 import type { Habit, HabitFollowUp, HabitLog } from '../../../types/services/habit.types';
 import { requireAuth } from '../../utils/error-handler';
@@ -26,6 +27,8 @@ import {
   habitMeasureEditInputSchema,
   habitMeasureIdArgSchema,
   habitMyDayArgsSchema,
+  habitPurposeEditInputSchema,
+  habitPurposeInputSchema,
   habitStatsArgsSchema,
   habitWeekViewArgsSchema,
   habitsListArgsSchema,
@@ -69,6 +72,16 @@ export const habitResolvers = {
       requireAuth(context, 'Habit.activity');
       try {
         return await activityService.getActivityById(String(parent.activityId), uid(context));
+      } catch {
+        return null;
+      }
+    },
+
+    purpose: async (parent: Habit, _args: unknown, context: { user?: { id: string | number } | null }) => {
+      if (!parent.purposeId) return null;
+      requireAuth(context, 'Habit.purpose');
+      try {
+        return await habitPurposeService.getHabitPurpose(String(parent.purposeId), uid(context));
       } catch {
         return null;
       }
@@ -121,6 +134,24 @@ export const habitResolvers = {
   },
 
   Query: {
+    habitPurposes: async (
+      _parent: unknown,
+      _args: unknown,
+      context: { user?: { id: string | number } | null }
+    ) => {
+      requireAuth(context, 'habitPurposes');
+      return habitPurposeService.listHabitPurposes(uid(context));
+    },
+
+    habitPurpose: withValidatedResolver(
+      habitIdArgSchema,
+      async (_parent, { id }: { id: string }, context) => {
+        requireAuth(context, 'habitPurpose');
+        return habitPurposeService.getHabitPurpose(id, uid(context));
+      },
+      'habitPurpose'
+    ),
+
     habit: withValidatedResolver(
       habitIdArgSchema,
       async (_parent, { id }: { id: string }, context) => {
@@ -248,6 +279,33 @@ export const habitResolvers = {
   },
 
   Mutation: {
+    habitPurposeAdd: withValidatedResolver(
+      habitPurposeInputSchema,
+      async (_parent, { input }, context) => {
+        requireAuth(context, 'habitPurposeAdd');
+        return habitPurposeService.createHabitPurpose(uid(context), input);
+      },
+      'habitPurposeAdd'
+    ),
+
+    habitPurposeEdit: withValidatedResolver(
+      habitPurposeEditInputSchema,
+      async (_parent, { input }, context) => {
+        requireAuth(context, 'habitPurposeEdit');
+        return habitPurposeService.updateHabitPurpose(input.id, uid(context), input);
+      },
+      'habitPurposeEdit'
+    ),
+
+    habitPurposeRemove: withValidatedResolver(
+      habitIdArgSchema,
+      async (_parent, { id }: { id: string }, context) => {
+        requireAuth(context, 'habitPurposeRemove');
+        return habitPurposeService.removeHabitPurpose(id, uid(context));
+      },
+      'habitPurposeRemove'
+    ),
+
     habitAdd: withValidatedResolver(
       habitAddInputSchema,
       async (_parent, { input }, context) => {

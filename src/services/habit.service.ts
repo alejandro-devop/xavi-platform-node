@@ -53,6 +53,7 @@ type HabitRow = {
   category_id: string | null;
   measure_id: string | null;
   activity_id: number | null;
+  purpose_id: number | null;
   habit_type: 'boolean' | 'count' | 'time';
   period_days: number;
   restart_count: number;
@@ -83,7 +84,7 @@ type HabitLogRow = {
 const HABIT_RETURNING = `id, user_id, name, description, frequency, target_count, icon, color, is_active,
   order_index, start_date, end_date, should_avoid, should_keep,
   days, streak, max_streak, daily_goal, timer_goal, times_goal,
-  step, category_id, measure_id, activity_id,
+  step, category_id, measure_id, activity_id, purpose_id,
   habit_type, period_days, restart_count, weekly_lifelines, status,
   created_at, updated_at`;
 
@@ -122,6 +123,7 @@ function mapHabit(row: HabitRow): Habit {
     categoryId: row.category_id ?? null,
     measureId: row.measure_id ?? null,
     activityId: row.activity_id ?? null,
+    purposeId: row.purpose_id ?? null,
     habitType: row.habit_type ?? 'boolean',
     periodDays: row.period_days ?? 0,
     restartCount: row.restart_count ?? 0,
@@ -351,13 +353,13 @@ async function createHabit(userId: number, input: CreateHabitInput): Promise<Hab
   const result = await db.query<HabitRow>(
     `INSERT INTO habits (
       user_id, name, description, frequency, target_count, icon, color,
-      category_id, measure_id, activity_id, start_date, end_date,
+      category_id, measure_id, activity_id, purpose_id, start_date, end_date,
       should_avoid, should_keep,
       habit_type, weekly_lifelines, period_days, status,
       daily_goal, timer_goal, times_goal, step, order_index
     ) VALUES (
-      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12,
-      $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23
+      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13,
+      $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24
     ) RETURNING ${HABIT_RETURNING}`,
     [
       userId,
@@ -370,6 +372,7 @@ async function createHabit(userId: number, input: CreateHabitInput): Promise<Hab
       categoryId,
       input.measureId ?? null,
       input.activityId ?? null,
+      input.purposeId ?? null,
       input.startDate ?? null,
       input.endDate ?? null,
       input.shouldAvoid ?? false,
@@ -455,6 +458,7 @@ async function updateHabit(id: string, userId: number, input: UpdateHabitInput):
     category_id: 'categoryId',
     measure_id: 'measureId',
     activity_id: 'activityId',
+    purpose_id: 'purposeId',
     start_date: 'startDate',
     end_date: 'endDate',
     should_avoid: 'shouldAvoid',
@@ -602,7 +606,7 @@ async function addHabitLog(
     const updateResult = await db.query<HabitLogRow>(
       `UPDATE habit_logs
        SET count = $1, time = $2, notes = COALESCE($3, notes), story = COALESCE($4, story),
-           is_accomplished = $5, is_failed = $6,
+           is_accomplished = $5, is_failed = $6, archived = FALSE,
            difficulty = COALESCE($7, difficulty), updated_at = NOW()
        WHERE id = $8
        RETURNING ${LOG_RETURNING}`,

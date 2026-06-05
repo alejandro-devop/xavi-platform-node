@@ -1,6 +1,19 @@
 import { gql } from 'graphql-tag';
 
 export const habitTypeDefs = gql`
+  enum HabitPurposePlacement { pool want avoid }
+
+  type HabitPurpose {
+    id: ID!
+    userId: Int!
+    name: String!
+    icon: String
+    placement: HabitPurposePlacement!
+    orderIndex: Int!
+    createdAt: DateTime!
+    updatedAt: DateTime!
+  }
+
   enum HabitFrequency {
     daily
     weekly
@@ -78,11 +91,13 @@ export const habitTypeDefs = gql`
     categoryId: ID
     measureId: ID
     activityId: Int
+    purposeId: ID
     createdAt: DateTime!
     updatedAt: DateTime!
     category: HabitCategory
     measure: HabitMeasure
     activity: Activity
+    purpose: HabitPurpose
     logs(limit: Int, isArchived: Boolean): [HabitLog!]!
     followUps(limit: Int, isArchived: Boolean): [HabitFollowUp!]!
     stats: HabitStats!
@@ -167,6 +182,8 @@ export const habitTypeDefs = gql`
   }
 
   extend type Query {
+    habitPurposes: [HabitPurpose!]!
+    habitPurpose(id: ID!): HabitPurpose!
     habit(id: ID!): Habit
     habits(isActive: Boolean, status: HabitStatus, categoryId: ID, page: Int, limit: Int): HabitCollection!
     habitLogs(habitId: ID!, startDate: String, endDate: String, limit: Int, isArchived: Boolean): [HabitLog!]!
@@ -188,6 +205,9 @@ export const habitTypeDefs = gql`
   }
 
   extend type Mutation {
+    habitPurposeAdd(input: HabitPurposeInput!): HabitPurpose!
+    habitPurposeEdit(input: HabitPurposeEditInput!): HabitPurpose!
+    habitPurposeRemove(id: ID!): Boolean!
     habitAdd(input: HabitInput!): Habit!
     habitEdit(input: HabitEditInput!): Habit!
     habitRemove(id: ID!): Boolean!
@@ -204,6 +224,21 @@ export const habitTypeDefs = gql`
     habitMeasureRemove(id: ID!): Boolean!
   }
 
+  input HabitPurposeInput {
+    name: String!
+    icon: String
+    placement: HabitPurposePlacement
+    orderIndex: Int
+  }
+
+  input HabitPurposeEditInput {
+    id: ID!
+    name: String
+    icon: String
+    placement: HabitPurposePlacement
+    orderIndex: Int
+  }
+
   input HabitInput {
     name: String!
     description: String
@@ -214,6 +249,7 @@ export const habitTypeDefs = gql`
     categoryId: ID
     measureId: ID
     activityId: Int
+    purposeId: ID
     startDate: String
     endDate: String
     shouldAvoid: Boolean
@@ -239,6 +275,7 @@ export const habitTypeDefs = gql`
     categoryId: ID
     measureId: ID
     activityId: Int
+    purposeId: ID
     startDate: String
     endDate: String
     shouldAvoid: Boolean
