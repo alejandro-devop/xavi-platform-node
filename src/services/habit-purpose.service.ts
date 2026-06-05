@@ -10,6 +10,7 @@ type PurposeRow = {
   id: number;
   user_id: number;
   name: string;
+  description: string | null;
   icon: string | null;
   placement: 'pool' | 'want' | 'avoid';
   order_index: number;
@@ -17,13 +18,14 @@ type PurposeRow = {
   updated_at: Date;
 };
 
-const PURPOSE_RETURNING = `id, user_id, name, icon, placement, order_index, created_at, updated_at`;
+const PURPOSE_RETURNING = `id, user_id, name, description, icon, placement, order_index, created_at, updated_at`;
 
 function mapPurpose(row: PurposeRow): HabitPurpose {
   return {
     id: String(row.id),
     userId: row.user_id,
     name: row.name,
+    description: row.description,
     icon: row.icon,
     placement: row.placement,
     orderIndex: row.order_index,
@@ -62,12 +64,13 @@ async function getHabitPurpose(id: string, userId: number): Promise<HabitPurpose
 async function createHabitPurpose(userId: number, input: HabitPurposeInput): Promise<HabitPurpose> {
   const db = getDbPool();
   const result = await db.query<PurposeRow>(
-    `INSERT INTO habit_purposes (user_id, name, icon, placement, order_index)
-     VALUES ($1, $2, $3, $4, $5)
+    `INSERT INTO habit_purposes (user_id, name, description, icon, placement, order_index)
+     VALUES ($1, $2, $3, $4, $5, $6)
      RETURNING ${PURPOSE_RETURNING}`,
     [
       userId,
       input.name,
+      input.description ?? null,
       input.icon ?? null,
       input.placement ?? 'pool',
       input.orderIndex ?? 0,
@@ -88,6 +91,7 @@ async function updateHabitPurpose(
 
   const fieldMap: Record<string, keyof HabitPurposeEditInput> = {
     name: 'name',
+    description: 'description',
     icon: 'icon',
     placement: 'placement',
     order_index: 'orderIndex',

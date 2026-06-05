@@ -7,6 +7,7 @@ export const habitTypeDefs = gql`
     id: ID!
     userId: Int!
     name: String!
+    description: String
     icon: String
     placement: HabitPurposePlacement!
     orderIndex: Int!
@@ -226,6 +227,7 @@ export const habitTypeDefs = gql`
 
   input HabitPurposeInput {
     name: String!
+    description: String
     icon: String
     placement: HabitPurposePlacement
     orderIndex: Int
@@ -234,6 +236,7 @@ export const habitTypeDefs = gql`
   input HabitPurposeEditInput {
     id: ID!
     name: String
+    description: String
     icon: String
     placement: HabitPurposePlacement
     orderIndex: Int

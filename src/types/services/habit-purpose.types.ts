@@ -4,6 +4,7 @@ export interface HabitPurpose {
   id: string
   userId: number
   name: string
+  description: string | null
   icon: string | null
   placement: HabitPurposePlacement
   orderIndex: number
@@ -13,6 +14,7 @@ export interface HabitPurpose {
 
 export interface HabitPurposeInput {
   name: string
+  description?: string | null
   icon?: string | null
   placement?: HabitPurposePlacement
   orderIndex?: number

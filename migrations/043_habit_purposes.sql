@@ -6,6 +6,7 @@ CREATE TABLE habit_purposes (
   icon VARCHAR(100),
   placement VARCHAR(10) NOT NULL DEFAULT 'pool'
     CHECK (placement IN ('pool', 'want', 'avoid')),
+  description TEXT,
   order_index INTEGER NOT NULL DEFAULT 0,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
