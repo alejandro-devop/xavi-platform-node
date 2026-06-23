@@ -1,7 +1,8 @@
-# Graph Report - /Users/jako/Developer/xavi-platform/xavi-platform-node  (2026-06-23)
+# Graph Report - xavi-platform-node  (2026-06-23)
 
 ## Corpus Check
-- cluster-only mode — file stats not available
+- 294 files · ~125,561 words
+- Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
 - 1902 nodes · 4350 edges · 92 communities (87 shown, 5 thin omitted)
@@ -9,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `b2133b9f`
+- Built from commit: `d1ab7a52`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
