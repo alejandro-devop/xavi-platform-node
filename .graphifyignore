@@ -1,0 +1,8 @@
+*.md
+*.mdx
+*.txt
+*.html
+*.rst
+*.yaml
+*.yml
+docs/
