@@ -3,6 +3,7 @@ import { ConflictError, ForbiddenError, NotFoundError } from '../shared/errors';
 import { habitCategoryService } from './habit-category.service';
 import { habitMeasureService } from './habit-measure.service';
 import { activityService } from './activity.service';
+import { userSettingsService } from './user-settings.service';
 import {
   addDaysToDateString,
   applyFailedStreak,
@@ -59,6 +60,7 @@ type HabitRow = {
   restart_count: number;
   weekly_lifelines: number;
   status: 'active' | 'completed' | 'archived';
+  hidden: boolean;
   created_at: Date;
   updated_at: Date;
 };
@@ -85,7 +87,7 @@ const HABIT_RETURNING = `id, user_id, name, description, frequency, target_count
   order_index, start_date, end_date, should_avoid, should_keep,
   days, streak, max_streak, daily_goal, timer_goal, times_goal,
   step, category_id, measure_id, activity_id, purpose_id,
-  habit_type, period_days, restart_count, weekly_lifelines, status,
+  habit_type, period_days, restart_count, weekly_lifelines, status, hidden,
   created_at, updated_at`;
 
 const LOG_RETURNING = `id, habit_id, user_id, completed_date, count, time, notes, story, archived,
@@ -129,6 +131,7 @@ function mapHabit(row: HabitRow): Habit {
     restartCount: row.restart_count ?? 0,
     weeklyLifelines: row.weekly_lifelines ?? 0,
     status: row.status ?? 'active',
+    hidden: row.hidden ?? false,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -210,6 +213,19 @@ async function getOwnedHabitOrThrow(habitId: number, userId: number): Promise<Ha
   const habit = await getHabitRowOrThrow(habitId);
   assertHabitOwnership(habit, userId);
   return habit;
+}
+
+async function assertHabitVisibleForUser(habit: HabitRow, userId: number): Promise<void> {
+  if (!habit.hidden) return;
+  if (await userSettingsService.shouldHideHiddenHabits(userId)) {
+    throw new NotFoundError('Habit not found');
+  }
+}
+
+async function hiddenHabitsSqlFilter(userId: number, tableAlias?: string): Promise<string> {
+  if (!(await userSettingsService.shouldHideHiddenHabits(userId))) return '';
+  const prefix = tableAlias ? `${tableAlias}.` : '';
+  return ` AND ${prefix}hidden = FALSE`;
 }
 
 async function resolveCategoryId(userId: number, categoryId?: string | null): Promise<string> {
@@ -355,11 +371,11 @@ async function createHabit(userId: number, input: CreateHabitInput): Promise<Hab
       user_id, name, description, frequency, target_count, icon, color,
       category_id, measure_id, activity_id, purpose_id, start_date, end_date,
       should_avoid, should_keep,
-      habit_type, weekly_lifelines, period_days, status,
+      habit_type, weekly_lifelines, period_days, status, hidden,
       daily_goal, timer_goal, times_goal, step, order_index
     ) VALUES (
       $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13,
-      $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24
+      $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25
     ) RETURNING ${HABIT_RETURNING}`,
     [
       userId,
@@ -381,6 +397,7 @@ async function createHabit(userId: number, input: CreateHabitInput): Promise<Hab
       input.weeklyLifelines ?? 0,
       periodDays,
       'active',
+      input.hidden ?? false,
       dailyGoal,
       input.timerGoal ?? 0,
       input.timesGoal ?? 0,
@@ -412,6 +429,8 @@ async function listHabits(userId: number, options: ListHabitsOptions = {}): Prom
     whereClause += ` AND category_id = $${params.length}`;
   }
 
+  whereClause += await hiddenHabitsSqlFilter(userId);
+
   const countResult = await db.query<{ count: string }>(
     `SELECT COUNT(*)::text AS count FROM habits ${whereClause}`,
     params
@@ -434,6 +453,7 @@ async function listHabits(userId: number, options: ListHabitsOptions = {}): Prom
 
 async function getHabitById(id: string, userId: number): Promise<Habit> {
   const habit = await getOwnedHabitOrThrow(parseHabitId(id), userId);
+  await assertHabitVisibleForUser(habit, userId);
   return mapHabit(habit);
 }
 
@@ -466,6 +486,7 @@ async function updateHabit(id: string, userId: number, input: UpdateHabitInput):
     habit_type: 'habitType',
     weekly_lifelines: 'weeklyLifelines',
     status: 'status',
+    hidden: 'hidden',
     daily_goal: 'dailyGoal',
     timer_goal: 'timerGoal',
     times_goal: 'timesGoal',
@@ -779,6 +800,8 @@ async function listHabitFollowUps(
     paramIndex++;
   }
 
+  query += await hiddenHabitsSqlFilter(userId, 'h');
+
   const limit = options.limit ?? 100;
   query += ` ORDER BY hl.completed_date DESC LIMIT $${paramIndex}`;
   params.push(limit);
@@ -830,6 +853,8 @@ async function getHabitMyDay(userId: number, date: string): Promise<HabitMyDayEn
     log_updated_at: Date | null;
   };
 
+  const hiddenFilter = await hiddenHabitsSqlFilter(userId, 'h');
+
   const [habitsResult, lifelinesResult] = await Promise.all([
     db.query<HabitMyDayRow>(
       `SELECT h.*,
@@ -844,7 +869,7 @@ async function getHabitMyDay(userId: number, date: string): Promise<HabitMyDayEn
          AND hl.archived = FALSE
          AND hl.is_lifeline = FALSE
        WHERE h.user_id = $1
-         AND h.status = 'active'
+         AND h.status = 'active'${hiddenFilter}
        ORDER BY h.order_index ASC`,
       [userId, date]
     ),
@@ -902,6 +927,7 @@ async function getHabitWeekView(
 ): Promise<HabitWeekView> {
   const habitId = parseHabitId(habitIdStr);
   const habitRow = await getOwnedHabitOrThrow(habitId, userId);
+  await assertHabitVisibleForUser(habitRow, userId);
   const habit = mapHabit(habitRow);
 
   const dates: string[] = [];
@@ -974,6 +1000,7 @@ async function completeHabit(id: string, userId: number): Promise<Habit> {
 async function getHabitStats(habitIdStr: string, userId: number): Promise<HabitStats> {
   const habitId = parseHabitId(habitIdStr);
   const habit = await getOwnedHabitOrThrow(habitId, userId);
+  await assertHabitVisibleForUser(habit, userId);
   const db = getDbPool();
 
   const totalResult = await db.query<{ total: string; total_count: string | null }>(

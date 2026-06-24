@@ -82,6 +82,7 @@ export const habitTypeDefs = gql`
     restartCount: Int!
     weeklyLifelines: Int!
     status: HabitStatus!
+    hidden: Boolean!
     days: Int!
     streak: Int!
     maxStreak: Int!
@@ -264,6 +265,7 @@ export const habitTypeDefs = gql`
     timesGoal: Int
     step: Int
     orderIndex: Int
+    hidden: Boolean
   }
 
   input HabitEditInput {
@@ -291,6 +293,7 @@ export const habitTypeDefs = gql`
     step: Int
     orderIndex: Int
     status: HabitStatus
+    hidden: Boolean
   }
 
   input HabitLogAddInput {

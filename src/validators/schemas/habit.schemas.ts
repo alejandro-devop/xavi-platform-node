@@ -24,6 +24,7 @@ const legacyHabitFields = {
   timesGoal: z.number().int().min(0).nullable().optional(),
   step: z.number().int().nullable().optional(),
   orderIndex: z.number().int().min(0).optional(),
+  hidden: z.boolean().optional(),
 };
 
 export const habitIdArgSchema = z.object({
@@ -140,6 +141,7 @@ const habitEditFields = [
   'step',
   'orderIndex',
   'status',
+  'hidden',
 ] as const;
 
 const habitStatus = z.enum(['active', 'completed', 'archived']);

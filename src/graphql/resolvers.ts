@@ -19,6 +19,7 @@ import { courseResolvers } from './modules/course/course.resolvers';
 import { sweeterWayResolvers } from './modules/sweeter-way/sweeter-way.resolvers';
 import { noteResolvers } from './modules/note/note.resolvers';
 import { quarterResolvers } from './modules/quarter/quarter.resolvers';
+import { userSettingsResolvers } from './modules/user-settings/user-settings.resolvers';
 
 // Merge all resolvers
 export const resolvers = mergeResolvers([
@@ -42,4 +43,5 @@ export const resolvers = mergeResolvers([
   sweeterWayResolvers,
   noteResolvers,
   quarterResolvers,
+  userSettingsResolvers,
 ]);

@@ -19,6 +19,12 @@ jest.mock('../../../src/services/habit-measure.service', () => ({
   },
 }));
 
+jest.mock('../../../src/services/user-settings.service', () => ({
+  userSettingsService: {
+    shouldHideHiddenHabits: jest.fn().mockResolvedValue(false),
+  },
+}));
+
 import { getDbPool } from '../../../src/shared/database/pool';
 
 const mockGetDbPool = getDbPool as jest.MockedFunction<typeof getDbPool>;
@@ -58,6 +64,13 @@ function createHabitRow(overrides: Record<string, unknown> = {}) {
     category_id: 'cat-uuid-1',
     measure_id: null,
     activity_id: null,
+    purpose_id: null,
+    habit_type: 'boolean',
+    period_days: 0,
+    restart_count: 0,
+    weekly_lifelines: 0,
+    status: 'active',
+    hidden: false,
     created_at: now,
     updated_at: now,
     ...overrides,

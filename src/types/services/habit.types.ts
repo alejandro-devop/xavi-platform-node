@@ -37,6 +37,7 @@ export interface Habit {
   restartCount: number;
   weeklyLifelines: number;
   status: HabitStatus;
+  hidden: boolean;
   createdAt: Date;
   updatedAt: Date;
   category?: HabitCategory | null;
@@ -128,6 +129,7 @@ export interface CreateHabitInput {
   timesGoal?: number;
   step?: number | null;
   orderIndex?: number;
+  hidden?: boolean;
 }
 
 export interface UpdateHabitInput {
@@ -154,6 +156,7 @@ export interface UpdateHabitInput {
   timesGoal?: number;
   step?: number | null;
   orderIndex?: number;
+  hidden?: boolean;
 }
 
 export interface ListHabitsOptions {

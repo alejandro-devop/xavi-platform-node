@@ -20,6 +20,7 @@ import { courseTypeDefs } from './modules/course/course.schema';
 import { sweeterWayTypeDefs } from './modules/sweeter-way/sweeter-way.schema';
 import { noteTypeDefs } from './modules/note/note.schema';
 import { quarterTypeDefs } from './modules/quarter/quarter.schema';
+import { userSettingsTypeDefs } from './modules/user-settings/user-settings.schema';
 
 // Base Query and Mutation types
 const baseTypeDefs = gql`
@@ -56,4 +57,5 @@ export const typeDefs = [
   sweeterWayTypeDefs,
   noteTypeDefs,
   quarterTypeDefs,
+  userSettingsTypeDefs,
 ];
