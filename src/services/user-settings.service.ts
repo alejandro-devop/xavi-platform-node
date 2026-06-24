@@ -1,9 +1,11 @@
+import { activityCategoryService } from './activity-category.service';
 import { getDbPool } from '../shared/database/pool';
 import type { UpdateUserSettingsInput, UserSettings } from '../types/services/user-settings.types';
 
 type UserSettingsRow = {
   user_id: number;
   hide_hidden_habits: boolean;
+  sleep_activity_category_id: string | null;
   created_at: Date;
   updated_at: Date;
 };
@@ -12,6 +14,7 @@ function mapRow(row: UserSettingsRow): UserSettings {
   return {
     userId: row.user_id,
     hideHiddenHabits: row.hide_hidden_habits,
+    sleepActivityCategoryId: row.sleep_activity_category_id,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -46,16 +49,35 @@ export const userSettingsService = {
     const db = getDbPool();
     await getOrCreateSettings(userId);
 
-    if (input.hideHiddenHabits === undefined) {
+    const updates: string[] = [];
+    const params: unknown[] = [];
+    let paramIndex = 1;
+
+    if (input.hideHiddenHabits !== undefined) {
+      updates.push(`hide_hidden_habits = $${paramIndex}`);
+      params.push(input.hideHiddenHabits);
+      paramIndex++;
+    }
+
+    if (input.sleepActivityCategoryId !== undefined) {
+      if (input.sleepActivityCategoryId !== null) {
+        await activityCategoryService.getCategoryById(input.sleepActivityCategoryId, userId);
+      }
+      updates.push(`sleep_activity_category_id = $${paramIndex}`);
+      params.push(input.sleepActivityCategoryId);
+      paramIndex++;
+    }
+
+    if (updates.length === 0) {
       return getOrCreateSettings(userId);
     }
 
+    updates.push('updated_at = NOW()');
+    params.push(userId);
+
     const result = await db.query<UserSettingsRow>(
-      `UPDATE user_settings
-       SET hide_hidden_habits = $1, updated_at = NOW()
-       WHERE user_id = $2
-       RETURNING *`,
-      [input.hideHiddenHabits, userId]
+      `UPDATE user_settings SET ${updates.join(', ')} WHERE user_id = $${paramIndex} RETURNING *`,
+      params
     );
     return mapRow(result.rows[0]);
   },

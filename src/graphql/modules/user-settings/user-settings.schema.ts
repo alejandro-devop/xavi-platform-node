@@ -4,6 +4,7 @@ export const userSettingsTypeDefs = gql`
   type UserSettings {
     userId: Int!
     hideHiddenHabits: Boolean!
+    sleepActivityCategoryId: ID
     createdAt: DateTime!
     updatedAt: DateTime!
   }
@@ -18,5 +19,6 @@ export const userSettingsTypeDefs = gql`
 
   input UpdateUserSettingsInput {
     hideHiddenHabits: Boolean
+    sleepActivityCategoryId: ID
   }
 `;
