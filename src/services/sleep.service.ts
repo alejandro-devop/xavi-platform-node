@@ -9,6 +9,7 @@ import type {
   SleepStatsOptions,
   UpdateSleepLogInput,
 } from '../types/services/sleep.types';
+import { sleepFollowUpSyncService } from './sleep-follow-up-sync.service';
 
 type SleepLogRow = {
   id: number;
@@ -20,11 +21,12 @@ type SleepLogRow = {
   quality: string | null;
   mood_on_waking: string | null;
   notes: string | null;
+  activity_follow_up_id: number | null;
   created_at: Date;
   updated_at: Date;
 };
 
-const SLEEP_LOG_RETURNING = `id, user_id, sleep_date, bedtime, wake_time, duration_minutes, quality, mood_on_waking, notes, created_at, updated_at`;
+const SLEEP_LOG_RETURNING = `id, user_id, sleep_date, bedtime, wake_time, duration_minutes, quality, mood_on_waking, notes, activity_follow_up_id, created_at, updated_at`;
 
 function formatDurationHours(minutes: number): string {
   return (minutes / 60).toFixed(1);
@@ -102,7 +104,13 @@ async function createSleepLog(userId: number, input: CreateSleepLogInput): Promi
       input.notes ?? null,
     ]
   );
-  return mapSleepLog(result.rows[0]);
+  const row = result.rows[0];
+  await sleepFollowUpSyncService.createFollowUpForSleepLog(userId, row, {
+    ...(input.bedtimeStartTime ? { bedtimeStartTime: input.bedtimeStartTime } : {}),
+    ...(input.bedtimeRaw ? { bedtimeRaw: input.bedtimeRaw } : {}),
+  });
+  const refreshed = await getSleepLogRowOrThrow(row.id);
+  return mapSleepLog(refreshed);
 }
 
 async function listSleepLogs(
@@ -224,12 +232,19 @@ async function updateSleepLog(
     `UPDATE sleep_logs SET ${updates.join(', ')} WHERE id = $${paramIndex} RETURNING ${SLEEP_LOG_RETURNING}`,
     params
   );
-  return mapSleepLog(result.rows[0]);
+  const row = result.rows[0];
+  await sleepFollowUpSyncService.updateFollowUpForSleepLog(userId, row, {
+    ...(input.bedtimeStartTime ? { bedtimeStartTime: input.bedtimeStartTime } : {}),
+    ...(input.bedtimeRaw ? { bedtimeRaw: input.bedtimeRaw } : {}),
+  });
+  const refreshed = await getSleepLogRowOrThrow(sleepLogId);
+  return mapSleepLog(refreshed);
 }
 
 async function deleteSleepLog(id: string, userId: number): Promise<boolean> {
   const sleepLogId = parseSleepLogId(id);
-  await getOwnedSleepLogOrThrow(sleepLogId, userId);
+  const existing = await getOwnedSleepLogOrThrow(sleepLogId, userId);
+  await sleepFollowUpSyncService.deleteFollowUpForSleepLog(userId, existing);
   await getDbPool().query('DELETE FROM sleep_logs WHERE id = $1', [sleepLogId]);
   return true;
 }

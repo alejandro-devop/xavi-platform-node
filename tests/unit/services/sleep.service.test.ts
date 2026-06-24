@@ -6,6 +6,14 @@ jest.mock('../../../src/shared/database/pool', () => ({
   getDbPool: jest.fn(),
 }));
 
+jest.mock('../../../src/services/sleep-follow-up-sync.service', () => ({
+  sleepFollowUpSyncService: {
+    createFollowUpForSleepLog: jest.fn().mockResolvedValue(undefined),
+    updateFollowUpForSleepLog: jest.fn().mockResolvedValue(undefined),
+    deleteFollowUpForSleepLog: jest.fn().mockResolvedValue(undefined),
+  },
+}));
+
 import { getDbPool } from '../../../src/shared/database/pool';
 
 const mockGetDbPool = getDbPool as jest.MockedFunction<typeof getDbPool>;
@@ -28,6 +36,7 @@ function createSleepLogRow(overrides: Record<string, unknown> = {}) {
     quality: 'good',
     mood_on_waking: 'refreshed',
     notes: null,
+    activity_follow_up_id: null,
     created_at: now,
     updated_at: now,
     ...overrides,
@@ -42,7 +51,10 @@ describe('SleepService', () => {
 
   describe('createSleepLog', () => {
     it('creates log with calculated duration', async () => {
-      mockDbPool.query.mockResolvedValueOnce({ rows: [createSleepLogRow()] });
+      const row = createSleepLogRow();
+      mockDbPool.query
+        .mockResolvedValueOnce({ rows: [row] })
+        .mockResolvedValueOnce({ rows: [row] });
 
       const log = await sleepService.createSleepLog(USER_ID, {
         sleepDate: '2024-06-01',

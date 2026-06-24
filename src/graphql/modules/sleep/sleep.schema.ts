@@ -83,6 +83,7 @@ export const sleepTypeDefs = gql`
     sleepDate: DateTime!
     bedtime: DateTime!
     wakeTime: DateTime!
+    bedtimeStartTime: String
     quality: SleepQuality
     moodOnWaking: MoodOnWaking
     notes: String
@@ -93,6 +94,7 @@ export const sleepTypeDefs = gql`
     sleepDate: DateTime
     bedtime: DateTime
     wakeTime: DateTime
+    bedtimeStartTime: String
     quality: SleepQuality
     moodOnWaking: MoodOnWaking
     notes: String
