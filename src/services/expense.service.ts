@@ -5,7 +5,7 @@ import {
   walletExpenseCategories,
   walletBudgets,
 } from '../shared/database/schema';
-import { eq, and, gte, lte, desc, sql } from 'drizzle-orm';
+import { eq, and, gte, lte, desc, or, isNull, gt } from 'drizzle-orm';
 import { BadRequestError } from '../shared/errors';
 import { checkRecordExists } from '../shared/utils/db-validators';
 import { balanceStrategies, updateBalances } from '../shared/utils/balance-strategies';
@@ -45,6 +45,11 @@ export const expenseService = {
     if (filter?.endDate) {
       conditions.push(lte(walletExpenses.date, filter.endDate));
     }
+
+    // Hide incoming legs of wallet transfers (only show outgoing leg in transaction list)
+    conditions.push(
+      or(isNull(walletExpenses.transferId), gt(walletExpenses.debit, '0')) as typeof conditions[0]
+    );
 
     const expenses = await db.query.walletExpenses.findMany({
       where: and(...conditions),
@@ -294,6 +299,12 @@ export const expenseService = {
 
     // Get existing expense
     const expense = await this.getExpenseById(id, userId);
+
+    if (expense.transferId) {
+      throw new BadRequestError(
+        'This transaction is part of a wallet transfer. Use walletTransferRemove instead.'
+      );
+    }
 
     // Use Drizzle transaction
     await db.transaction(async (tx) => {

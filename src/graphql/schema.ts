@@ -4,6 +4,7 @@ import { healthTypeDefs } from './modules/common/health.schema';
 import { walletTypeDefs } from './modules/wallet/wallet.schema';
 import { expenseCategoryTypeDefs } from './modules/expense-category/expense-category.schema';
 import { expenseTypeDefs } from './modules/expense/expense.schema';
+import { expenseExtractionTypeDefs } from './modules/expense-extraction/expense-extraction.schema';
 import { scheduledExpenseTypeDefs } from './modules/scheduled-expense/scheduled-expense.schema';
 import { budgetTypeDefs } from './modules/budget/budget.schema';
 import { frequencyTypeDefs } from './modules/frequency/frequency.schema';
@@ -21,6 +22,8 @@ import { sweeterWayTypeDefs } from './modules/sweeter-way/sweeter-way.schema';
 import { noteTypeDefs } from './modules/note/note.schema';
 import { quarterTypeDefs } from './modules/quarter/quarter.schema';
 import { userSettingsTypeDefs } from './modules/user-settings/user-settings.schema';
+import { creditCardTypeDefs } from './modules/credit-card/credit-card.schema';
+import { walletTransferTypeDefs } from './modules/wallet-transfer/wallet-transfer.schema';
 
 // Base Query and Mutation types
 const baseTypeDefs = gql`
@@ -41,6 +44,7 @@ export const typeDefs = [
   walletTypeDefs,
   expenseCategoryTypeDefs,
   expenseTypeDefs,
+  expenseExtractionTypeDefs,
   scheduledExpenseTypeDefs,
   budgetTypeDefs,
   frequencyTypeDefs,
@@ -58,4 +62,6 @@ export const typeDefs = [
   noteTypeDefs,
   quarterTypeDefs,
   userSettingsTypeDefs,
+  creditCardTypeDefs,
+  walletTransferTypeDefs,
 ];

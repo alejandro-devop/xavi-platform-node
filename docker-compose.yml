@@ -83,6 +83,9 @@ services:
       EMAIL_API_KEY: ${EMAIL_API_KEY}
       EMAIL_FROM: ${EMAIL_FROM:-noreply@xavi.app}
       EMAIL_OTP_EXPIRATION_MINUTES: ${EMAIL_OTP_EXPIRATION_MINUTES:-15}
+
+      # Expense extraction (Anthropic Claude)
+      CLAUDE_API_KEY: ${CLAUDE_API_KEY}
     volumes:
       - ./src:/app/src
       - ./scripts:/app/scripts

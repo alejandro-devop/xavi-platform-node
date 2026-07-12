@@ -2,6 +2,7 @@ import { expenseService } from '../../../services/expense.service';
 import { budgetService } from '../../../services/budget.service';
 import { walletService } from '../../../services/wallet.service';
 import { expenseCategoryService } from '../../../services/expense-category.service';
+import { walletTransferService } from '../../../services/wallet-transfer.service';
 import { withErrorHandling, requireAuth } from '../../utils/error-handler';
 import { withValidatedResolver } from '../../utils/validation';
 import {
@@ -62,6 +63,8 @@ export const expenseResolvers = {
   },
 
   WalletExpense: {
+    isTransfer: (parent: any) => !!parent.transferId,
+
     wallet: async (parent: any, _: any, context: any) => {
       if (!parent.walletId) return null;
       try {
@@ -84,6 +87,15 @@ export const expenseResolvers = {
       if (!parent.budgetId) return null;
       try {
         return await budgetService.getBudgetById(parent.budgetId, context.user.id);
+      } catch (error) {
+        return null;
+      }
+    },
+
+    transfer: async (parent: any, _: any, context: any) => {
+      if (!parent.transferId) return null;
+      try {
+        return await walletTransferService.getTransferById(parent.transferId, context.user.id);
       } catch (error) {
         return null;
       }

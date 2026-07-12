@@ -187,8 +187,33 @@ export const walletExpenses = pgTable('wallet_expenses', {
   credit: decimal('credit', { precision: 15, scale: 2 }).notNull().default('0'),
   isIncome: boolean('is_income').notNull().default(false),
   isOutcome: boolean('is_outcome').notNull().default(false),
+  transferId: uuid('transfer_id').references((): any => walletTransfers.id, {
+    onDelete: 'cascade',
+  }),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+// ============================================
+// WALLET TRANSFERS
+// ============================================
+export const walletTransfers = pgTable('wallet_transfers', {
+  id: uuid('id')
+    .primaryKey()
+    .$defaultFn(() => generateUuidV7()),
+  userId: integer('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  fromWalletId: uuid('from_wallet_id')
+    .notNull()
+    .references(() => walletWallets.id, { onDelete: 'cascade' }),
+  toWalletId: uuid('to_wallet_id')
+    .notNull()
+    .references(() => walletWallets.id, { onDelete: 'cascade' }),
+  amount: decimal('amount', { precision: 15, scale: 2 }).notNull(),
+  date: date('date').notNull(),
+  description: varchar('description', { length: 255 }).notNull(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
 });
 
 // ============================================
@@ -300,6 +325,77 @@ export const shoppingListItemsRelations = relations(shoppingListItems, ({ one })
 }));
 
 // ============================================
+// WALLET CREDIT CARDS
+// ============================================
+export const walletCreditCards = pgTable('wallet_credit_cards', {
+  id: uuid('id')
+    .primaryKey()
+    .$defaultFn(() => generateUuidV7()),
+  userId: integer('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  name: varchar('name', { length: 255 }).notNull(),
+  icon: varchar('icon', { length: 50 }),
+  creditLimit: decimal('credit_limit', { precision: 15, scale: 2 }).notNull().default('0'),
+  currentDebt: decimal('current_debt', { precision: 15, scale: 2 }).notNull().default('0'),
+  cutoffDay: integer('cutoff_day').notNull(),
+  paymentDay: integer('payment_day').notNull(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+export const walletCreditCardCharges = pgTable('wallet_credit_card_charges', {
+  id: uuid('id')
+    .primaryKey()
+    .$defaultFn(() => generateUuidV7()),
+  userId: integer('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  creditCardId: uuid('credit_card_id')
+    .notNull()
+    .references(() => walletCreditCards.id, { onDelete: 'cascade' }),
+  categoryId: uuid('category_id').references(() => walletExpenseCategories.id, {
+    onDelete: 'set null',
+  }),
+  description: varchar('description', { length: 255 }).notNull(),
+  amount: decimal('amount', { precision: 15, scale: 2 }).notNull().default('0'),
+  date: date('date').notNull(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+export const walletCreditCardPayments = pgTable('wallet_credit_card_payments', {
+  id: uuid('id')
+    .primaryKey()
+    .$defaultFn(() => generateUuidV7()),
+  userId: integer('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  creditCardId: uuid('credit_card_id')
+    .notNull()
+    .references(() => walletCreditCards.id, { onDelete: 'cascade' }),
+  expenseId: uuid('expense_id')
+    .notNull()
+    .references(() => walletExpenses.id, { onDelete: 'cascade' }),
+  amount: decimal('amount', { precision: 15, scale: 2 }).notNull().default('0'),
+  paidDate: date('paid_date').notNull(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+});
+
+export const walletUserSettings = pgTable('wallet_user_settings', {
+  userId: integer('user_id')
+    .primaryKey()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  creditCardPaymentCategoryId: uuid('credit_card_payment_category_id').references(
+    () => walletExpenseCategories.id,
+    { onDelete: 'set null' }
+  ),
+  periodCutoffDay: integer('period_cutoff_day'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+// ============================================
 // RELATIONS (Optional - for query convenience)
 // ============================================
 export const walletWalletsRelations = relations(walletWallets, ({ one, many }) => ({
@@ -328,6 +424,28 @@ export const walletExpensesRelations = relations(walletExpenses, ({ one }) => ({
     fields: [walletExpenses.budgetId],
     references: [walletBudgets.id],
   }),
+  transfer: one(walletTransfers, {
+    fields: [walletExpenses.transferId],
+    references: [walletTransfers.id],
+  }),
+}));
+
+export const walletTransfersRelations = relations(walletTransfers, ({ one, many }) => ({
+  user: one(users, {
+    fields: [walletTransfers.userId],
+    references: [users.id],
+  }),
+  fromWallet: one(walletWallets, {
+    fields: [walletTransfers.fromWalletId],
+    references: [walletWallets.id],
+    relationName: 'transferFromWallet',
+  }),
+  toWallet: one(walletWallets, {
+    fields: [walletTransfers.toWalletId],
+    references: [walletWallets.id],
+    relationName: 'transferToWallet',
+  }),
+  expenses: many(walletExpenses),
 }));
 
 export const walletScheduledExpensesRelations = relations(walletScheduledExpenses, ({ one }) => ({
@@ -366,6 +484,56 @@ export const walletBudgetClosuresRelations = relations(walletBudgetClosures, ({ 
   user: one(users, {
     fields: [walletBudgetClosures.userId],
     references: [users.id],
+  }),
+}));
+
+export const walletCreditCardsRelations = relations(walletCreditCards, ({ one, many }) => ({
+  user: one(users, {
+    fields: [walletCreditCards.userId],
+    references: [users.id],
+  }),
+  charges: many(walletCreditCardCharges),
+  payments: many(walletCreditCardPayments),
+}));
+
+export const walletCreditCardChargesRelations = relations(walletCreditCardCharges, ({ one }) => ({
+  user: one(users, {
+    fields: [walletCreditCardCharges.userId],
+    references: [users.id],
+  }),
+  creditCard: one(walletCreditCards, {
+    fields: [walletCreditCardCharges.creditCardId],
+    references: [walletCreditCards.id],
+  }),
+  category: one(walletExpenseCategories, {
+    fields: [walletCreditCardCharges.categoryId],
+    references: [walletExpenseCategories.id],
+  }),
+}));
+
+export const walletCreditCardPaymentsRelations = relations(walletCreditCardPayments, ({ one }) => ({
+  user: one(users, {
+    fields: [walletCreditCardPayments.userId],
+    references: [users.id],
+  }),
+  creditCard: one(walletCreditCards, {
+    fields: [walletCreditCardPayments.creditCardId],
+    references: [walletCreditCards.id],
+  }),
+  expense: one(walletExpenses, {
+    fields: [walletCreditCardPayments.expenseId],
+    references: [walletExpenses.id],
+  }),
+}));
+
+export const walletUserSettingsRelations = relations(walletUserSettings, ({ one }) => ({
+  user: one(users, {
+    fields: [walletUserSettings.userId],
+    references: [users.id],
+  }),
+  creditCardPaymentCategory: one(walletExpenseCategories, {
+    fields: [walletUserSettings.creditCardPaymentCategoryId],
+    references: [walletExpenseCategories.id],
   }),
 }));
 

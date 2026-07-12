@@ -13,6 +13,8 @@ export const expenseTypeDefs = gql`
     credit: Decimal!
     isIncome: Boolean!
     isOutcome: Boolean!
+    transferId: ID
+    isTransfer: Boolean!
     createdAt: DateTime!
     updatedAt: DateTime!
 
@@ -20,6 +22,7 @@ export const expenseTypeDefs = gql`
     wallet: Wallet
     category: WalletExpenseCategory
     budget: WalletBudget
+    transfer: WalletTransfer
   }
 
   extend type Query {

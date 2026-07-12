@@ -4,6 +4,7 @@ export interface Expense {
   walletId: string;
   categoryId?: string | null;
   budgetId?: string | null;
+  transferId?: string | null;
   debit: number;
   credit: number;
   description: string;

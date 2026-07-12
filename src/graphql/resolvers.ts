@@ -3,6 +3,7 @@ import { healthResolvers } from './modules/common/health.resolvers';
 import { walletResolvers } from './modules/wallet/wallet.resolvers';
 import { expenseCategoryResolvers } from './modules/expense-category/expense-category.resolvers';
 import { expenseResolvers } from './modules/expense/expense.resolvers';
+import { expenseExtractionResolvers } from './modules/expense-extraction/expense-extraction.resolvers';
 import { scheduledExpenseResolvers } from './modules/scheduled-expense/scheduled-expense.resolvers';
 import { budgetResolvers } from './modules/budget/budget.resolvers';
 import { frequencyResolvers } from './modules/frequency/frequency.resolvers';
@@ -20,6 +21,8 @@ import { sweeterWayResolvers } from './modules/sweeter-way/sweeter-way.resolvers
 import { noteResolvers } from './modules/note/note.resolvers';
 import { quarterResolvers } from './modules/quarter/quarter.resolvers';
 import { userSettingsResolvers } from './modules/user-settings/user-settings.resolvers';
+import { creditCardResolvers } from './modules/credit-card/credit-card.resolvers';
+import { walletTransferResolvers } from './modules/wallet-transfer/wallet-transfer.resolvers';
 
 // Merge all resolvers
 export const resolvers = mergeResolvers([
@@ -27,6 +30,7 @@ export const resolvers = mergeResolvers([
   walletResolvers,
   expenseCategoryResolvers,
   expenseResolvers,
+  expenseExtractionResolvers,
   scheduledExpenseResolvers,
   budgetResolvers,
   frequencyResolvers,
@@ -44,4 +48,6 @@ export const resolvers = mergeResolvers([
   noteResolvers,
   quarterResolvers,
   userSettingsResolvers,
+  creditCardResolvers,
+  walletTransferResolvers,
 ]);

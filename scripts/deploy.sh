@@ -47,7 +47,7 @@ gcloud run deploy "${SERVICE_NAME}" \
   --region="${REGION}" \
   --allow-unauthenticated \
   --service-account="${SERVICE_ACCOUNT}" \
-  --set-secrets="DATABASE_URL=database-url:latest,JWT_ACCESS_SECRET=jwt-secret:latest,JWT_REFRESH_SECRET=jwt-secret:latest,REDIS_URL=redis-url:latest" \
+  --set-secrets="DATABASE_URL=database-url:latest,JWT_ACCESS_SECRET=jwt-secret:latest,JWT_REFRESH_SECRET=jwt-secret:latest,REDIS_URL=redis-url:latest,CLAUDE_API_KEY=claude-api-key:latest" \
   --set-env-vars="NODE_ENV=production,ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-https://sweeter-way-web.vercel.app|https://xavi-habits-webapp.vercel.app|http://localhost:5173},EMAIL_API_KEY=${EMAIL_API_KEY},EMAIL_FROM=${EMAIL_FROM:-noreply@alejosworld.com},EMAIL_OTP_EXPIRATION_MINUTES=${EMAIL_OTP_EXPIRATION_MINUTES:-15}" \
   --memory=1Gi \
   --cpu=2 \
