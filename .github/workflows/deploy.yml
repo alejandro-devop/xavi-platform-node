@@ -1,0 +1,79 @@
+name: Deploy to Cloud Run
+
+on:
+  push:
+    branches: [main]
+
+env:
+  PROJECT_ID: xavier-platform
+  REGION: us-central1
+  SERVICE_NAME: xavi-api
+  REPOSITORY: xavi-api
+  SERVICE_ACCOUNT: xavi-api-sa@xavier-platform.iam.gserviceaccount.com
+  MIGRATE_JOB_NAME: xavi-migrate
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: ${{ env.PROJECT_ID }}
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+
+      - name: Build image
+        run: |
+          docker build \
+            -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/app:${{ github.sha }} \
+            -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/app:latest \
+            .
+
+      - name: Push image
+        run: |
+          docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/app:${{ github.sha }}
+          docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/app:latest
+
+      - name: Run database migrations
+        run: |
+          gcloud run jobs deploy ${{ env.MIGRATE_JOB_NAME }} \
+            --image=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/app:${{ github.sha }} \
+            --region=${{ env.REGION }} \
+            --service-account=${{ env.SERVICE_ACCOUNT }} \
+            --set-secrets="DATABASE_URL=database-url:latest" \
+            --command="npm" \
+            --args="run,migrate" \
+            --max-retries=0
+
+          gcloud run jobs execute ${{ env.MIGRATE_JOB_NAME }} \
+            --region=${{ env.REGION }} \
+            --wait
+
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy ${{ env.SERVICE_NAME }} \
+            --image=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/app:${{ github.sha }} \
+            --platform=managed \
+            --region=${{ env.REGION }} \
+            --allow-unauthenticated \
+            --service-account=${{ env.SERVICE_ACCOUNT }} \
+            --set-secrets="DATABASE_URL=database-url:latest,JWT_ACCESS_SECRET=jwt-secret:latest,JWT_REFRESH_SECRET=jwt-secret:latest,REDIS_URL=redis-url:latest,CLAUDE_API_KEY=claude-api-key:latest" \
+            --set-env-vars="NODE_ENV=production,ALLOWED_ORIGINS=https://sweeter-way-web.vercel.app|https://xavi-habits-webapp.vercel.app|http://localhost:5173,EMAIL_API_KEY=${{ secrets.EMAIL_API_KEY }},EMAIL_FROM=noreply@alejosworld.com,EMAIL_OTP_EXPIRATION_MINUTES=15" \
+            --memory=1Gi \
+            --cpu=2 \
+            --timeout=600 \
+            --max-instances=10 \
+            --min-instances=0 \
+            --cpu-boost
