@@ -3,6 +3,7 @@ import {
   applyFailedStreak,
   applyLifelineToEndDate,
   getEffectiveGoal,
+  isFrontierFollowUp,
 } from './habit-streak';
 import { syncHabitStreakFromLogs } from './habit.service';
 
@@ -123,6 +124,27 @@ describe('applyLifelineToEndDate', () => {
   test('8 — con end_date null devuelve null', () => {
     const result = applyLifelineToEndDate({ end_date: null });
     expect(result.end_date).toBeNull();
+  });
+});
+
+// ─── isFrontierFollowUp: back-fill vs frontera ───────────────────────────────
+
+describe('isFrontierFollowUp', () => {
+  test('back-fill (día pasado, hay un log posterior) → no es frontera', () => {
+    // Racha días 3-4; registro retroactivo del día 2 → NO debe reiniciar.
+    expect(isFrontierFollowUp('2026-01-02', '2026-01-04')).toBe(false);
+  });
+
+  test('registro del día más reciente → es frontera', () => {
+    expect(isFrontierFollowUp('2026-01-04', '2026-01-04')).toBe(true);
+  });
+
+  test('registro más nuevo que cualquier log previo → es frontera', () => {
+    expect(isFrontierFollowUp('2026-01-05', '2026-01-04')).toBe(true);
+  });
+
+  test('primer log del hábito (sin fecha previa) → es frontera', () => {
+    expect(isFrontierFollowUp('2026-01-01', null)).toBe(true);
   });
 });
 

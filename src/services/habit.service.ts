@@ -9,6 +9,7 @@ import {
   applyFailedStreak,
   applyLifelineToEndDate,
   isFollowUpGoalMet,
+  isFrontierFollowUp,
 } from './habit-streak';
 import type {
   AddHabitLogInput,
@@ -303,7 +304,7 @@ export async function syncHabitStreakFromLogs(habitId: number): Promise<void> {
   await db.query(
     `UPDATE habits
      SET streak = $1,
-         max_streak = $2,
+         max_streak = GREATEST(max_streak, $2),
          days = (SELECT COUNT(*) FROM habit_logs WHERE habit_id = $3 AND archived = FALSE)
      WHERE id = $3`,
     [streak, max_streak, habitId]
@@ -319,36 +320,41 @@ async function applyStreakAfterFollowUp(
 ): Promise<void> {
   const db = getDbPool();
 
-  if (isLifeline) {
-    const { end_date } = applyLifelineToEndDate(habit);
-    await db.query(`UPDATE habits SET end_date = $1 WHERE id = $2`, [end_date, habit.id]);
-    return;
+  // ¿Este registro es el más reciente del hábito? El log ya está escrito, así que
+  // MAX(completed_date) lo incluye: si hay un log posterior, se está rellenando un
+  // día pasado (back-fill) y NO debe dispararse el "reinicio".
+  const frontierResult = await db.query<{ latest: string | null }>(
+    `SELECT MAX(completed_date)::text AS latest
+     FROM habit_logs
+     WHERE habit_id = $1 AND archived = FALSE`,
+    [habit.id]
+  );
+  const isFrontier = isFrontierFollowUp(date, frontierResult.rows[0].latest);
+
+  // Efectos de "reinicio" (archivar historial previo / resetear end_date / restart_count):
+  // solo en la frontera. Un fallo o comodín retroactivo no reinicia nada.
+  if (isFrontier) {
+    if (isLifeline) {
+      const { end_date } = applyLifelineToEndDate(habit);
+      await db.query(`UPDATE habits SET end_date = $1 WHERE id = $2`, [end_date, habit.id]);
+    } else if (isFailed) {
+      const failed = applyFailedStreak(habit, date);
+      await db.query(
+        `UPDATE habit_logs SET archived = TRUE
+         WHERE habit_id = $1 AND completed_date < $2::date AND archived = FALSE`,
+        [habit.id, date]
+      );
+      await db.query(
+        `UPDATE habits SET end_date = $1, restart_count = $2 WHERE id = $3`,
+        [failed.end_date, failed.restart_count, habit.id]
+      );
+    }
   }
 
-  if (isFailed) {
-    const failed = applyFailedStreak(habit, date);
-    await db.query(
-      `UPDATE habit_logs SET archived = TRUE
-       WHERE habit_id = $1 AND completed_date < $2::date AND archived = FALSE`,
-      [habit.id, date]
-    );
-    await db.query(
-      `UPDATE habits SET streak = $1, end_date = $2, restart_count = $3 WHERE id = $4`,
-      [failed.streak, failed.end_date, failed.restart_count, habit.id]
-    );
-    return;
-  }
-
-  if (isAccomplished) {
-    await db.query(
-      `UPDATE habits
-       SET streak = streak + 1,
-           max_streak = GREATEST(max_streak, streak + 1),
-           days = days + 1
-       WHERE id = $1`,
-      [habit.id]
-    );
-  }
+  // La racha (streak / max_streak / days) SIEMPRE se recalcula desde los logs, de forma
+  // consciente de la fecha e independiente del orden de registro. Así, registrar un
+  // fallo/logro en un día pasado nunca corrompe la racha actual.
+  await syncHabitStreakFromLogs(habit.id);
 }
 
 async function createHabit(userId: number, input: CreateHabitInput): Promise<Habit> {

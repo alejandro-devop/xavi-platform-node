@@ -64,3 +64,20 @@ export function applyLifelineToEndDate(
       : String(habit.end_date).split('T')[0];
   return { end_date: addDaysToDateString(dateStr, 1) };
 }
+
+/**
+ * ¿El follow-up que se registra es el más reciente del hábito (la "frontera"),
+ * o se está rellenando un día pasado (back-fill)?
+ *
+ * Los efectos de "reinicio" al fallar/usar comodín (archivar historial, resetear
+ * `end_date`, incrementar `restart_count`) solo tienen sentido en la frontera: un
+ * fallo registrado en un día pasado NO debe reiniciar la racha actual ni archivar
+ * los logros posteriores. La racha en sí se recalcula siempre desde los logs.
+ *
+ * `latestLoggedDate` es el `MAX(completed_date)` (no archivado) del hábito, ya
+ * incluyendo el log recién escrito. Fechas en formato `YYYY-MM-DD` (comparación
+ * lexicográfica = cronológica).
+ */
+export function isFrontierFollowUp(date: string, latestLoggedDate: string | null): boolean {
+  return latestLoggedDate === null || date >= latestLoggedDate;
+}
