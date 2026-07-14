@@ -6,15 +6,25 @@ type UserSettingsRow = {
   user_id: number;
   hide_hidden_habits: boolean;
   sleep_activity_category_id: string | null;
+  habit_reminder_enabled: boolean;
+  habit_reminder_time: string | Date | null;
   created_at: Date;
   updated_at: Date;
 };
+
+function formatTime(value: string | Date | null): string | null {
+  if (value == null) return null;
+  if (typeof value === 'string') return value.slice(0, 5);
+  return value.toTimeString().slice(0, 5);
+}
 
 function mapRow(row: UserSettingsRow): UserSettings {
   return {
     userId: row.user_id,
     hideHiddenHabits: row.hide_hidden_habits,
     sleepActivityCategoryId: row.sleep_activity_category_id,
+    habitReminderEnabled: row.habit_reminder_enabled,
+    habitReminderTime: formatTime(row.habit_reminder_time),
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -65,6 +75,18 @@ export const userSettingsService = {
       }
       updates.push(`sleep_activity_category_id = $${paramIndex}`);
       params.push(input.sleepActivityCategoryId);
+      paramIndex++;
+    }
+
+    if (input.habitReminderEnabled !== undefined) {
+      updates.push(`habit_reminder_enabled = $${paramIndex}`);
+      params.push(input.habitReminderEnabled);
+      paramIndex++;
+    }
+
+    if (input.habitReminderTime !== undefined) {
+      updates.push(`habit_reminder_time = $${paramIndex}`);
+      params.push(input.habitReminderTime);
       paramIndex++;
     }
 

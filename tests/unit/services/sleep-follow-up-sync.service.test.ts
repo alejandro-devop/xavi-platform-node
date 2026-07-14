@@ -63,6 +63,8 @@ describe('sleepFollowUpSyncService', () => {
       userId: USER_ID,
       hideHiddenHabits: true,
       sleepActivityCategoryId: null,
+      habitReminderEnabled: false,
+      habitReminderTime: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -77,6 +79,8 @@ describe('sleepFollowUpSyncService', () => {
       userId: USER_ID,
       hideHiddenHabits: true,
       sleepActivityCategoryId: CATEGORY_ID,
+      habitReminderEnabled: false,
+      habitReminderTime: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -122,6 +126,8 @@ describe('sleepFollowUpSyncService', () => {
       userId: USER_ID,
       hideHiddenHabits: true,
       sleepActivityCategoryId: CATEGORY_ID,
+      habitReminderEnabled: false,
+      habitReminderTime: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     });

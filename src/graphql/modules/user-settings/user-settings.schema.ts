@@ -5,6 +5,9 @@ export const userSettingsTypeDefs = gql`
     userId: Int!
     hideHiddenHabits: Boolean!
     sleepActivityCategoryId: ID
+    habitReminderEnabled: Boolean!
+    """Hora local del recordatorio diario de hábitos, formato HH:mm."""
+    habitReminderTime: String
     createdAt: DateTime!
     updatedAt: DateTime!
   }
@@ -20,5 +23,8 @@ export const userSettingsTypeDefs = gql`
   input UpdateUserSettingsInput {
     hideHiddenHabits: Boolean
     sleepActivityCategoryId: ID
+    habitReminderEnabled: Boolean
+    """Hora local HH:mm (o null para limpiar)."""
+    habitReminderTime: String
   }
 `;
