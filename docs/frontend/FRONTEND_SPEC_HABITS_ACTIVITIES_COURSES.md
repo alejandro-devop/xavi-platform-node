@@ -631,7 +631,7 @@ Resolver `Habit.activity` devuelve `Activity` completo si está vinculado.
 
 ### 6.6 Rachas y fallos
 
-- `habitFollowUpAdd` con `isFailed: true` → racha a 0, lógica de `endDate` y archivado (backend).
+- `habitFollowUpAdd` con `isFailed: true` → racha a 0 y lógica de `endDate`/`restartCount` (backend). El historial de días previos permanece visible.
 - `stats.streak` / `habit.streak` — preferir campos del hábito en UI de racha actual.
 - Consultar `habitStats` para dashboard.
 

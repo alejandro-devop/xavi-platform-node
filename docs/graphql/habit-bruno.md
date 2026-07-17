@@ -235,7 +235,7 @@ Misma convención que categorías (`habitMeasureAdd`, `habitMeasureEdit`, `habit
 ### `HabitFollowUpAdd`
 
 Al marcar `isAccomplished: true` (o cumplir meta), incrementa `habit.streak` y `maxStreak`.  
-Con `isFailed: true`, pone racha en 0, extiende `endDate` y archiva follow-ups anteriores.
+Con `isFailed: true`, pone racha en 0 y extiende `endDate` / `restartCount`. El historial previo **no** se archiva (sigue visible en semana/día).
 
 ```graphql
 mutation HabitFollowUpAdd($input: HabitFollowUpAddInput!) {
@@ -334,7 +334,7 @@ Si el hábito tiene `activityId`, resuelve el tipo GraphQL `Activity` (módulo a
 
 ### Racha recalculada (Fase 3)
 
-Tras cada follow-up **accomplished** o al **borrar** un follow-up, `streak` / `maxStreak` / `days` se recalculan desde los logs no archivados (no solo incremento manual). Con `isFailed: true` se mantiene reset a 0 y archivo de logs anteriores.
+Tras cada follow-up **accomplished**/**failed** o al **borrar** un follow-up, `streak` / `maxStreak` / `days` se recalculan desde los logs (no solo incremento manual). Con `isFailed: true` la racha vuelve a 0 usando el fallo como frontera de época; el historial no se oculta.
 
 ---
 

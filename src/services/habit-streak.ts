@@ -69,10 +69,11 @@ export function applyLifelineToEndDate(
  * ¿El follow-up que se registra es el más reciente del hábito (la "frontera"),
  * o se está rellenando un día pasado (back-fill)?
  *
- * Los efectos de "reinicio" al fallar/usar comodín (archivar historial, resetear
- * `end_date`, incrementar `restart_count`) solo tienen sentido en la frontera: un
- * fallo registrado en un día pasado NO debe reiniciar la racha actual ni archivar
- * los logros posteriores. La racha en sí se recalcula siempre desde los logs.
+ * Los efectos de "reinicio" al fallar/usar comodín (resetear `end_date`,
+ * incrementar `restart_count`) solo tienen sentido en la frontera: un fallo
+ * registrado en un día pasado NO debe reiniciar la racha actual ni tocar el
+ * periodo. La racha en sí se recalcula siempre desde los logs (`is_failed`
+ * como frontera de época); el historial no se archiva.
  *
  * `latestLoggedDate` es el `MAX(completed_date)` (no archivado) del hábito, ya
  * incluyendo el log recién escrito. Fechas en formato `YYYY-MM-DD` (comparación

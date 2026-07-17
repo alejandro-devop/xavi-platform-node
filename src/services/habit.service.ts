@@ -331,19 +331,17 @@ async function applyStreakAfterFollowUp(
   );
   const isFrontier = isFrontierFollowUp(date, frontierResult.rows[0].latest);
 
-  // Efectos de "reinicio" (archivar historial previo / resetear end_date / restart_count):
+  // Efectos de "reinicio" (resetear end_date / incrementar restart_count):
   // solo en la frontera. Un fallo o comodín retroactivo no reinicia nada.
+  // El historial (habit_logs) NO se archiva: la racha ya se corta por is_failed
+  // en syncHabitStreakFromLogs, y la UI de semana/día debe seguir viendo fallos
+  // y logros previos.
   if (isFrontier) {
     if (isLifeline) {
       const { end_date } = applyLifelineToEndDate(habit);
       await db.query(`UPDATE habits SET end_date = $1 WHERE id = $2`, [end_date, habit.id]);
     } else if (isFailed) {
       const failed = applyFailedStreak(habit, date);
-      await db.query(
-        `UPDATE habit_logs SET archived = TRUE
-         WHERE habit_id = $1 AND completed_date < $2::date AND archived = FALSE`,
-        [habit.id, date]
-      );
       await db.query(
         `UPDATE habits SET end_date = $1, restart_count = $2 WHERE id = $3`,
         [failed.end_date, failed.restart_count, habit.id]
