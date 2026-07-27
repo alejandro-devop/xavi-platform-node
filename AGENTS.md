@@ -73,6 +73,13 @@
 - Documentación: `docs/graphql/learning-bruno.md`.
 - **Colección Bruno:** `bruno/xavi-learning-graphql/`.
 
+## Learning Notes (knowledge base)
+
+- Esquema SDL y resolvers: `src/graphql/modules/learning-note/`.
+- Servicio: `src/services/learning-note.service.ts`.
+- Migración FTS: `migrations/056_create_learning_notes.sql`.
+- Documentación: `docs/graphql/learning-note-bruno.md`.
+
 ## Courses
 
 - Esquema SDL y resolvers: `src/graphql/modules/course/`.

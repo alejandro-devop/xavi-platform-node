@@ -21,6 +21,7 @@ import { weeklyRoutineTypeDefs } from './modules/weekly-routine/weekly-routine.s
 import { todoTypeDefs } from './modules/todo/todo.schema';
 import { sleepTypeDefs } from './modules/sleep/sleep.schema';
 import { learningTypeDefs } from './modules/learning/learning.schema';
+import { learningNoteTypeDefs } from './modules/learning-note/learning-note.schema';
 import { courseTypeDefs } from './modules/course/course.schema';
 import { sweeterWayTypeDefs } from './modules/sweeter-way/sweeter-way.schema';
 import { noteTypeDefs } from './modules/note/note.schema';
@@ -65,6 +66,7 @@ export const typeDefs = [
   todoTypeDefs,
   sleepTypeDefs,
   learningTypeDefs,
+  learningNoteTypeDefs,
   courseTypeDefs,
   sweeterWayTypeDefs,
   noteTypeDefs,
