@@ -318,6 +318,8 @@ export const habitTypeDefs = gql`
     isFailed: Boolean
     isLifeline: Boolean
     difficulty: Int
+    """UUID v7 del cliente para idempotencia offline."""
+    clientId: ID
   }
 
   input HabitFollowUpEditInput {
@@ -333,6 +335,8 @@ export const habitTypeDefs = gql`
   }
 
   input HabitCategoryInput {
+    """UUID v7 opcional generado en cliente."""
+    id: ID
     name: String!
     description: String
     icon: String
@@ -350,6 +354,8 @@ export const habitTypeDefs = gql`
   }
 
   input HabitMeasureInput {
+    """UUID v7 opcional generado en cliente."""
+    id: ID
     name: String!
     abbreviation: String
     type: String

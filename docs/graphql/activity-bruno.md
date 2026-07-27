@@ -220,6 +220,8 @@ La hora de fin **no se persiste** en registros cerrados; el API devuelve `endTim
 ### `ActivityFollowUpStart` (iniciar cronómetro)
 
 Crea un follow-up abierto (`durationMinutes: null`). Falla si ya hay otro abierto para el usuario.
+`subtaskIds` (opcional) copia subtareas de la actividad a la sesión (`sessionSubtasks`); el progreso
+es de la ejecución, no de la plantilla.
 
 ```graphql
 mutation ActivityFollowUpStart($input: ActivityFollowUpStartInput!) {
@@ -230,6 +232,8 @@ mutation ActivityFollowUpStart($input: ActivityFollowUpStartInput!) {
     isOpen
     linkedTodoId
     activity { id title }
+    sessionSubtasks { id title isCompleted orderIndex }
+    sessionSubtasksCount { total completed }
   }
 }
 ```
@@ -241,7 +245,32 @@ mutation ActivityFollowUpStart($input: ActivityFollowUpStartInput!) {
     "date": "2026-05-20",
     "startTime": "09:30",
     "notes": "En curso",
-    "linkedTodoId": "42"
+    "linkedTodoId": "42",
+    "subtaskIds": ["10", "11"]
+  }
+}
+```
+
+### `ActivityFollowUpSubtaskEdit` (progreso de sesión)
+
+Marca/desmarca una subtarea de la ejecución abierta.
+
+```graphql
+mutation ActivityFollowUpSubtaskEdit($input: ActivityFollowUpSubtaskEditInput!) {
+  activityFollowUpSubtaskEdit(input: $input) {
+    id
+    title
+    isCompleted
+  }
+}
+```
+
+```json
+{
+  "input": {
+    "followUpId": "3",
+    "sessionSubtaskId": "5",
+    "isCompleted": true
   }
 }
 ```

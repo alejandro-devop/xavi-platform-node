@@ -11,6 +11,7 @@ export interface HabitCategory {
 }
 
 export interface CreateHabitCategoryInput {
+  id?: string | null;
   name: string;
   description?: string | null;
   icon?: string | null;

@@ -3,6 +3,7 @@ import { activityFollowUpService } from '../../../services/activity-follow-up.se
 import { activityService } from '../../../services/activity.service';
 import { activityTodoFoldersService } from '../../../services/activity-todo-folders.service';
 import { todoService } from '../../../services/todo.service';
+import { workoutService } from '../../../services/workout.service';
 import type { Activity } from '../../../types/services/activity.types';
 import {
   activityAddInputSchema,
@@ -15,11 +16,16 @@ import {
   activityFollowUpStartInputSchema,
   activityFollowUpEditInputSchema,
   activityFollowUpIdArgSchema,
+  activityFollowUpSubtaskEditInputSchema,
+  activityFollowUpSubtaskAddInputSchema,
   activityFollowUpsArgsSchema,
   activityFollowUpsFieldArgsSchema,
   activityFollowUpsInDatesArgsSchema,
   activityIdArgSchema,
   activityPendingTodosArgsSchema,
+  activitySubtaskAddInputSchema,
+  activitySubtaskEditInputSchema,
+  activitySubtaskRemoveInputSchema,
   activitiesListArgsSchema,
 } from '../../../validators/schemas/activity.schemas';
 import { requireAuth } from '../../utils/error-handler';
@@ -72,6 +78,32 @@ export const activityResolvers = {
         uid(context)
       );
     },
+
+    subtasks: async (
+      parent: Activity,
+      _args: unknown,
+      context: { user?: { id: string | number } | null }
+    ) => {
+      requireAuth(context, 'Activity.subtasks');
+      if (parent.subtasks) return parent.subtasks;
+      return await activityService.listSubtasksForActivity(
+        activityService.parseActivityId(parent.id)
+      );
+    },
+
+    subtasksCount: async (parent: Activity) => {
+      if (parent.subtasksCount) return parent.subtasksCount;
+      if (parent.subtasks) {
+        return {
+          total: parent.subtasks.length,
+          completed: parent.subtasks.filter((s) => s.isCompleted).length,
+        };
+      }
+      const counts = await activityService.loadSubtasksCounts([
+        activityService.parseActivityId(parent.id),
+      ]);
+      return counts.get(activityService.parseActivityId(parent.id)) ?? { total: 0, completed: 0 };
+    },
   },
 
   ActivityFollowUp: {
@@ -92,6 +124,38 @@ export const activityResolvers = {
       if (!parent.linkedTodoId) return null;
       requireAuth(context, 'ActivityFollowUp.linkedTodo');
       return await todoService.getTodoById(parent.linkedTodoId, uid(context));
+    },
+
+    sessionSubtasks: async (
+      parent: { id: string; sessionSubtasks?: unknown },
+      _args: unknown,
+      context: { user?: { id: string | number } | null }
+    ) => {
+      requireAuth(context, 'ActivityFollowUp.sessionSubtasks');
+      if (parent.sessionSubtasks) return parent.sessionSubtasks;
+      return await activityFollowUpService.listSessionSubtasks(
+        activityFollowUpService.parseFollowUpId(parent.id)
+      );
+    },
+
+    sessionSubtasksCount: async (
+      parent: { id: string; sessionSubtasks?: { isCompleted: boolean }[]; sessionSubtasksCount?: unknown },
+      _args: unknown,
+      context: { user?: { id: string | number } | null }
+    ) => {
+      requireAuth(context, 'ActivityFollowUp.sessionSubtasksCount');
+      if (parent.sessionSubtasksCount) return parent.sessionSubtasksCount;
+      if (parent.sessionSubtasks) {
+        return activityFollowUpService.countSessionSubtasks(
+          parent.sessionSubtasks as Parameters<
+            typeof activityFollowUpService.countSessionSubtasks
+          >[0]
+        );
+      }
+      const subtasks = await activityFollowUpService.listSessionSubtasks(
+        activityFollowUpService.parseFollowUpId(parent.id)
+      );
+      return activityFollowUpService.countSessionSubtasks(subtasks);
     },
   },
 
@@ -196,7 +260,17 @@ export const activityResolvers = {
       activityAddInputSchema,
       async (_parent, { input }, context) => {
         requireAuth(context, 'activityAdd');
-        return await activityService.createActivity(uid(context), input);
+        const userId = uid(context);
+        const { workoutExerciseIds, ...activityInput } = input;
+        const activity = await activityService.createActivity(userId, activityInput);
+        if (workoutExerciseIds !== undefined) {
+          await workoutService.setActivityWorkoutExercises(
+            userId,
+            activity.id,
+            workoutExerciseIds
+          );
+        }
+        return activity;
       },
       'activityAdd'
     ),
@@ -205,8 +279,15 @@ export const activityResolvers = {
       activityEditInputSchema,
       async (_parent, { input }, context) => {
         requireAuth(context, 'activityEdit');
-        const { id, ...fields } = input;
-        return await activityService.updateActivity(id, uid(context), fields);
+        const userId = uid(context);
+        const { id, workoutExerciseIds, ...fields } = input;
+        const activity = await activityService.updateActivity(id, userId, fields);
+        if (workoutExerciseIds !== undefined) {
+          await workoutService.setActivityWorkoutExercises(userId, id, workoutExerciseIds);
+        } else if (fields.isWorkout === false) {
+          await workoutService.setActivityWorkoutExercises(userId, id, []);
+        }
+        return activity;
       },
       'activityEdit'
     ),
@@ -279,8 +360,14 @@ export const activityResolvers = {
       activityFollowUpEditInputSchema,
       async (_parent, { input }, context) => {
         requireAuth(context, 'activityFollowUpEdit');
+        const userId = uid(context);
         const { id, ...fields } = input;
-        return await activityFollowUpService.updateFollowUp(id, uid(context), fields);
+        const before = await activityFollowUpService.getFollowUpById(id, userId);
+        const updated = await activityFollowUpService.updateFollowUp(id, userId, fields);
+        if (before.isOpen && !updated.isOpen) {
+          await workoutService.tryAwardXpForClosedFollowUp(userId, updated.id, updated.date);
+        }
+        return updated;
       },
       'activityFollowUpEdit'
     ),
@@ -292,6 +379,59 @@ export const activityResolvers = {
         return await activityFollowUpService.deleteFollowUp(id, uid(context));
       },
       'activityFollowUpRemove'
+    ),
+
+    activityFollowUpSubtaskEdit: withValidatedResolver(
+      activityFollowUpSubtaskEditInputSchema,
+      async (_parent, { input }, context) => {
+        requireAuth(context, 'activityFollowUpSubtaskEdit');
+        const { followUpId, sessionSubtaskId, isCompleted } = input;
+        return await activityFollowUpService.updateSessionSubtask(
+          followUpId,
+          sessionSubtaskId,
+          uid(context),
+          { isCompleted }
+        );
+      },
+      'activityFollowUpSubtaskEdit'
+    ),
+
+    activityFollowUpSubtaskAdd: withValidatedResolver(
+      activityFollowUpSubtaskAddInputSchema,
+      async (_parent, { input }, context) => {
+        requireAuth(context, 'activityFollowUpSubtaskAdd');
+        return await activityFollowUpService.addSessionSubtask(uid(context), input);
+      },
+      'activityFollowUpSubtaskAdd'
+    ),
+
+    activitySubtaskAdd: withValidatedResolver(
+      activitySubtaskAddInputSchema,
+      async (_parent, { input }, context) => {
+        requireAuth(context, 'activitySubtaskAdd');
+        return await activityService.createSubtask(uid(context), input);
+      },
+      'activitySubtaskAdd'
+    ),
+
+    activitySubtaskEdit: withValidatedResolver(
+      activitySubtaskEditInputSchema,
+      async (_parent, { input }, context) => {
+        requireAuth(context, 'activitySubtaskEdit');
+        const { activityId, subtaskId, ...fields } = input;
+        return await activityService.updateSubtask(activityId, subtaskId, uid(context), fields);
+      },
+      'activitySubtaskEdit'
+    ),
+
+    activitySubtaskRemove: withValidatedResolver(
+      activitySubtaskRemoveInputSchema,
+      async (_parent, { input }, context) => {
+        requireAuth(context, 'activitySubtaskRemove');
+        const { activityId, subtaskId } = input;
+        return await activityService.deleteSubtask(activityId, subtaskId, uid(context));
+      },
+      'activitySubtaskRemove'
     ),
   },
 };

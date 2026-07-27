@@ -356,7 +356,8 @@ export const habitResolvers = {
       habitFollowUpAddInputSchema,
       async (_parent, { input }, context) => {
         requireAuth(context, 'habitFollowUpAdd');
-        const { habitId, date, count, time, notes, story, isAccomplished, isFailed, isLifeline, difficulty } = input;
+        const { habitId, date, count, time, notes, story, isAccomplished, isFailed, isLifeline, difficulty, clientId } =
+          input;
         const log = await habitService.addHabitLog(habitId, uid(context), {
           completedDate: date,
           count,
@@ -367,6 +368,7 @@ export const habitResolvers = {
           isFailed,
           isLifeline,
           difficulty,
+          clientId,
         });
         return toFollowUp(log);
       },

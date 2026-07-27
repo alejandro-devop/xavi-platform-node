@@ -108,6 +108,8 @@ export interface HabitFollowUpsDateGroup {
 /** Activity linked to a habit — use GraphQL `Activity` type via `Habit.activity`. */
 
 export interface CreateHabitInput {
+  /** UUID v7 opcional generado en cliente (solo tablas con PK UUID). */
+  id?: string | null;
   name: string;
   description?: string | null;
   frequency?: HabitFrequency;
@@ -184,6 +186,8 @@ export interface AddHabitLogInput {
   isFailed?: boolean;
   isLifeline?: boolean;
   difficulty?: number | null;
+  /** UUID v7 del cliente para idempotencia offline. */
+  clientId?: string | null;
 }
 
 export interface UpdateHabitFollowUpInput {

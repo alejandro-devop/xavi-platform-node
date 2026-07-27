@@ -1,5 +1,6 @@
 import { getDbPool } from '../shared/database/pool';
 import { BadRequestError, ForbiddenError, NotFoundError } from '../shared/errors';
+import { generateUuidV7, isUuidV7 } from '../shared/database/uuid';
 import type {
   CreateHabitCategoryInput,
   HabitCategory,
@@ -70,11 +71,25 @@ async function createCategory(
   input: CreateHabitCategoryInput
 ): Promise<HabitCategory> {
   const db = getDbPool();
+  const id = input.id ?? generateUuidV7();
+  if (input.id != null && !isUuidV7(input.id)) {
+    throw new BadRequestError('id must be a UUID v7');
+  }
+  if (input.id != null) {
+    const existing = await db.query<CategoryRow>(
+      'SELECT * FROM habit_categories WHERE id = $1 AND user_id = $2',
+      [input.id, userId]
+    );
+    if (existing.rows.length > 0) {
+      return mapCategory(existing.rows[0]);
+    }
+  }
   const result = await db.query<CategoryRow>(
-    `INSERT INTO habit_categories (user_id, name, description, icon, color, order_index)
-     VALUES ($1, $2, $3, $4, $5, $6)
+    `INSERT INTO habit_categories (id, user_id, name, description, icon, color, order_index)
+     VALUES ($1, $2, $3, $4, $5, $6, $7)
      RETURNING *`,
     [
+      id,
       userId,
       input.name,
       input.description ?? null,

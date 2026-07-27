@@ -7,6 +7,13 @@ const followUpIdString = z.string().regex(/^\d+$/, 'Invalid follow-up ID');
 const todoIdString = z.string().regex(/^\d+$/, 'Invalid todo ID');
 const uuidString = z.string().uuid('Invalid UUID');
 const dateString = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format (use YYYY-MM-DD)');
+const workoutExerciseIdsArray = z
+  .array(uuidString)
+  .max(50)
+  .refine((ids) => new Set(ids).size === ids.length, {
+    message: 'workoutExerciseIds must not contain duplicates',
+  })
+  .optional();
 const timeString = z
   .string()
   .regex(/^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/, 'Invalid time format (use HH:mm or HH:mm:ss)');
@@ -46,6 +53,8 @@ export const activityAddInputSchema = z.object({
   categoryId: uuidString.nullable().optional(),
   scheduledDate: z.coerce.date().nullable().optional(),
   todoFolderIds: todoFolderIdsArray,
+  isWorkout: z.boolean().optional(),
+  workoutExerciseIds: workoutExerciseIdsArray,
 });
 
 export const activityEditInputSchema = z
@@ -58,6 +67,8 @@ export const activityEditInputSchema = z
     categoryId: uuidString.nullable().optional(),
     scheduledDate: z.coerce.date().nullable().optional(),
     todoFolderIds: todoFolderIdsArray,
+    isWorkout: z.boolean().optional(),
+    workoutExerciseIds: workoutExerciseIdsArray,
   })
   .refine(
     (d) =>
@@ -67,7 +78,9 @@ export const activityEditInputSchema = z
       d.priority !== undefined ||
       d.categoryId !== undefined ||
       d.scheduledDate !== undefined ||
-      d.todoFolderIds !== undefined,
+      d.todoFolderIds !== undefined ||
+      d.isWorkout !== undefined ||
+      d.workoutExerciseIds !== undefined,
     { message: 'At least one field is required to update' }
   );
 
@@ -80,6 +93,32 @@ export const activityPendingTodosArgsSchema = z
     activityId: d.activityId,
     limit: d.limit ?? 50,
   }));
+
+const subtaskIdString = z.string().regex(/^\d+$/, 'Invalid subtask ID');
+
+export const activitySubtaskAddInputSchema = z.object({
+  activityId: activityIdString,
+  title: z.string().min(1).max(255),
+  orderIndex: z.number().int().min(0).optional(),
+});
+
+export const activitySubtaskEditInputSchema = z
+  .object({
+    activityId: activityIdString,
+    subtaskId: subtaskIdString,
+    title: z.string().min(1).max(255).optional(),
+    isCompleted: z.boolean().optional(),
+    orderIndex: z.number().int().min(0).optional(),
+  })
+  .refine(
+    (d) => d.title !== undefined || d.isCompleted !== undefined || d.orderIndex !== undefined,
+    { message: 'At least one field is required to update' }
+  );
+
+export const activitySubtaskRemoveInputSchema = z.object({
+  activityId: activityIdString,
+  subtaskId: subtaskIdString,
+});
 
 export const activityCategoryIdArgSchema = z.object({
   id: uuidString,
@@ -155,8 +194,19 @@ export const activityFollowUpAddInputSchema = z.object({
   activityId: activityIdString,
   date: dateString,
   startTime: timeString,
-  durationMinutes: z.number().int().positive().max(24 * 60),
+  durationMinutes: z
+    .number()
+    .int()
+    .positive()
+    .max(24 * 60),
   notes: z.string().nullable().optional(),
+  clientId: z
+    .string()
+    .regex(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+      'clientId must be a UUID v7'
+    )
+    .optional(),
 });
 
 export const activityFollowUpStartInputSchema = z.object({
@@ -165,6 +215,25 @@ export const activityFollowUpStartInputSchema = z.object({
   startTime: timeString,
   notes: z.string().nullable().optional(),
   linkedTodoId: todoIdString.nullable().optional(),
+  clientId: z
+    .string()
+    .regex(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+      'clientId must be a UUID v7'
+    )
+    .optional(),
+  subtaskIds: z.array(subtaskIdString).max(100).optional(),
+});
+
+export const activityFollowUpSubtaskEditInputSchema = z.object({
+  followUpId: followUpIdString,
+  sessionSubtaskId: subtaskIdString,
+  isCompleted: z.boolean(),
+});
+
+export const activityFollowUpSubtaskAddInputSchema = z.object({
+  followUpId: followUpIdString,
+  title: z.string().trim().min(1).max(255),
 });
 
 export const activityFollowUpEditInputSchema = z
@@ -172,7 +241,12 @@ export const activityFollowUpEditInputSchema = z
     id: followUpIdString,
     date: dateString.optional(),
     startTime: timeString.optional(),
-    durationMinutes: z.number().int().positive().max(24 * 60).optional(),
+    durationMinutes: z
+      .number()
+      .int()
+      .positive()
+      .max(24 * 60)
+      .optional(),
     notes: z.string().nullable().optional(),
   })
   .refine(

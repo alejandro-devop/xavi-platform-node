@@ -1,4 +1,6 @@
 import { activityCategoryService } from './activity-category.service';
+import { activityService } from './activity.service';
+import { todoFolderService } from './todo-folder.service';
 import { getDbPool } from '../shared/database/pool';
 import type { UpdateUserSettingsInput, UserSettings } from '../types/services/user-settings.types';
 
@@ -8,6 +10,10 @@ type UserSettingsRow = {
   sleep_activity_category_id: string | null;
   habit_reminder_enabled: boolean;
   habit_reminder_time: string | Date | null;
+  day_start_reminder_enabled: boolean;
+  day_start_reminder_time: string | Date | null;
+  standup_todo_folder_id: number | null;
+  housework_activity_id: number | null;
   created_at: Date;
   updated_at: Date;
 };
@@ -25,6 +31,12 @@ function mapRow(row: UserSettingsRow): UserSettings {
     sleepActivityCategoryId: row.sleep_activity_category_id,
     habitReminderEnabled: row.habit_reminder_enabled,
     habitReminderTime: formatTime(row.habit_reminder_time),
+    dayStartReminderEnabled: row.day_start_reminder_enabled,
+    dayStartReminderTime: formatTime(row.day_start_reminder_time),
+    standupTodoFolderId:
+      row.standup_todo_folder_id != null ? String(row.standup_todo_folder_id) : null,
+    houseworkActivityId:
+      row.housework_activity_id != null ? String(row.housework_activity_id) : null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -87,6 +99,40 @@ export const userSettingsService = {
     if (input.habitReminderTime !== undefined) {
       updates.push(`habit_reminder_time = $${paramIndex}`);
       params.push(input.habitReminderTime);
+      paramIndex++;
+    }
+
+    if (input.dayStartReminderEnabled !== undefined) {
+      updates.push(`day_start_reminder_enabled = $${paramIndex}`);
+      params.push(input.dayStartReminderEnabled);
+      paramIndex++;
+    }
+
+    if (input.dayStartReminderTime !== undefined) {
+      updates.push(`day_start_reminder_time = $${paramIndex}`);
+      params.push(input.dayStartReminderTime);
+      paramIndex++;
+    }
+
+    if (input.standupTodoFolderId !== undefined) {
+      if (input.standupTodoFolderId !== null) {
+        await todoFolderService.getFolderById(input.standupTodoFolderId, userId);
+      }
+      updates.push(`standup_todo_folder_id = $${paramIndex}`);
+      params.push(
+        input.standupTodoFolderId === null ? null : parseInt(input.standupTodoFolderId, 10)
+      );
+      paramIndex++;
+    }
+
+    if (input.houseworkActivityId !== undefined) {
+      if (input.houseworkActivityId !== null) {
+        await activityService.getActivityById(input.houseworkActivityId, userId);
+      }
+      updates.push(`housework_activity_id = $${paramIndex}`);
+      params.push(
+        input.houseworkActivityId === null ? null : parseInt(input.houseworkActivityId, 10)
+      );
       paramIndex++;
     }
 

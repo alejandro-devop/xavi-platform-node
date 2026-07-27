@@ -27,6 +27,17 @@ export const activityTypeDefs = gql`
     updatedAt: DateTime!
   }
 
+  type ActivityFollowUpSubtask {
+    id: ID!
+    followUpId: ID!
+    activitySubtaskId: ID
+    title: String!
+    isCompleted: Boolean!
+    orderIndex: Int!
+    createdAt: DateTime!
+    updatedAt: DateTime!
+  }
+
   type ActivityFollowUp {
     id: ID!
     activityId: ID!
@@ -44,11 +55,29 @@ export const activityTypeDefs = gql`
     updatedAt: DateTime!
     activity: Activity
     linkedTodo: Todo
+    """Subtareas seleccionadas para esta ejecución (progreso de sesión)."""
+    sessionSubtasks: [ActivityFollowUpSubtask!]!
+    sessionSubtasksCount: ActivitySubtasksCount!
   }
 
   type ActivityFollowUpsDateGroup {
     date: String!
     followUps: [ActivityFollowUp!]!
+  }
+
+  type ActivitySubtask {
+    id: ID!
+    activityId: ID!
+    title: String!
+    isCompleted: Boolean!
+    orderIndex: Int!
+    createdAt: DateTime!
+    updatedAt: DateTime!
+  }
+
+  type ActivitySubtasksCount {
+    total: Int!
+    completed: Int!
   }
 
   type Activity {
@@ -67,6 +96,8 @@ export const activityTypeDefs = gql`
     category: ActivityCategory
     todoFolders: [TodoFolder!]!
     followUps(limit: Int, from: String, to: String): [ActivityFollowUp!]!
+    subtasks: [ActivitySubtask!]!
+    subtasksCount: ActivitySubtasksCount!
   }
 
   type ActivityCollection {
@@ -109,6 +140,42 @@ export const activityTypeDefs = gql`
     activityFollowUpStart(input: ActivityFollowUpStartInput!): ActivityFollowUp!
     activityFollowUpEdit(input: ActivityFollowUpEditInput!): ActivityFollowUp!
     activityFollowUpRemove(id: ID!): Boolean!
+    activityFollowUpSubtaskEdit(input: ActivityFollowUpSubtaskEditInput!): ActivityFollowUpSubtask!
+    """Añade una subtarea a un follow-up abierto (persiste en la Activity y en la sesión)."""
+    activityFollowUpSubtaskAdd(input: ActivityFollowUpSubtaskAddInput!): ActivityFollowUpSubtask!
+    activitySubtaskAdd(input: ActivitySubtaskInput!): ActivitySubtask!
+    activitySubtaskEdit(input: ActivitySubtaskEditInput!): ActivitySubtask!
+    activitySubtaskRemove(input: ActivitySubtaskRemoveInput!): Boolean!
+  }
+
+  input ActivityFollowUpSubtaskEditInput {
+    followUpId: ID!
+    sessionSubtaskId: ID!
+    isCompleted: Boolean!
+  }
+
+  input ActivityFollowUpSubtaskAddInput {
+    followUpId: ID!
+    title: String!
+  }
+
+  input ActivitySubtaskInput {
+    activityId: ID!
+    title: String!
+    orderIndex: Int
+  }
+
+  input ActivitySubtaskEditInput {
+    activityId: ID!
+    subtaskId: ID!
+    title: String
+    isCompleted: Boolean
+    orderIndex: Int
+  }
+
+  input ActivitySubtaskRemoveInput {
+    activityId: ID!
+    subtaskId: ID!
   }
 
   input ActivityInput {
@@ -119,6 +186,10 @@ export const activityTypeDefs = gql`
     categoryId: ID
     scheduledDate: DateTime
     todoFolderIds: [ID!]
+    """Marca la actividad como plantilla de entrenamiento."""
+    isWorkout: Boolean
+    """IDs de ejercicios del catálogo (plantilla sugerida al iniciar)."""
+    workoutExerciseIds: [ID!]
   }
 
   input ActivityEditInput {
@@ -130,6 +201,8 @@ export const activityTypeDefs = gql`
     categoryId: ID
     scheduledDate: DateTime
     todoFolderIds: [ID!]
+    isWorkout: Boolean
+    workoutExerciseIds: [ID!]
   }
 
   input ActivityCategoryInput {
@@ -155,6 +228,8 @@ export const activityTypeDefs = gql`
     startTime: String!
     durationMinutes: Int!
     notes: String
+    """UUID v7 del cliente para idempotencia offline."""
+    clientId: ID
   }
 
   input ActivityFollowUpStartInput {
@@ -163,6 +238,10 @@ export const activityTypeDefs = gql`
     startTime: String!
     notes: String
     linkedTodoId: ID
+    """UUID v7 del cliente para idempotencia offline."""
+    clientId: ID
+    """IDs de subtareas de la actividad a incluir en esta ejecución."""
+    subtaskIds: [ID!]
   }
 
   input ActivityFollowUpEditInput {

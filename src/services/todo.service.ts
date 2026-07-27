@@ -1,6 +1,7 @@
 import { todoFolderService } from './todo-folder.service';
 import { todoTagService } from './todo-tag.service';
 import { getDbPool } from '../shared/database/pool';
+import { isUuidV7 } from '../shared/database/uuid';
 import { BadRequestError, ForbiddenError, NotFoundError } from '../shared/errors';
 import type {
   CreateTodoInput,
@@ -163,10 +164,7 @@ async function listSubtasksForTodo(todoId: number): Promise<TodoSubtask[]> {
 }
 
 async function createTodo(userId: number, input: CreateTodoInput): Promise<Todo> {
-  const resolvedFolderId = await todoFolderService.resolveFolderIdForTodo(
-    userId,
-    input.folderId
-  );
+  const resolvedFolderId = await todoFolderService.resolveFolderIdForTodo(userId, input.folderId);
   const folderKey: FolderIdKey = resolvedFolderId ?? null;
 
   let orderIndex = input.orderIndex;
@@ -174,10 +172,25 @@ async function createTodo(userId: number, input: CreateTodoInput): Promise<Todo>
     orderIndex = await getNextOrderIndexInFolder(userId, folderKey);
   }
 
+  const clientId = input.clientId && isUuidV7(input.clientId) ? input.clientId : null;
+
   const db = getDbPool();
+
+  // Idempotencia offline: si el clientId ya existe, devolver el todo original sin duplicar.
+  if (clientId) {
+    const existing = await db.query<TodoRow>(
+      `SELECT ${TODO_RETURNING} FROM todos WHERE client_id = $1 AND user_id = $2`,
+      [clientId, userId]
+    );
+    if (existing.rows.length > 0) {
+      const tags = await todoTagService.listTagsForTodo(existing.rows[0].id);
+      return mapTodo(existing.rows[0], { tags });
+    }
+  }
+
   const result = await db.query<TodoRow>(
-    `INSERT INTO todos (user_id, folder_id, order_index, title, description, status, priority, due_date, selected_today)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+    `INSERT INTO todos (user_id, folder_id, order_index, title, description, status, priority, due_date, selected_today, client_id)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
      RETURNING ${TODO_RETURNING}`,
     [
       userId,
@@ -189,6 +202,7 @@ async function createTodo(userId: number, input: CreateTodoInput): Promise<Todo>
       input.priority ?? 'medium',
       input.dueDate ?? null,
       input.selectedToday ?? false,
+      clientId,
     ]
   );
   const row = result.rows[0];

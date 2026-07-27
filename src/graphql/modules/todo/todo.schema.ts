@@ -125,6 +125,10 @@ export const todoTypeDefs = gql`
     tagIds: [ID!]
     folderId: ID
     orderIndex: Int
+    """
+    UUID v7 del cliente para idempotencia offline.
+    """
+    clientId: ID
   }
 
   input TodoReorderInput {

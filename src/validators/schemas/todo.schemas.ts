@@ -11,11 +11,7 @@ const todoPriority = z.enum(['low', 'medium', 'high', 'urgent']);
 /** Markdown descriptions — aligns with PostgreSQL TEXT practical limit for API payloads */
 export const TODO_DESCRIPTION_MAX_LENGTH = 32_768;
 
-const todoDescriptionSchema = z
-  .string()
-  .max(TODO_DESCRIPTION_MAX_LENGTH)
-  .nullable()
-  .optional();
+const todoDescriptionSchema = z.string().max(TODO_DESCRIPTION_MAX_LENGTH).nullable().optional();
 
 export const todoIdArgSchema = z.object({
   id: todoIdString,
@@ -61,6 +57,13 @@ export const todoAddInputSchema = z.object({
   tagIds: tagIdsArraySchema,
   folderId: optionalFolderIdSchema,
   orderIndex: z.number().int().min(0).optional(),
+  clientId: z
+    .string()
+    .regex(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+      'clientId must be a UUID v7'
+    )
+    .optional(),
 });
 
 export const todoReorderInputSchema = z.object({
@@ -110,8 +113,7 @@ export const todoSubtaskEditInputSchema = z
     orderIndex: z.number().int().min(0).optional(),
   })
   .refine(
-    (d) =>
-      d.title !== undefined || d.isCompleted !== undefined || d.orderIndex !== undefined,
+    (d) => d.title !== undefined || d.isCompleted !== undefined || d.orderIndex !== undefined,
     { message: 'At least one field is required to update' }
   );
 

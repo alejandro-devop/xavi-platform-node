@@ -126,4 +126,171 @@ describe('ActivityFollowUpService', () => {
     expect(followUp.isOpen).toBe(true);
     expect(mockDbPool.query).toHaveBeenCalledTimes(2);
   });
+
+  it('startFollowUp attaches selected subtasks', async () => {
+    mockDbPool.query
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [createFollowUpRow({ duration_minutes: null })] })
+      .mockResolvedValueOnce({
+        rows: [
+          { id: 10, title: 'Barrer', order_index: 0 },
+          { id: 11, title: 'Trapear', order_index: 1 },
+        ],
+      })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [] });
+
+    const followUp = await activityFollowUpService.startFollowUp(USER_ID, {
+      activityId: String(ACTIVITY_ID),
+      date: '2024-06-01',
+      startTime: '09:00:00',
+      subtaskIds: ['10', '11'],
+    });
+
+    expect(followUp.isOpen).toBe(true);
+    expect(mockDbPool.query).toHaveBeenCalledTimes(5);
+  });
+
+  it('startFollowUp rejects subtasks from another activity', async () => {
+    mockDbPool.query
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [createFollowUpRow({ duration_minutes: null })] })
+      .mockResolvedValueOnce({
+        rows: [{ id: 10, title: 'Barrer', order_index: 0 }],
+      });
+
+    await expect(
+      activityFollowUpService.startFollowUp(USER_ID, {
+        activityId: String(ACTIVITY_ID),
+        date: '2024-06-01',
+        startTime: '09:00:00',
+        subtaskIds: ['10', '99'],
+      })
+    ).rejects.toThrow(BadRequestError);
+  });
+
+  it('updateSessionSubtask toggles completion', async () => {
+    const now = new Date('2024-06-01T12:00:00Z');
+    mockDbPool.query
+      .mockResolvedValueOnce({ rows: [createFollowUpRow({ duration_minutes: null })] })
+      .mockResolvedValueOnce({
+        rows: [
+          {
+            id: 5,
+            follow_up_id: FOLLOW_UP_ID,
+            activity_subtask_id: 10,
+            title: 'Barrer',
+            is_completed: true,
+            order_index: 0,
+            created_at: now,
+            updated_at: now,
+          },
+        ],
+      });
+
+    const subtask = await activityFollowUpService.updateSessionSubtask(
+      String(FOLLOW_UP_ID),
+      '5',
+      USER_ID,
+      { isCompleted: true }
+    );
+
+    expect(subtask.isCompleted).toBe(true);
+    expect(subtask.title).toBe('Barrer');
+  });
+
+  it('addSessionSubtask creates template + session row on open follow-up', async () => {
+    const now = new Date('2024-06-01T12:00:00Z');
+    mockDbPool.query
+      .mockResolvedValueOnce({ rows: [createFollowUpRow({ duration_minutes: null })] }) // owned
+      .mockResolvedValueOnce({ rows: [] }) // session dup
+      .mockResolvedValueOnce({ rows: [] }) // template existing
+      .mockResolvedValueOnce({ rows: [{ max: '2' }] }) // max template order
+      .mockResolvedValueOnce({ rows: [{ id: 44, title: 'Limpiar cocina' }] }) // insert template
+      .mockResolvedValueOnce({ rows: [{ max: '1' }] }) // max session order
+      .mockResolvedValueOnce({
+        rows: [
+          {
+            id: 90,
+            follow_up_id: FOLLOW_UP_ID,
+            activity_subtask_id: 44,
+            title: 'Limpiar cocina',
+            is_completed: false,
+            order_index: 2,
+            created_at: now,
+            updated_at: now,
+          },
+        ],
+      });
+
+    const subtask = await activityFollowUpService.addSessionSubtask(USER_ID, {
+      followUpId: String(FOLLOW_UP_ID),
+      title: 'Limpiar cocina',
+    });
+
+    expect(subtask.id).toBe('90');
+    expect(subtask.title).toBe('Limpiar cocina');
+    expect(subtask.isCompleted).toBe(false);
+    expect(subtask.orderIndex).toBe(2);
+    expect(subtask.activitySubtaskId).toBe('44');
+  });
+
+  it('addSessionSubtask reuses existing template title', async () => {
+    const now = new Date('2024-06-01T12:00:00Z');
+    mockDbPool.query
+      .mockResolvedValueOnce({ rows: [createFollowUpRow({ duration_minutes: null })] })
+      .mockResolvedValueOnce({ rows: [] }) // session dup
+      .mockResolvedValueOnce({
+        rows: [{ id: 10, title: 'Barrer', order_index: 0 }],
+      }) // template hit
+      .mockResolvedValueOnce({ rows: [{ max: null }] }) // max session
+      .mockResolvedValueOnce({
+        rows: [
+          {
+            id: 91,
+            follow_up_id: FOLLOW_UP_ID,
+            activity_subtask_id: 10,
+            title: 'Barrer',
+            is_completed: false,
+            order_index: 0,
+            created_at: now,
+            updated_at: now,
+          },
+        ],
+      });
+
+    const subtask = await activityFollowUpService.addSessionSubtask(USER_ID, {
+      followUpId: String(FOLLOW_UP_ID),
+      title: 'barrer',
+    });
+
+    expect(subtask.activitySubtaskId).toBe('10');
+    expect(subtask.title).toBe('Barrer');
+  });
+
+  it('addSessionSubtask rejects closed follow-up', async () => {
+    mockDbPool.query.mockResolvedValueOnce({
+      rows: [createFollowUpRow({ duration_minutes: 30 })],
+    });
+
+    await expect(
+      activityFollowUpService.addSessionSubtask(USER_ID, {
+        followUpId: String(FOLLOW_UP_ID),
+        title: 'Nueva',
+      })
+    ).rejects.toBeInstanceOf(BadRequestError);
+  });
+
+  it('addSessionSubtask rejects duplicate title in session', async () => {
+    mockDbPool.query
+      .mockResolvedValueOnce({ rows: [createFollowUpRow({ duration_minutes: null })] })
+      .mockResolvedValueOnce({ rows: [{ id: 1 }] });
+
+    await expect(
+      activityFollowUpService.addSessionSubtask(USER_ID, {
+        followUpId: String(FOLLOW_UP_ID),
+        title: 'Barrer',
+      })
+    ).rejects.toBeInstanceOf(BadRequestError);
+  });
 });

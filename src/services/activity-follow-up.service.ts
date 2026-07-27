@@ -1,16 +1,21 @@
 import { getDbPool } from '../shared/database/pool';
 import { BadRequestError, ForbiddenError, NotFoundError } from '../shared/errors';
+import { isUuidV7 } from '../shared/database/uuid';
 import {
   computeActivityFollowUpEnd,
   formatStartTimeForApi,
 } from '../shared/utils/activity-follow-up-time';
+import type { ActivitySubtasksCount } from '../types/services/activity.types';
 import type {
   ActivityFollowUp,
+  ActivityFollowUpSubtask,
   ActivityFollowUpsDateGroup,
   CreateActivityFollowUpInput,
   ListActivityFollowUpsOptions,
   StartActivityFollowUpInput,
   UpdateActivityFollowUpInput,
+  UpdateActivityFollowUpSubtaskInput,
+  AddActivityFollowUpSubtaskInput,
 } from '../types/services/activity-follow-up.types';
 import { activityService } from './activity.service';
 import { todoService } from './todo.service';
@@ -28,7 +33,20 @@ type FollowUpRow = {
   updated_at: Date;
 };
 
+type FollowUpSubtaskRow = {
+  id: number;
+  follow_up_id: number;
+  activity_subtask_id: number | null;
+  title: string;
+  is_completed: boolean;
+  order_index: number;
+  created_at: Date;
+  updated_at: Date;
+};
+
 const CLOSED_FOLLOW_UP_FILTER = 'af.duration_minutes IS NOT NULL';
+const SESSION_SUBTASK_RETURNING =
+  'id, follow_up_id, activity_subtask_id, title, is_completed, order_index, created_at, updated_at';
 
 function formatDateForApi(value: Date | string): string {
   if (typeof value === 'string') {
@@ -80,12 +98,34 @@ function mapFollowUp(row: FollowUpRow): ActivityFollowUp {
   };
 }
 
+function mapSessionSubtask(row: FollowUpSubtaskRow): ActivityFollowUpSubtask {
+  return {
+    id: String(row.id),
+    followUpId: String(row.follow_up_id),
+    activitySubtaskId:
+      row.activity_subtask_id !== null ? String(row.activity_subtask_id) : null,
+    title: row.title,
+    isCompleted: row.is_completed,
+    orderIndex: row.order_index,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
 export function parseFollowUpId(id: string | number): number {
   const followUpId = typeof id === 'number' ? id : parseInt(id, 10);
   if (Number.isNaN(followUpId)) {
     throw new NotFoundError('Activity follow-up not found');
   }
   return followUpId;
+}
+
+function parseSessionSubtaskId(id: string | number): number {
+  const sessionSubtaskId = typeof id === 'number' ? id : parseInt(id, 10);
+  if (Number.isNaN(sessionSubtaskId)) {
+    throw new NotFoundError('Session subtask not found');
+  }
+  return sessionSubtaskId;
 }
 
 async function getFollowUpRowOrThrow(followUpId: number): Promise<FollowUpRow> {
@@ -126,7 +166,10 @@ async function assertNoOpenFollowUp(userId: number): Promise<void> {
   }
 }
 
-async function validateLinkedTodo(linkedTodoId: string | null | undefined, userId: number): Promise<void> {
+async function validateLinkedTodo(
+  linkedTodoId: string | null | undefined,
+  userId: number
+): Promise<void> {
   if (linkedTodoId === undefined || linkedTodoId === null) {
     return;
   }
@@ -143,19 +186,96 @@ async function sumSpentTimeMinutes(activityId: number): Promise<number> {
   return parseInt(result.rows[0].total, 10);
 }
 
+async function listSessionSubtasks(followUpId: number): Promise<ActivityFollowUpSubtask[]> {
+  const db = getDbPool();
+  const result = await db.query<FollowUpSubtaskRow>(
+    `SELECT ${SESSION_SUBTASK_RETURNING}
+     FROM activity_follow_up_subtasks
+     WHERE follow_up_id = $1
+     ORDER BY order_index ASC, created_at ASC`,
+    [followUpId]
+  );
+  return result.rows.map(mapSessionSubtask);
+}
+
+function countSessionSubtasks(subtasks: ActivityFollowUpSubtask[]): ActivitySubtasksCount {
+  return {
+    total: subtasks.length,
+    completed: subtasks.filter((s) => s.isCompleted).length,
+  };
+}
+
+async function attachSelectedSubtasks(
+  followUpId: number,
+  activityId: number,
+  subtaskIds: string[] | undefined
+): Promise<void> {
+  if (!subtaskIds || subtaskIds.length === 0) {
+    return;
+  }
+
+  const uniqueIds = [...new Set(subtaskIds.map((id) => parseInt(id, 10)))];
+  if (uniqueIds.some((id) => Number.isNaN(id))) {
+    throw new BadRequestError('Invalid subtask ID');
+  }
+
+  const db = getDbPool();
+  const result = await db.query<{
+    id: number;
+    title: string;
+    order_index: number;
+  }>(
+    `SELECT id, title, order_index
+     FROM activity_subtasks
+     WHERE activity_id = $1 AND id = ANY($2::int[])
+     ORDER BY order_index ASC, created_at ASC`,
+    [activityId, uniqueIds]
+  );
+
+  if (result.rows.length !== uniqueIds.length) {
+    throw new BadRequestError('One or more subtasks do not belong to this activity');
+  }
+
+  for (const row of result.rows) {
+    await db.query(
+      `INSERT INTO activity_follow_up_subtasks (
+         follow_up_id, activity_subtask_id, title, is_completed, order_index
+       ) VALUES ($1, $2, $3, FALSE, $4)`,
+      [followUpId, row.id, row.title, row.order_index]
+    );
+  }
+}
+
 async function createFollowUp(
   userId: number,
   input: CreateActivityFollowUpInput
 ): Promise<ActivityFollowUp> {
+  const clientId = input.clientId ?? null;
+  if (clientId != null) {
+    if (!isUuidV7(clientId)) {
+      throw new BadRequestError('clientId must be a UUID v7');
+    }
+    const existing = await findByClientId(userId, clientId);
+    if (existing) return existing;
+  }
+
   const activityId = activityService.parseActivityId(input.activityId);
   await activityService.getActivityById(String(activityId), userId);
 
   const db = getDbPool();
   const result = await db.query<FollowUpRow>(
-    `INSERT INTO activity_follow_ups (user_id, activity_id, date, start_time, duration_minutes, notes)
-     VALUES ($1, $2, $3::date, $4::time, $5, $6)
+    `INSERT INTO activity_follow_ups (user_id, activity_id, date, start_time, duration_minutes, notes, client_id)
+     VALUES ($1, $2, $3::date, $4::time, $5, $6, $7)
      RETURNING *`,
-    [userId, activityId, input.date, input.startTime, input.durationMinutes, input.notes ?? null]
+    [
+      userId,
+      activityId,
+      input.date,
+      input.startTime,
+      input.durationMinutes,
+      input.notes ?? null,
+      clientId,
+    ]
   );
   return mapFollowUp(result.rows[0]);
 }
@@ -164,6 +284,15 @@ async function startFollowUp(
   userId: number,
   input: StartActivityFollowUpInput
 ): Promise<ActivityFollowUp> {
+  const clientId = input.clientId ?? null;
+  if (clientId != null) {
+    if (!isUuidV7(clientId)) {
+      throw new BadRequestError('clientId must be a UUID v7');
+    }
+    const existing = await findByClientId(userId, clientId);
+    if (existing) return existing;
+  }
+
   await assertNoOpenFollowUp(userId);
   await validateLinkedTodo(input.linkedTodoId, userId);
 
@@ -178,12 +307,25 @@ async function startFollowUp(
   const db = getDbPool();
   const result = await db.query<FollowUpRow>(
     `INSERT INTO activity_follow_ups (
-       user_id, activity_id, date, start_time, duration_minutes, notes, linked_todo_id
+       user_id, activity_id, date, start_time, duration_minutes, notes, linked_todo_id, client_id
      )
-     VALUES ($1, $2, $3::date, $4::time, NULL, $5, $6)
+     VALUES ($1, $2, $3::date, $4::time, NULL, $5, $6, $7)
      RETURNING *`,
-    [userId, activityId, input.date, input.startTime, input.notes ?? null, linkedTodoId]
+    [userId, activityId, input.date, input.startTime, input.notes ?? null, linkedTodoId, clientId]
   );
+
+  const followUp = mapFollowUp(result.rows[0]);
+  await attachSelectedSubtasks(result.rows[0].id, activityId, input.subtaskIds);
+  return followUp;
+}
+
+async function findByClientId(userId: number, clientId: string): Promise<ActivityFollowUp | null> {
+  const db = getDbPool();
+  const result = await db.query<FollowUpRow>(
+    `SELECT * FROM activity_follow_ups WHERE client_id = $1 AND user_id = $2`,
+    [clientId, userId]
+  );
+  if (result.rows.length === 0) return null;
   return mapFollowUp(result.rows[0]);
 }
 
@@ -260,6 +402,114 @@ async function getFollowUpById(id: string, userId: number): Promise<ActivityFoll
   return mapFollowUp(row);
 }
 
+async function updateSessionSubtask(
+  followUpIdStr: string,
+  sessionSubtaskIdStr: string,
+  userId: number,
+  input: UpdateActivityFollowUpSubtaskInput
+): Promise<ActivityFollowUpSubtask> {
+  const followUpId = parseFollowUpId(followUpIdStr);
+  await getOwnedFollowUpOrThrow(followUpId, userId);
+
+  const sessionSubtaskId = parseSessionSubtaskId(sessionSubtaskIdStr);
+  const db = getDbPool();
+  const result = await db.query<FollowUpSubtaskRow>(
+    `UPDATE activity_follow_up_subtasks
+     SET is_completed = $1
+     WHERE id = $2 AND follow_up_id = $3
+     RETURNING ${SESSION_SUBTASK_RETURNING}`,
+    [input.isCompleted, sessionSubtaskId, followUpId]
+  );
+  if (result.rows.length === 0) {
+    throw new NotFoundError('Session subtask not found');
+  }
+  return mapSessionSubtask(result.rows[0]);
+}
+
+/**
+ * Añade una subtarea a un follow-up abierto.
+ * Persiste en `activity_subtasks` (reutiliza si el título ya existe) y la adjunta a la sesión.
+ */
+async function addSessionSubtask(
+  userId: number,
+  input: AddActivityFollowUpSubtaskInput
+): Promise<ActivityFollowUpSubtask> {
+  const title = input.title.trim();
+  if (!title) {
+    throw new BadRequestError('Title is required');
+  }
+
+  const followUpId = parseFollowUpId(input.followUpId);
+  const followUp = await getOwnedFollowUpOrThrow(followUpId, userId);
+  if (followUp.duration_minutes !== null) {
+    throw new BadRequestError('Cannot add subtasks to a closed follow-up');
+  }
+
+  const db = getDbPool();
+  const activityId = followUp.activity_id;
+
+  const sessionDup = await db.query<{ id: number }>(
+    `SELECT id FROM activity_follow_up_subtasks
+     WHERE follow_up_id = $1 AND lower(btrim(title)) = lower(btrim($2::text))
+     LIMIT 1`,
+    [followUpId, title]
+  );
+  if (sessionDup.rows.length > 0) {
+    throw new BadRequestError('Session already has a subtask with this title');
+  }
+
+  const existingTemplate = await db.query<{
+    id: number;
+    title: string;
+    order_index: number;
+  }>(
+    `SELECT id, title, order_index FROM activity_subtasks
+     WHERE activity_id = $1 AND lower(btrim(title)) = lower(btrim($2::text))
+     LIMIT 1`,
+    [activityId, title]
+  );
+
+  let activitySubtaskId: number;
+  let displayTitle: string;
+
+  if (existingTemplate.rows.length > 0) {
+    activitySubtaskId = existingTemplate.rows[0].id;
+    displayTitle = existingTemplate.rows[0].title;
+  } else {
+    const maxTemplate = await db.query<{ max: string | null }>(
+      `SELECT MAX(order_index)::text AS max FROM activity_subtasks WHERE activity_id = $1`,
+      [activityId]
+    );
+    const nextTemplateOrder =
+      (maxTemplate.rows[0]?.max != null ? parseInt(maxTemplate.rows[0].max, 10) : -1) + 1;
+    const created = await db.query<{ id: number; title: string }>(
+      `INSERT INTO activity_subtasks (activity_id, title, order_index)
+       VALUES ($1, $2, $3)
+       RETURNING id, title`,
+      [activityId, title, nextTemplateOrder]
+    );
+    activitySubtaskId = created.rows[0].id;
+    displayTitle = created.rows[0].title;
+  }
+
+  const maxSession = await db.query<{ max: string | null }>(
+    `SELECT MAX(order_index)::text AS max FROM activity_follow_up_subtasks WHERE follow_up_id = $1`,
+    [followUpId]
+  );
+  const orderIndex =
+    (maxSession.rows[0]?.max != null ? parseInt(maxSession.rows[0].max, 10) : -1) + 1;
+
+  const inserted = await db.query<FollowUpSubtaskRow>(
+    `INSERT INTO activity_follow_up_subtasks (
+       follow_up_id, activity_subtask_id, title, is_completed, order_index
+     ) VALUES ($1, $2, $3, FALSE, $4)
+     RETURNING ${SESSION_SUBTASK_RETURNING}`,
+    [followUpId, activitySubtaskId, displayTitle, orderIndex]
+  );
+
+  return mapSessionSubtask(inserted.rows[0]);
+}
+
 async function listFollowUps(
   userId: number,
   options: ListActivityFollowUpsOptions = {}
@@ -327,6 +577,10 @@ export const activityFollowUpService = {
   listFollowUps,
   listFollowUpsInDates,
   listDayFollowUps,
+  listSessionSubtasks,
+  countSessionSubtasks,
+  updateSessionSubtask,
+  addSessionSubtask,
   sumSpentTimeMinutes,
   parseFollowUpId,
 };

@@ -10,6 +10,10 @@ import { frequencyResolvers } from './modules/frequency/frequency.resolvers';
 import { periodResolvers } from './modules/period/period.resolvers';
 import { shoppingResolvers } from './modules/shopping/shopping.resolvers';
 import { activityResolvers } from './modules/activity/activity.resolvers';
+import { activityDayPlanResolvers } from './modules/activity-day-plan/activity-day-plan.resolvers';
+import { vidaResolvers } from './modules/vida/vida.resolvers';
+import { workoutResolvers } from './modules/workout/workout.resolvers';
+import { standupResolvers } from './modules/standup/standup.resolvers';
 import { habitResolvers } from './modules/habit/habit.resolvers';
 import { routineResolvers } from './modules/routine/routine.resolvers';
 import { weeklyRoutineResolvers } from './modules/weekly-routine/weekly-routine.resolvers';
@@ -37,6 +41,10 @@ export const resolvers = mergeResolvers([
   periodResolvers,
   shoppingResolvers,
   activityResolvers,
+  activityDayPlanResolvers,
+  vidaResolvers,
+  workoutResolvers,
+  standupResolvers,
   habitResolvers,
   routineResolvers,
   weeklyRoutineResolvers,

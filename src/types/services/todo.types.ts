@@ -57,6 +57,8 @@ export interface CreateTodoInput {
   tagIds?: string[];
   folderId?: string | null;
   orderIndex?: number;
+  /** UUID v7 del cliente para idempotencia offline. */
+  clientId?: string;
 }
 
 export interface UpdateTodoInput {

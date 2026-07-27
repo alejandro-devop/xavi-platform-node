@@ -1,5 +1,6 @@
 import { getDbPool } from '../shared/database/pool';
-import { ForbiddenError, NotFoundError } from '../shared/errors';
+import { BadRequestError, ForbiddenError, NotFoundError } from '../shared/errors';
+import { generateUuidV7, isUuidV7 } from '../shared/database/uuid';
 import type {
   CreateHabitMeasureInput,
   HabitMeasure,
@@ -62,11 +63,24 @@ async function getMeasureById(id: string, userId: number): Promise<HabitMeasure>
 
 async function createMeasure(userId: number, input: CreateHabitMeasureInput): Promise<HabitMeasure> {
   const db = getDbPool();
+  const id = input.id ?? generateUuidV7();
+  if (input.id != null && !isUuidV7(input.id)) {
+    throw new BadRequestError('id must be a UUID v7');
+  }
+  if (input.id != null) {
+    const existing = await db.query<MeasureRow>(
+      'SELECT * FROM habit_measures WHERE id = $1 AND user_id = $2',
+      [input.id, userId]
+    );
+    if (existing.rows.length > 0) {
+      return mapMeasure(existing.rows[0]);
+    }
+  }
   const result = await db.query<MeasureRow>(
-    `INSERT INTO habit_measures (user_id, name, abbreviation, type)
-     VALUES ($1, $2, $3, $4)
+    `INSERT INTO habit_measures (id, user_id, name, abbreviation, type)
+     VALUES ($1, $2, $3, $4, $5)
      RETURNING *`,
-    [userId, input.name, input.abbreviation ?? null, input.type ?? null]
+    [id, userId, input.name, input.abbreviation ?? null, input.type ?? null]
   );
   return mapMeasure(result.rows[0]);
 }

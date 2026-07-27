@@ -5,9 +5,9 @@
     "semantic_hash": "0842b3692729e950e137bc0e43ebe826"
   },
   ".claude/settings.local.json": {
-    "mtime": 1779985767.762279,
-    "ast_hash": "0af8a7dbcd02d5e276e725d600bc6944",
-    "semantic_hash": "0af8a7dbcd02d5e276e725d600bc6944"
+    "mtime": 1783930841.9270318,
+    "ast_hash": "3296a494331e4b44cf180f0c1a7da162",
+    "semantic_hash": ""
   },
   ".eslintrc.js": {
     "mtime": 1769802117.7223465,
@@ -250,9 +250,9 @@
     "semantic_hash": "bcc79839513babe10c8ea72cdc671a40"
   },
   "package.json": {
-    "mtime": 1776042786.2169037,
-    "ast_hash": "01d07c24c43c90c6cfc926cc9979fef8",
-    "semantic_hash": "01d07c24c43c90c6cfc926cc9979fef8"
+    "mtime": 1783049469.9349482,
+    "ast_hash": "3c5588df0fe8fa7733b171c2a4314b2a",
+    "semantic_hash": ""
   },
   "scripts/create-migration.ts": {
     "mtime": 1772150215.561512,
@@ -260,9 +260,9 @@
     "semantic_hash": "88985ef2ff54627d0fe3b3e748c3fded"
   },
   "scripts/deploy.sh": {
-    "mtime": 1780009000.409608,
-    "ast_hash": "be2874108841a31583a4aa7374bfb267",
-    "semantic_hash": "be2874108841a31583a4aa7374bfb267"
+    "mtime": 1784679211.0576465,
+    "ast_hash": "fa41e233a175085d162babad4650bd0d",
+    "semantic_hash": ""
   },
   "scripts/docker-entrypoint.sh": {
     "mtime": 1772157856.3187473,
@@ -370,14 +370,14 @@
     "semantic_hash": "053a78da279ebe4f4259791b68033199"
   },
   "src/graphql/modules/activity/activity.resolvers.ts": {
-    "mtime": 1780023220.8185575,
-    "ast_hash": "d72221f5ba986241fd84a7ea2c24d6ba",
-    "semantic_hash": "d72221f5ba986241fd84a7ea2c24d6ba"
+    "mtime": 1784679211.4152417,
+    "ast_hash": "926990804c28292f20956e3f0cb8b01c",
+    "semantic_hash": ""
   },
   "src/graphql/modules/activity/activity.schema.ts": {
-    "mtime": 1780023214.2872422,
-    "ast_hash": "0a023b76f1e0e1af13923bd671b8d638",
-    "semantic_hash": "0a023b76f1e0e1af13923bd671b8d638"
+    "mtime": 1784679211.4148726,
+    "ast_hash": "d3203e63723410fcd69064f20ac78235",
+    "semantic_hash": ""
   },
   "src/graphql/modules/budget/budget.resolvers.ts": {
     "mtime": 1775452837.6352603,
@@ -425,14 +425,14 @@
     "semantic_hash": "d4691fa496371a42e72deb6e5587a8ae"
   },
   "src/graphql/modules/expense/expense.resolvers.ts": {
-    "mtime": 1775060938.6432202,
-    "ast_hash": "54312643aa813fb0424c3ec349c84a4b",
-    "semantic_hash": "54312643aa813fb0424c3ec349c84a4b"
+    "mtime": 1783033043.621898,
+    "ast_hash": "091efe899231e2792d781da71569e65c",
+    "semantic_hash": ""
   },
   "src/graphql/modules/expense/expense.schema.ts": {
-    "mtime": 1771952339.698288,
-    "ast_hash": "cab7100bb796f819d31ad861d1b40a5b",
-    "semantic_hash": "cab7100bb796f819d31ad861d1b40a5b"
+    "mtime": 1783033039.272317,
+    "ast_hash": "3a17b97d4bbbd52ae79e74422aba4567",
+    "semantic_hash": ""
   },
   "src/graphql/modules/frequency/frequency.resolvers.ts": {
     "mtime": 1771952339.578357,
@@ -445,14 +445,14 @@
     "semantic_hash": "c292eae81afb9973d68e85c06f4bf8f1"
   },
   "src/graphql/modules/habit/habit.resolvers.ts": {
-    "mtime": 1780633420.918262,
-    "ast_hash": "fef7cf968818504f3ad6a86bc16051df",
-    "semantic_hash": "fef7cf968818504f3ad6a86bc16051df"
+    "mtime": 1784679211.0580392,
+    "ast_hash": "b802cc80854a89a5a0288628ea174369",
+    "semantic_hash": ""
   },
   "src/graphql/modules/habit/habit.schema.ts": {
-    "mtime": 1780634620.4031074,
-    "ast_hash": "af90cbe38fcd5f5754b67a3768f743fa",
-    "semantic_hash": "af90cbe38fcd5f5754b67a3768f743fa"
+    "mtime": 1784679211.4149647,
+    "ast_hash": "a1d1c835ae40d978f70033ad4f7d4e4d",
+    "semantic_hash": ""
   },
   "src/graphql/modules/learning/learning.resolvers.ts": {
     "mtime": 1779290935.2197406,
@@ -530,9 +530,9 @@
     "semantic_hash": "c34dc09e8fe036c4431e29a37961b0e5"
   },
   "src/graphql/modules/sleep/sleep.schema.ts": {
-    "mtime": 1779285746.3186963,
-    "ast_hash": "1d385a34db10ea5e9777beed66c512a0",
-    "semantic_hash": "1d385a34db10ea5e9777beed66c512a0"
+    "mtime": 1782264174.872619,
+    "ast_hash": "e7a38b6c2cd5f560a61d738d25c63065",
+    "semantic_hash": ""
   },
   "src/graphql/modules/sweeter-way/sweeter-way.resolvers.ts": {
     "mtime": 1779996865.4499345,
@@ -550,9 +550,9 @@
     "semantic_hash": "f8832b3914b56d6b292a2def3ed6282b"
   },
   "src/graphql/modules/todo/todo.schema.ts": {
-    "mtime": 1780590748.2648318,
-    "ast_hash": "041494d205687451f66c47f792a2f3a1",
-    "semantic_hash": "041494d205687451f66c47f792a2f3a1"
+    "mtime": 1784317553.4782271,
+    "ast_hash": "ae44e8389bffbeee6b3764004625522a",
+    "semantic_hash": ""
   },
   "src/graphql/modules/wallet/wallet.resolvers.ts": {
     "mtime": 1772127114.145504,
@@ -575,14 +575,14 @@
     "semantic_hash": "00de99ebb59b5ae22a79bf464333bdd5"
   },
   "src/graphql/resolvers.ts": {
-    "mtime": 1780369363.1894474,
-    "ast_hash": "1477488d03d3260b447c08f9e0918d43",
-    "semantic_hash": "1477488d03d3260b447c08f9e0918d43"
+    "mtime": 1784736304.712272,
+    "ast_hash": "770971cbd0a876142e6b8349a3da9ad1",
+    "semantic_hash": ""
   },
   "src/graphql/schema.ts": {
-    "mtime": 1780369356.8416867,
-    "ast_hash": "10c3caafa9ffe3b5b491ada2b3fb8c58",
-    "semantic_hash": "10c3caafa9ffe3b5b491ada2b3fb8c58"
+    "mtime": 1784736303.6846583,
+    "ast_hash": "9f1c24c7ae66616826b962af673e3194",
+    "semantic_hash": ""
   },
   "src/graphql/server.ts": {
     "mtime": 1771623239.153673,
@@ -685,9 +685,9 @@
     "semantic_hash": "657d24fed7e7dd6c6e9d85fa9f99a13f"
   },
   "src/services/activity-follow-up.service.ts": {
-    "mtime": 1780023216.7587442,
-    "ast_hash": "92b486c2b5e47518bc1de54a7ed59e0a",
-    "semantic_hash": "92b486c2b5e47518bc1de54a7ed59e0a"
+    "mtime": 1784679211.0580623,
+    "ast_hash": "3eb4516f18931944749dd091ec403dfb",
+    "semantic_hash": ""
   },
   "src/services/activity-todo-folders.service.ts": {
     "mtime": 1780022392.664475,
@@ -695,9 +695,9 @@
     "semantic_hash": "25bcb5e8d5cef8e01b980c25b34c1baf"
   },
   "src/services/activity.service.ts": {
-    "mtime": 1780022399.9020166,
-    "ast_hash": "f437f84dce935f9b365585c389e3ce2e",
-    "semantic_hash": "f437f84dce935f9b365585c389e3ce2e"
+    "mtime": 1784679211.057834,
+    "ast_hash": "7cf4c462f46207f66b707b86dc749df7",
+    "semantic_hash": ""
   },
   "src/services/budget-closure.service.ts": {
     "mtime": 1775451966.4665105,
@@ -720,19 +720,19 @@
     "semantic_hash": "5214a26730216a10a86ce9c7aff4dda9"
   },
   "src/services/expense.service.ts": {
-    "mtime": 1775451966.2645588,
-    "ast_hash": "71db9e1554161798918bbc8fced386f8",
-    "semantic_hash": "71db9e1554161798918bbc8fced386f8"
+    "mtime": 1783033068.103268,
+    "ast_hash": "e0aec19243d357a1354ac1e96edf6286",
+    "semantic_hash": ""
   },
   "src/services/habit-category.service.ts": {
-    "mtime": 1779216027.9969492,
-    "ast_hash": "13f0c01cf7ada4e569199678618d3898",
-    "semantic_hash": "13f0c01cf7ada4e569199678618d3898"
+    "mtime": 1784679211.415075,
+    "ast_hash": "bbe47f8cc137562044bbffde343fa4a0",
+    "semantic_hash": ""
   },
   "src/services/habit-measure.service.ts": {
-    "mtime": 1779216043.1207473,
-    "ast_hash": "3d90d49b3276f786ff2b9a59d89904c3",
-    "semantic_hash": "3d90d49b3276f786ff2b9a59d89904c3"
+    "mtime": 1784679211.0578077,
+    "ast_hash": "5a904055c824cfc17c1cf3d312df11ad",
+    "semantic_hash": ""
   },
   "src/services/habit-purpose.service.ts": {
     "mtime": 1780634642.3717186,
@@ -740,19 +740,19 @@
     "semantic_hash": "256cda5a954ba7c4639ee9b64613b524"
   },
   "src/services/habit-streak.test.ts": {
-    "mtime": 1780549921.135872,
-    "ast_hash": "feb771bec815d5628ddb19f4f10934cd",
-    "semantic_hash": "feb771bec815d5628ddb19f4f10934cd"
+    "mtime": 1784008853.8329759,
+    "ast_hash": "d638ffc25907e3c55f01fed5511803ab",
+    "semantic_hash": ""
   },
   "src/services/habit-streak.ts": {
-    "mtime": 1780549655.9577293,
-    "ast_hash": "65d5a8d820b00858b93e9e16a26548ba",
-    "semantic_hash": "65d5a8d820b00858b93e9e16a26548ba"
+    "mtime": 1784261250.080783,
+    "ast_hash": "ea8267a8046796d20da2529397d6239d",
+    "semantic_hash": ""
   },
   "src/services/habit.service.ts": {
-    "mtime": 1780633347.0082161,
-    "ast_hash": "63233f08db4ae23c80bb878f930bad76",
-    "semantic_hash": "63233f08db4ae23c80bb878f930bad76"
+    "mtime": 1784679211.058043,
+    "ast_hash": "7915a34114b4ef380f6e7308a15206db",
+    "semantic_hash": ""
   },
   "src/services/learning.service.ts": {
     "mtime": 1779290910.8000927,
@@ -785,9 +785,9 @@
     "semantic_hash": "54298fdd0414aca62b8949439cfdbef8"
   },
   "src/services/sleep.service.ts": {
-    "mtime": 1779285742.6459517,
-    "ast_hash": "861dc57f2cd1298e2a8af2158d1bf050",
-    "semantic_hash": "861dc57f2cd1298e2a8af2158d1bf050"
+    "mtime": 1782264185.1309588,
+    "ast_hash": "aebe94274d2267e2410f1f94d8eeb327",
+    "semantic_hash": ""
   },
   "src/services/sweeter-way-bond.service.ts": {
     "mtime": 1779996725.8970616,
@@ -825,9 +825,9 @@
     "semantic_hash": "b02d0c53c79bc7651856f2a058d897d5"
   },
   "src/services/todo.service.ts": {
-    "mtime": 1780344312.4057271,
-    "ast_hash": "aa57eee423d5ba4aa5502164355db09b",
-    "semantic_hash": "aa57eee423d5ba4aa5502164355db09b"
+    "mtime": 1784317677.0398226,
+    "ast_hash": "44edee371e841b586249928b8612eacf",
+    "semantic_hash": ""
   },
   "src/services/wallet.service.ts": {
     "mtime": 1772134231.1829872,
@@ -860,14 +860,14 @@
     "semantic_hash": "9a8eb0c6ba0368bd5a665919a12950ce"
   },
   "src/shared/database/schema.ts": {
-    "mtime": 1780590708.4448297,
-    "ast_hash": "f7cb02007abe159d5668e682cce91209",
-    "semantic_hash": "f7cb02007abe159d5668e682cce91209"
+    "mtime": 1783891474.8301911,
+    "ast_hash": "4b4d8c59c4c03dbbea285784414746f5",
+    "semantic_hash": ""
   },
   "src/shared/database/uuid.ts": {
-    "mtime": 1771628028.779528,
-    "ast_hash": "a2546cfb3a7ec4754d4eae5e3666318b",
-    "semantic_hash": "a2546cfb3a7ec4754d4eae5e3666318b"
+    "mtime": 1784679211.4148917,
+    "ast_hash": "23ccf56fab70a0673a57326830c44fa2",
+    "semantic_hash": ""
   },
   "src/shared/errors/error-handler.ts": {
     "mtime": 1771976091.5386207,
@@ -995,14 +995,14 @@
     "semantic_hash": "b03409a64fa5bbc4a4d8bff077854822"
   },
   "src/types/services/activity-follow-up.types.ts": {
-    "mtime": 1780023195.322009,
-    "ast_hash": "79cdc102d3535bde3ad9ce797d387bc8",
-    "semantic_hash": "79cdc102d3535bde3ad9ce797d387bc8"
+    "mtime": 1784679211.0593941,
+    "ast_hash": "eed3922d90a704703db465c19832ad30",
+    "semantic_hash": ""
   },
   "src/types/services/activity.types.ts": {
-    "mtime": 1780022394.1364875,
-    "ast_hash": "6f0033b56d72eeb02a925be0c413aaf8",
-    "semantic_hash": "6f0033b56d72eeb02a925be0c413aaf8"
+    "mtime": 1784679211.0578334,
+    "ast_hash": "f77cdad083dcf1487866e0ca5a24e370",
+    "semantic_hash": ""
   },
   "src/types/services/budget.types.ts": {
     "mtime": 1775452837.463608,
@@ -1020,19 +1020,19 @@
     "semantic_hash": "c4aa74a48289f997ed1fb912e280cf0f"
   },
   "src/types/services/expense.types.ts": {
-    "mtime": 1775060938.4443667,
-    "ast_hash": "ad9670bdb504c94ca2a12e732f39a9bc",
-    "semantic_hash": "ad9670bdb504c94ca2a12e732f39a9bc"
+    "mtime": 1783033026.476875,
+    "ast_hash": "0efa6e0242dec81ad3e94e3fb2fed3d3",
+    "semantic_hash": ""
   },
   "src/types/services/habit-category.types.ts": {
-    "mtime": 1779215988.6069026,
-    "ast_hash": "039b79f95e6f3b0cd7a76cce30f710bf",
-    "semantic_hash": "039b79f95e6f3b0cd7a76cce30f710bf"
+    "mtime": 1784679211.4152539,
+    "ast_hash": "b865856fc44e4b4fe1444db01d7b1497",
+    "semantic_hash": ""
   },
   "src/types/services/habit-measure.types.ts": {
-    "mtime": 1779215990.2095623,
-    "ast_hash": "43edef2c80dcfc1217dd1b6bb2469d60",
-    "semantic_hash": "43edef2c80dcfc1217dd1b6bb2469d60"
+    "mtime": 1784679211.4151726,
+    "ast_hash": "df28bd2080837b0f2e77fd98902834f0",
+    "semantic_hash": ""
   },
   "src/types/services/habit-purpose.types.ts": {
     "mtime": 1780634610.390361,
@@ -1040,9 +1040,9 @@
     "semantic_hash": "e9ad8c11fcbcf768f724e4bba6630e8a"
   },
   "src/types/services/habit.types.ts": {
-    "mtime": 1780633317.4491293,
-    "ast_hash": "6a71e5eef0ab28b9c4e6c9173e64075e",
-    "semantic_hash": "6a71e5eef0ab28b9c4e6c9173e64075e"
+    "mtime": 1784679211.4150202,
+    "ast_hash": "38a459c570cd7fffdf8efa262721f32d",
+    "semantic_hash": ""
   },
   "src/types/services/learning.types.ts": {
     "mtime": 1779290875.4522488,
@@ -1070,9 +1070,9 @@
     "semantic_hash": "3528776e685ae97fd3248862b8a6580c"
   },
   "src/types/services/sleep.types.ts": {
-    "mtime": 1779285730.996804,
-    "ast_hash": "644a57f8c5292b7fdf6adb973fbc0495",
-    "semantic_hash": "644a57f8c5292b7fdf6adb973fbc0495"
+    "mtime": 1782264180.1275496,
+    "ast_hash": "bfa2b361cbffbbadf29a07c50fac3ef1",
+    "semantic_hash": ""
   },
   "src/types/services/sweeter-way.types.ts": {
     "mtime": 1779996724.0021513,
@@ -1095,9 +1095,9 @@
     "semantic_hash": "9fb30f51a6311160a0faf013dab031a8"
   },
   "src/types/services/todo.types.ts": {
-    "mtime": 1780344299.0937598,
-    "ast_hash": "73f68be91df233ec12fc84614f906c70",
-    "semantic_hash": "73f68be91df233ec12fc84614f906c70"
+    "mtime": 1784317564.958,
+    "ast_hash": "76e80753cb0c3148322ef45a248a462f",
+    "semantic_hash": ""
   },
   "src/types/services/wallet.types.ts": {
     "mtime": 1771566273.3206742,
@@ -1145,9 +1145,9 @@
     "semantic_hash": "3646f5e8baaf869acf79a2417a6cf604"
   },
   "src/validators/schemas/activity.schemas.ts": {
-    "mtime": 1780023211.065877,
-    "ast_hash": "260fc433b67eb844d51b6fee63a9cd1e",
-    "semantic_hash": "260fc433b67eb844d51b6fee63a9cd1e"
+    "mtime": 1784679211.0576997,
+    "ast_hash": "2943f8aa27d7ab7c710a28cf9134746d",
+    "semantic_hash": ""
   },
   "src/validators/schemas/budget.schemas.ts": {
     "mtime": 1775452837.6352608,
@@ -1170,9 +1170,9 @@
     "semantic_hash": "e208767a7122645f378c0241f4dd64a6"
   },
   "src/validators/schemas/habit.schemas.ts": {
-    "mtime": 1780633359.9894235,
-    "ast_hash": "6b9a922562d1f159fe26a4c2200c1e65",
-    "semantic_hash": "6b9a922562d1f159fe26a4c2200c1e65"
+    "mtime": 1784679211.4152002,
+    "ast_hash": "e746adafec65d3cecce63d14a9a8146c",
+    "semantic_hash": ""
   },
   "src/validators/schemas/learning.schemas.ts": {
     "mtime": 1779290919.4864383,
@@ -1205,9 +1205,9 @@
     "semantic_hash": "6fe062ed8b8fb0a8761c4666a0a084f4"
   },
   "src/validators/schemas/sleep.schemas.ts": {
-    "mtime": 1779285744.7876055,
-    "ast_hash": "2880caa287ff6f87055432c067225dda",
-    "semantic_hash": "2880caa287ff6f87055432c067225dda"
+    "mtime": 1782264179.6350105,
+    "ast_hash": "c91b279b51342924e7c77114774af01d",
+    "semantic_hash": ""
   },
   "src/validators/schemas/sweeter-way.schemas.ts": {
     "mtime": 1779997092.1809523,
@@ -1230,9 +1230,9 @@
     "semantic_hash": "d80bca885a61caa8c75a6e9e8c02fd39"
   },
   "src/validators/schemas/todo.schemas.ts": {
-    "mtime": 1780344322.2770698,
-    "ast_hash": "9214123a6aa680a68f0282d71e77a7c0",
-    "semantic_hash": "9214123a6aa680a68f0282d71e77a7c0"
+    "mtime": 1784317677.0398185,
+    "ast_hash": "625a6e20584a63435d13da5fa8044eb1",
+    "semantic_hash": ""
   },
   "src/validators/schemas/wallet.schemas.ts": {
     "mtime": 1772130446.8440826,
@@ -1325,9 +1325,9 @@
     "semantic_hash": "8928018cafe7c9b4e3cb7f185ada9f6e"
   },
   "tests/unit/services/activity-follow-up.service.test.ts": {
-    "mtime": 1780023228.1846673,
-    "ast_hash": "155bff652e1552f6a5cd3f940d0f53d7",
-    "semantic_hash": "155bff652e1552f6a5cd3f940d0f53d7"
+    "mtime": 1784679211.4152708,
+    "ast_hash": "a76b2204e03150711e33fecc8b847521",
+    "semantic_hash": ""
   },
   "tests/unit/services/activity-todo-folders.service.test.ts": {
     "mtime": 1780022427.0514748,
@@ -1335,9 +1335,9 @@
     "semantic_hash": "dec6e3d215014508f8d74153fb33541d"
   },
   "tests/unit/services/activity.service.test.ts": {
-    "mtime": 1779337190.3283556,
-    "ast_hash": "42df56275d33269e6064e4aa7a7dc84b",
-    "semantic_hash": "42df56275d33269e6064e4aa7a7dc84b"
+    "mtime": 1784679211.4144926,
+    "ast_hash": "288676f26e73bee89ea3c7538f4307bf",
+    "semantic_hash": ""
   },
   "tests/unit/services/course.service.test.ts": {
     "mtime": 1779291542.2280712,
@@ -1370,9 +1370,9 @@
     "semantic_hash": "f9e0ac2e02631e0542320dadef1cf2a5"
   },
   "tests/unit/services/habit.service.test.ts": {
-    "mtime": 1779226134.7827427,
-    "ast_hash": "51bb667f2428b135d5372982e8d48bd5",
-    "semantic_hash": "51bb667f2428b135d5372982e8d48bd5"
+    "mtime": 1782260937.3759556,
+    "ast_hash": "fe9b009bc2d9d5733a2d03fe38b51b06",
+    "semantic_hash": ""
   },
   "tests/unit/services/learning.service.test.ts": {
     "mtime": 1779290969.2032106,
@@ -1390,9 +1390,9 @@
     "semantic_hash": "d0fbe03b91519952f6ad755ac46e3379"
   },
   "tests/unit/services/sleep.service.test.ts": {
-    "mtime": 1779285753.921385,
-    "ast_hash": "d87d82d208c9745ea244d46e19795eb7",
-    "semantic_hash": "d87d82d208c9745ea244d46e19795eb7"
+    "mtime": 1782263095.9912949,
+    "ast_hash": "3dbc1f7c508a47544394796c34a05341",
+    "semantic_hash": ""
   },
   "tests/unit/services/sweeter-way-bond.service.test.ts": {
     "mtime": 1779996731.4316628,
@@ -1420,9 +1420,9 @@
     "semantic_hash": "8edc76a568694f45f6d51bfc54872521"
   },
   "tests/unit/services/todo.service.test.ts": {
-    "mtime": 1780021116.865672,
-    "ast_hash": "b6face9f3e43d7f5e7e28c88e2e76d14",
-    "semantic_hash": "b6face9f3e43d7f5e7e28c88e2e76d14"
+    "mtime": 1784317622.9849944,
+    "ast_hash": "02fca2cc9329d8cf71e52402038920ef",
+    "semantic_hash": ""
   },
   "tests/unit/services/wallet.service.test.ts": {
     "mtime": 1772134231.3557336,
@@ -1468,5 +1468,355 @@
     "mtime": 1769802117.7224264,
     "ast_hash": "846d07430a7a1390c288d57fc33b9c26",
     "semantic_hash": "846d07430a7a1390c288d57fc33b9c26"
+  },
+  "migrations/045_habit_hidden_and_user_settings.sql": {
+    "mtime": 1782260903.1724958,
+    "ast_hash": "f90bf02c91cd009eb5a252e60d05bb70",
+    "semantic_hash": ""
+  },
+  "migrations/046_user_settings_sleep_activity_category.sql": {
+    "mtime": 1782262379.16085,
+    "ast_hash": "8d9beccb5277a65320fff945b85938e6",
+    "semantic_hash": ""
+  },
+  "migrations/047_sleep_logs_activity_follow_up.sql": {
+    "mtime": 1782263016.1961808,
+    "ast_hash": "c279f25dfe2a4b833120ee60a63905cd",
+    "semantic_hash": ""
+  },
+  "migrations/048_wallet_credit_cards.sql": {
+    "mtime": 1783029009.3187835,
+    "ast_hash": "bbd3603540386bf62aaa0f49e5dfbf58",
+    "semantic_hash": ""
+  },
+  "migrations/049_wallet_transfers.sql": {
+    "mtime": 1783032975.7061076,
+    "ast_hash": "f0a35cea12ff097f2a886ebccd9da3dd",
+    "semantic_hash": ""
+  },
+  "migrations/050_wallet_user_settings_period_cutoff.sql": {
+    "mtime": 1783891446.6519482,
+    "ast_hash": "2b5fbf64a50f35fb931be9de47b17ecc",
+    "semantic_hash": ""
+  },
+  "migrations/051_user_settings_habit_reminder.sql": {
+    "mtime": 1784148942.551722,
+    "ast_hash": "d9cad38831980f17fc083be96865af42",
+    "semantic_hash": ""
+  },
+  "migrations/052_activity_subtasks.sql": {
+    "mtime": 1784260771.584291,
+    "ast_hash": "c1e168d52581333cc8959900ac4b17b5",
+    "semantic_hash": ""
+  },
+  "migrations/053_activity_day_plan_items.sql": {
+    "mtime": 1784260771.5850492,
+    "ast_hash": "4722534a4e149e2fe06ab5c9a44bf249",
+    "semantic_hash": ""
+  },
+  "migrations/054_user_settings_day_start_reminder.sql": {
+    "mtime": 1784260771.5859776,
+    "ast_hash": "aca2b46663145c7f0b2cc107d850aea7",
+    "semantic_hash": ""
+  },
+  "migrations/055_restore_habit_logs_archived_on_fail.sql": {
+    "mtime": 1784261253.8912742,
+    "ast_hash": "be6732d55fc1d41f3792ae5d2d98a0b1",
+    "semantic_hash": ""
+  },
+  "migrations/056_offline_client_ids.sql": {
+    "mtime": 1784679211.0577712,
+    "ast_hash": "9c88b49752b4d9e4278beb3aecc08b3b",
+    "semantic_hash": ""
+  },
+  "src/graphql/modules/activity-day-plan/activity-day-plan.resolvers.ts": {
+    "mtime": 1784679211.415075,
+    "ast_hash": "94649761ac90938f8eb44d5f3bdf019c",
+    "semantic_hash": ""
+  },
+  "src/graphql/modules/activity-day-plan/activity-day-plan.schema.ts": {
+    "mtime": 1784679211.4148958,
+    "ast_hash": "81115ff8b308df85003bb7547b039eed",
+    "semantic_hash": ""
+  },
+  "src/graphql/modules/credit-card/credit-card.resolvers.ts": {
+    "mtime": 1783891525.5653987,
+    "ast_hash": "590b553c6770d6fe55178ea934398ae6",
+    "semantic_hash": ""
+  },
+  "src/graphql/modules/credit-card/credit-card.schema.ts": {
+    "mtime": 1783891484.0945573,
+    "ast_hash": "e71918e375e7d57366432a3e4f7b7cd0",
+    "semantic_hash": ""
+  },
+  "src/graphql/modules/expense-extraction/expense-extraction.resolvers.ts": {
+    "mtime": 1783049490.4733741,
+    "ast_hash": "de1d595ef52145b1b048eea1a97d9d4c",
+    "semantic_hash": ""
+  },
+  "src/graphql/modules/expense-extraction/expense-extraction.schema.ts": {
+    "mtime": 1783049487.5914183,
+    "ast_hash": "edf32d8cdb780f1e2a26dec3e07f3d4c",
+    "semantic_hash": ""
+  },
+  "src/graphql/modules/user-settings/user-settings.resolvers.ts": {
+    "mtime": 1782260906.3701386,
+    "ast_hash": "fbe8589e0375f39e5c6296c604728101",
+    "semantic_hash": ""
+  },
+  "src/graphql/modules/user-settings/user-settings.schema.ts": {
+    "mtime": 1784736326.7719464,
+    "ast_hash": "80430ab6f80ee7869cb40b9622841f7c",
+    "semantic_hash": ""
+  },
+  "src/graphql/modules/wallet-transfer/wallet-transfer.resolvers.ts": {
+    "mtime": 1783033037.261729,
+    "ast_hash": "42d5cccf4ab7e80660363aaa68a0d459",
+    "semantic_hash": ""
+  },
+  "src/graphql/modules/wallet-transfer/wallet-transfer.schema.ts": {
+    "mtime": 1783033032.8233693,
+    "ast_hash": "847edd9be8f24e3f5d2856b1c1074106",
+    "semantic_hash": ""
+  },
+  "src/services/activity-day-plan.service.ts": {
+    "mtime": 1784679211.4148605,
+    "ast_hash": "93e519a95e5c3df61f7891ebdaf1b18d",
+    "semantic_hash": ""
+  },
+  "src/services/credit-card.service.ts": {
+    "mtime": 1783891519.726482,
+    "ast_hash": "97b3462d126a00db0c926e3e4380da0a",
+    "semantic_hash": ""
+  },
+  "src/services/expense-extraction.service.ts": {
+    "mtime": 1783049467.4818017,
+    "ast_hash": "8ddcf1dbceeae59ea71d98eb1be9cc0f",
+    "semantic_hash": ""
+  },
+  "src/services/sleep-follow-up-sync.service.ts": {
+    "mtime": 1782264183.171888,
+    "ast_hash": "3e04edcec44d2751b84e9bbe10746828",
+    "semantic_hash": ""
+  },
+  "src/services/user-settings.service.ts": {
+    "mtime": 1784736324.6543853,
+    "ast_hash": "8b5f53da8e994430228202d6921a328d",
+    "semantic_hash": ""
+  },
+  "src/services/wallet-transfer.service.ts": {
+    "mtime": 1783033005.9741366,
+    "ast_hash": "8151c7454d624e0f3f4e3b359bf31abe",
+    "semantic_hash": ""
+  },
+  "src/shared/utils/sleep-bedtime-time.ts": {
+    "mtime": 1782264228.0057087,
+    "ast_hash": "738ef569cf1fbb5af3ee5edf8a7a8cdb",
+    "semantic_hash": ""
+  },
+  "src/types/services/activity-day-plan.types.ts": {
+    "mtime": 1784679211.020941,
+    "ast_hash": "50ffc2c229909662683c80702e9f97f7",
+    "semantic_hash": ""
+  },
+  "src/types/services/credit-card.types.ts": {
+    "mtime": 1783891486.914473,
+    "ast_hash": "be223c238ecf231bd09c4b794e0731f0",
+    "semantic_hash": ""
+  },
+  "src/types/services/expense-extraction.types.ts": {
+    "mtime": 1783049439.1225975,
+    "ast_hash": "4f50d000bf276bdfb711564293e53639",
+    "semantic_hash": ""
+  },
+  "src/types/services/user-settings.types.ts": {
+    "mtime": 1784736320.9241085,
+    "ast_hash": "a6761bbc4cc6c5393be4317f06d6fb5f",
+    "semantic_hash": ""
+  },
+  "src/types/services/wallet-transfer.types.ts": {
+    "mtime": 1783032976.9902182,
+    "ast_hash": "101d2edfcd9f65a478f8bc57153f49e7",
+    "semantic_hash": ""
+  },
+  "src/validators/schemas/activity-day-plan.schemas.ts": {
+    "mtime": 1784679211.0579004,
+    "ast_hash": "18528a610ccab3d512b8cbb3e740ccdd",
+    "semantic_hash": ""
+  },
+  "src/validators/schemas/credit-card.schemas.ts": {
+    "mtime": 1783891507.9748635,
+    "ast_hash": "163e0e9454daac87f9dd423424067722",
+    "semantic_hash": ""
+  },
+  "src/validators/schemas/expense-extraction.schemas.ts": {
+    "mtime": 1783065726.1498404,
+    "ast_hash": "f4ff1730bc65f782f69218fcca890f43",
+    "semantic_hash": ""
+  },
+  "src/validators/schemas/user-settings.schemas.ts": {
+    "mtime": 1784736327.1551757,
+    "ast_hash": "ac17927af071757b578b51955a802288",
+    "semantic_hash": ""
+  },
+  "src/validators/schemas/wallet-transfer.schemas.ts": {
+    "mtime": 1783032979.4329457,
+    "ast_hash": "2955952a7d9a6d285ff608d616385322",
+    "semantic_hash": ""
+  },
+  "tests/unit/services/activity-day-plan.service.test.ts": {
+    "mtime": 1784679211.058075,
+    "ast_hash": "1d2289eb9bbeb4b4f2728bfbc286fb38",
+    "semantic_hash": ""
+  },
+  "tests/unit/services/sleep-follow-up-sync.service.test.ts": {
+    "mtime": 1784260771.518564,
+    "ast_hash": "bc970f5419d29a89a691fa54fa071598",
+    "semantic_hash": ""
+  },
+  "tests/unit/services/user-settings.service.test.ts": {
+    "mtime": 1784736379.236241,
+    "ast_hash": "42ec54dd2aedf46bc5bc3ac6f621f0b8",
+    "semantic_hash": ""
+  },
+  "tests/unit/shared/sleep-bedtime-time.test.ts": {
+    "mtime": 1782264229.2633786,
+    "ast_hash": "d180a9feb340909385ec716e1166d7d0",
+    "semantic_hash": ""
+  },
+  "tests/unit/shared/uuid-v7.test.ts": {
+    "mtime": 1784679211.4150202,
+    "ast_hash": "6dbe195ac7e5346aab53fb125cbd5154",
+    "semantic_hash": ""
+  },
+  "migrations/057_todos_client_id.sql": {
+    "mtime": 1784317517.6804953,
+    "ast_hash": "8cb68ec6e332e87d3660cbc0bf88b692",
+    "semantic_hash": ""
+  },
+  "migrations/058_vida_items.sql": {
+    "mtime": 1784679211.0578878,
+    "ast_hash": "56cf0575779a0085033ac9cc2507dfaa",
+    "semantic_hash": ""
+  },
+  "migrations/059_activity_follow_up_subtasks.sql": {
+    "mtime": 1784679211.0577922,
+    "ast_hash": "f516273d504d194053e6acc60e415aad",
+    "semantic_hash": ""
+  },
+  "src/graphql/modules/vida/vida.resolvers.ts": {
+    "mtime": 1784679211.415046,
+    "ast_hash": "cd68e75f8eb4d07d9baf5680133e7311",
+    "semantic_hash": ""
+  },
+  "src/graphql/modules/vida/vida.schema.ts": {
+    "mtime": 1784679211.0578692,
+    "ast_hash": "e6feabb28e99e6a942331b21d4ac7416",
+    "semantic_hash": ""
+  },
+  "src/services/vida.service.ts": {
+    "mtime": 1784679211.4149346,
+    "ast_hash": "e48fe2e5c24a29a7fb7bb94f5a9969da",
+    "semantic_hash": ""
+  },
+  "src/types/services/vida.types.ts": {
+    "mtime": 1784679211.4152317,
+    "ast_hash": "ab0f4bec32cf13e1b59c7b04203bec75",
+    "semantic_hash": ""
+  },
+  "src/validators/schemas/vida.schemas.ts": {
+    "mtime": 1784679211.0578544,
+    "ast_hash": "2680e5f9e336ee29e12aebcc38740139",
+    "semantic_hash": ""
+  },
+  "tests/unit/services/vida.service.test.ts": {
+    "mtime": 1784679211.0577495,
+    "ast_hash": "2be36fd53e8134b9ef66628e1202943f",
+    "semantic_hash": ""
+  },
+  "migrations/060_workout_entrenamiento.sql": {
+    "mtime": 1784679211.415005,
+    "ast_hash": "2835f9d919037970647759327d93b805",
+    "semantic_hash": ""
+  },
+  "src/graphql/modules/workout/workout.resolvers.ts": {
+    "mtime": 1784679211.0577013,
+    "ast_hash": "e60b953e4f2029eee434a8697a44d853",
+    "semantic_hash": ""
+  },
+  "src/graphql/modules/workout/workout.schema.ts": {
+    "mtime": 1784679211.0962179,
+    "ast_hash": "0267cf1d890688f91c64486421cd3a43",
+    "semantic_hash": ""
+  },
+  "src/services/workout.service.ts": {
+    "mtime": 1784679211.0580068,
+    "ast_hash": "70622266ca02c285500d12c3727fdd69",
+    "semantic_hash": ""
+  },
+  "src/types/services/workout.types.ts": {
+    "mtime": 1784679211.057873,
+    "ast_hash": "ae503086764ad1a12f61948d8cf43e58",
+    "semantic_hash": ""
+  },
+  "src/validators/schemas/workout.schemas.ts": {
+    "mtime": 1784679211.057991,
+    "ast_hash": "8c14d786e7a6daf4e4d2fcc3e35e5b02",
+    "semantic_hash": ""
+  },
+  "tests/unit/services/workout.service.test.ts": {
+    "mtime": 1784679211.415106,
+    "ast_hash": "c8e45343601c1cd3f83254b5d2cd9831",
+    "semantic_hash": ""
+  },
+  "migrations/061_workout_game.sql": {
+    "mtime": 1784679211.4151514,
+    "ast_hash": "01665886037bfb4c9a45dcde631e22c3",
+    "semantic_hash": ""
+  },
+  "migrations/062_standup.sql": {
+    "mtime": 1784736163.390162,
+    "ast_hash": "1a9c48695612b1b456699222a2967e03",
+    "semantic_hash": ""
+  },
+  "src/graphql/modules/standup/standup.resolvers.ts": {
+    "mtime": 1784736696.3600268,
+    "ast_hash": "fef0478f96e7adea97f13a2a0b4019b0",
+    "semantic_hash": ""
+  },
+  "src/graphql/modules/standup/standup.schema.ts": {
+    "mtime": 1784736257.0424519,
+    "ast_hash": "51ba3ac20ae63234b1faaec91545d85a",
+    "semantic_hash": ""
+  },
+  "src/services/standup.service.ts": {
+    "mtime": 1784736280.7872095,
+    "ast_hash": "9339a336feaeaa91f2c3cd5b2854b1a2",
+    "semantic_hash": ""
+  },
+  "src/services/workout-game.ts": {
+    "mtime": 1784679211.415142,
+    "ast_hash": "afc532b2209d52459f0d313b03b55aa2",
+    "semantic_hash": ""
+  },
+  "src/types/services/standup.types.ts": {
+    "mtime": 1784736163.4127388,
+    "ast_hash": "5b803f2fb6069de189bf4409d2414925",
+    "semantic_hash": ""
+  },
+  "src/validators/schemas/standup.schemas.ts": {
+    "mtime": 1784736243.7857661,
+    "ast_hash": "f4c257bafd0bd9036bab44493985eab6",
+    "semantic_hash": ""
+  },
+  "tests/unit/services/standup.service.test.ts": {
+    "mtime": 1784736408.6785989,
+    "ast_hash": "6e69e570245ee4ccec7d5528e3f51bf5",
+    "semantic_hash": ""
+  },
+  "tests/unit/services/workout-game.test.ts": {
+    "mtime": 1784679211.0568721,
+    "ast_hash": "24bd66869f5eddb90e4d5dce57578e7c",
+    "semantic_hash": ""
   }
 }

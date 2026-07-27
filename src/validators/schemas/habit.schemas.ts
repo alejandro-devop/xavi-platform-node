@@ -187,6 +187,13 @@ export const habitFollowUpAddInputSchema = z.object({
   isFailed: z.boolean().optional(),
   isLifeline: z.boolean().optional(),
   difficulty: z.number().int().min(0).max(4).nullable().optional(),
+  clientId: z
+    .string()
+    .regex(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+      'clientId must be a UUID v7'
+    )
+    .optional(),
 });
 
 export const habitFollowUpEditInputSchema = z
@@ -231,6 +238,7 @@ export const habitFollowUpRemoveIdSchema = z.object({
 });
 
 export const habitCategoryAddInputSchema = z.object({
+  id: uuidString.optional(),
   name: z.string().min(1).max(255),
   description: z.string().nullable().optional(),
   icon: z.string().max(255).nullable().optional(),
@@ -258,6 +266,7 @@ export const habitCategoryEditInputSchema = z
   );
 
 export const habitMeasureAddInputSchema = z.object({
+  id: uuidString.optional(),
   name: z.string().min(1).max(255),
   abbreviation: z.string().max(50).nullable().optional(),
   type: z.string().max(50).nullable().optional(),

@@ -1,3 +1,16 @@
+import type { ActivitySubtasksCount } from './activity.types';
+
+export interface ActivityFollowUpSubtask {
+  id: string;
+  followUpId: string;
+  activitySubtaskId: string | null;
+  title: string;
+  isCompleted: boolean;
+  orderIndex: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface ActivityFollowUp {
   id: string;
   activityId: string;
@@ -13,6 +26,8 @@ export interface ActivityFollowUp {
   linkedTodoId: string | null;
   createdAt: Date;
   updatedAt: Date;
+  sessionSubtasks?: ActivityFollowUpSubtask[];
+  sessionSubtasksCount?: ActivitySubtasksCount;
 }
 
 export interface StartActivityFollowUpInput {
@@ -21,6 +36,18 @@ export interface StartActivityFollowUpInput {
   startTime: string;
   notes?: string | null;
   linkedTodoId?: string | null;
+  clientId?: string | null;
+  /** IDs de `activity_subtasks` a incluir en esta ejecución. */
+  subtaskIds?: string[];
+}
+
+export interface UpdateActivityFollowUpSubtaskInput {
+  isCompleted: boolean;
+}
+
+export interface AddActivityFollowUpSubtaskInput {
+  followUpId: string;
+  title: string;
 }
 
 export interface CreateActivityFollowUpInput {
@@ -29,6 +56,7 @@ export interface CreateActivityFollowUpInput {
   startTime: string;
   durationMinutes: number;
   notes?: string | null;
+  clientId?: string | null;
 }
 
 export interface UpdateActivityFollowUpInput {

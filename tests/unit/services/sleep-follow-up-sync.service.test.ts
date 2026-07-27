@@ -65,6 +65,10 @@ describe('sleepFollowUpSyncService', () => {
       sleepActivityCategoryId: null,
       habitReminderEnabled: false,
       habitReminderTime: null,
+      dayStartReminderEnabled: false,
+      dayStartReminderTime: null,
+      standupTodoFolderId: null,
+      houseworkActivityId: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -81,6 +85,10 @@ describe('sleepFollowUpSyncService', () => {
       sleepActivityCategoryId: CATEGORY_ID,
       habitReminderEnabled: false,
       habitReminderTime: null,
+      dayStartReminderEnabled: false,
+      dayStartReminderTime: null,
+      standupTodoFolderId: null,
+      houseworkActivityId: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -128,6 +136,10 @@ describe('sleepFollowUpSyncService', () => {
       sleepActivityCategoryId: CATEGORY_ID,
       habitReminderEnabled: false,
       habitReminderTime: null,
+      dayStartReminderEnabled: false,
+      dayStartReminderTime: null,
+      standupTodoFolderId: null,
+      houseworkActivityId: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     });

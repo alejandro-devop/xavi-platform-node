@@ -37,6 +37,21 @@
 - Documentación: `docs/graphql/activity-bruno.md`.
 - **Colección Bruno:** `bruno/xavi-activity-graphql/`.
 
+## Entrenamiento (Workout)
+
+- Esquema SDL y resolvers: `src/graphql/modules/workout/`.
+- Servicio: `src/services/workout.service.ts`.
+- Migración: `migrations/060_workout_entrenamiento.sql`.
+- Documentación: `docs/graphql/workout-bruno.md`.
+
+## My Stand up
+
+- Esquema SDL y resolvers: `src/graphql/modules/standup/`.
+- Servicio: `src/services/standup.service.ts`.
+- Migración: `migrations/062_standup.sql`.
+- Setting de carpeta de todos: `user_settings.standup_todo_folder_id`.
+- Documentación: `docs/graphql/standup-bruno.md`.
+
 ## Todos
 
 - Esquema SDL y resolvers: `src/graphql/modules/todo/`.

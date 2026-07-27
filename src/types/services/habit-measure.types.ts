@@ -9,6 +9,7 @@ export interface HabitMeasure {
 }
 
 export interface CreateHabitMeasureInput {
+  id?: string | null;
   name: string;
   abbreviation?: string | null;
   type?: string | null;

@@ -42,6 +42,7 @@ docker push "${IMAGE_NAME}"
 echo ""
 echo "☁️  Step 3/3: Deploying to Cloud Run..."
 gcloud run deploy "${SERVICE_NAME}" \
+  --project="${PROJECT_ID}" \
   --image="${IMAGE_NAME}" \
   --platform=managed \
   --region="${REGION}" \
@@ -62,5 +63,8 @@ echo "✅ Deployment completed successfully!"
 echo "=========================================="
 echo ""
 echo "Service URL:"
-gcloud run services describe "${SERVICE_NAME}" --region="${REGION}" --format="value(status.url)"
+gcloud run services describe "${SERVICE_NAME}" \
+  --project="${PROJECT_ID}" \
+  --region="${REGION}" \
+  --format="value(status.url)"
 echo ""

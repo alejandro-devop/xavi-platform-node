@@ -96,6 +96,59 @@ describe('TodoService', () => {
     });
   });
 
+  describe('createTodo', () => {
+    const CLIENT_ID = '01890a5d-ac96-774b-bcce-b302099a8057';
+
+    it('persists a valid clientId', async () => {
+      mockDbPool.query
+        .mockResolvedValueOnce({ rows: [] }) // lookup por client_id
+        .mockResolvedValueOnce({ rows: [createTodoRow()] }); // INSERT
+
+      const todo = await todoService.createTodo(USER_ID, {
+        title: 'Buy groceries',
+        orderIndex: 0,
+        clientId: CLIENT_ID,
+      });
+
+      expect(todo.id).toBe(String(TODO_ID));
+      const insertCall = mockDbPool.query.mock.calls[1];
+      expect(insertCall[0]).toContain('INSERT INTO todos');
+      expect(insertCall[0]).toContain('client_id');
+      expect(insertCall[1]).toContain(CLIENT_ID);
+    });
+
+    it('returns existing todo when clientId was already used', async () => {
+      mockDbPool.query
+        .mockResolvedValueOnce({ rows: [createTodoRow()] }) // lookup por client_id
+        .mockResolvedValueOnce({ rows: [] }); // tags del todo existente
+
+      const todo = await todoService.createTodo(USER_ID, {
+        title: 'Buy groceries',
+        orderIndex: 0,
+        clientId: CLIENT_ID,
+      });
+
+      expect(todo.id).toBe(String(TODO_ID));
+      const sqlCalls = mockDbPool.query.mock.calls.map((call) => call[0] as string);
+      expect(sqlCalls.some((sql) => sql.includes('INSERT INTO todos'))).toBe(false);
+    });
+
+    it('ignores an invalid clientId', async () => {
+      mockDbPool.query.mockResolvedValueOnce({ rows: [createTodoRow()] }); // INSERT directo
+
+      await todoService.createTodo(USER_ID, {
+        title: 'Buy groceries',
+        orderIndex: 0,
+        clientId: 'not-a-uuid',
+      });
+
+      const insertCall = mockDbPool.query.mock.calls[0];
+      expect(insertCall[0]).toContain('INSERT INTO todos');
+      expect(insertCall[1]).toContain(null);
+      expect(insertCall[1]).not.toContain('not-a-uuid');
+    });
+  });
+
   describe('completeTodo', () => {
     it('marks todo as completed', async () => {
       const now = new Date();

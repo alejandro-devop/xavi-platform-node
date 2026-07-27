@@ -11,6 +11,10 @@ import { frequencyTypeDefs } from './modules/frequency/frequency.schema';
 import { periodTypeDefs } from './modules/period/period.schema';
 import { shoppingTypeDefs } from './modules/shopping/shopping.schema';
 import { activityTypeDefs } from './modules/activity/activity.schema';
+import { activityDayPlanTypeDefs } from './modules/activity-day-plan/activity-day-plan.schema';
+import { vidaTypeDefs } from './modules/vida/vida.schema';
+import { workoutTypeDefs } from './modules/workout/workout.schema';
+import { standupTypeDefs } from './modules/standup/standup.schema';
 import { habitTypeDefs } from './modules/habit/habit.schema';
 import { routineTypeDefs } from './modules/routine/routine.schema';
 import { weeklyRoutineTypeDefs } from './modules/weekly-routine/weekly-routine.schema';
@@ -51,6 +55,10 @@ export const typeDefs = [
   periodTypeDefs,
   shoppingTypeDefs,
   activityTypeDefs,
+  activityDayPlanTypeDefs,
+  vidaTypeDefs,
+  workoutTypeDefs,
+  standupTypeDefs,
   habitTypeDefs,
   routineTypeDefs,
   weeklyRoutineTypeDefs,

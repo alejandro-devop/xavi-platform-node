@@ -1,5 +1,6 @@
 import { getDbPool } from '../shared/database/pool';
-import { ConflictError, ForbiddenError, NotFoundError } from '../shared/errors';
+import { BadRequestError, ConflictError, ForbiddenError, NotFoundError } from '../shared/errors';
+import { isUuidV7 } from '../shared/database/uuid';
 import { habitCategoryService } from './habit-category.service';
 import { habitMeasureService } from './habit-measure.service';
 import { activityService } from './activity.service';
@@ -579,6 +580,20 @@ async function addHabitLog(
   const date = input.completedDate ?? new Date().toISOString().split('T')[0];
   const db = getDbPool();
 
+  const clientId = input.clientId ?? null;
+  if (clientId != null) {
+    if (!isUuidV7(clientId)) {
+      throw new BadRequestError('clientId must be a UUID v7');
+    }
+    const byClient = await db.query<HabitLogRow>(
+      `SELECT ${LOG_RETURNING} FROM habit_logs WHERE client_id = $1 AND user_id = $2`,
+      [clientId, userId]
+    );
+    if (byClient.rows.length > 0) {
+      return mapHabitLog(byClient.rows[0]);
+    }
+  }
+
   if (input.isLifeline === true) {
     const today = new Date().toISOString().split('T')[0];
     const yesterday = addDaysToDateString(today, -1);
@@ -595,10 +610,18 @@ async function addHabitLog(
     const insertResult = await db.query<HabitLogRow>(
       `INSERT INTO habit_logs
          (habit_id, user_id, completed_date, count, time, notes, story,
-          is_accomplished, is_failed, is_lifeline, difficulty)
-       VALUES ($1, $2, $3::date, 0, 0, $4, $5, FALSE, FALSE, TRUE, $6)
+          is_accomplished, is_failed, is_lifeline, difficulty, client_id)
+       VALUES ($1, $2, $3::date, 0, 0, $4, $5, FALSE, FALSE, TRUE, $6, $7)
        RETURNING ${LOG_RETURNING}`,
-      [habitId, userId, date, input.notes ?? null, input.story ?? null, input.difficulty ?? null]
+      [
+        habitId,
+        userId,
+        date,
+        input.notes ?? null,
+        input.story ?? null,
+        input.difficulty ?? null,
+        clientId,
+      ]
     );
     await applyStreakAfterFollowUp(habit, date, false, false, true);
     return mapHabitLog(insertResult.rows[0]);
@@ -632,8 +655,10 @@ async function addHabitLog(
       `UPDATE habit_logs
        SET count = $1, time = $2, notes = COALESCE($3, notes), story = COALESCE($4, story),
            is_accomplished = $5, is_failed = $6, archived = FALSE,
-           difficulty = COALESCE($7, difficulty), updated_at = NOW()
-       WHERE id = $8
+           difficulty = COALESCE($7, difficulty),
+           client_id = COALESCE(client_id, $8),
+           updated_at = NOW()
+       WHERE id = $9
        RETURNING ${LOG_RETURNING}`,
       [
         mergedCount,
@@ -643,6 +668,7 @@ async function addHabitLog(
         accomplished,
         isFailed,
         input.difficulty ?? null,
+        clientId,
         existing.rows[0].id,
       ]
     );
@@ -652,8 +678,8 @@ async function addHabitLog(
     const insertResult = await db.query<HabitLogRow>(
       `INSERT INTO habit_logs
          (habit_id, user_id, completed_date, count, time, notes, story,
-          is_accomplished, is_failed, is_lifeline, difficulty)
-       VALUES ($1, $2, $3::date, $4, $5, $6, $7, $8, $9, FALSE, $10)
+          is_accomplished, is_failed, is_lifeline, difficulty, client_id)
+       VALUES ($1, $2, $3::date, $4, $5, $6, $7, $8, $9, FALSE, $10, $11)
        RETURNING ${LOG_RETURNING}`,
       [
         habitId,
@@ -666,6 +692,7 @@ async function addHabitLog(
         isAccomplished,
         isFailed,
         input.difficulty ?? null,
+        clientId,
       ]
     );
     logRow = insertResult.rows[0];
