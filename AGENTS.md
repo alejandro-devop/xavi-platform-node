@@ -80,6 +80,13 @@
 - Migración FTS: `migrations/056_create_learning_notes.sql`.
 - Documentación: `docs/graphql/learning-note-bruno.md`.
 
+## App Ideas
+
+- Esquema SDL y resolvers: `src/graphql/modules/app-idea/`.
+- Servicio: `src/services/app-idea.service.ts`.
+- Migración FTS: `migrations/065_create_app_ideas.sql`.
+- Documentación: `docs/graphql/app-idea-bruno.md`.
+
 ## Courses
 
 - Esquema SDL y resolvers: `src/graphql/modules/course/`.

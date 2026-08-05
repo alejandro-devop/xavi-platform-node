@@ -22,6 +22,7 @@ import { todoTypeDefs } from './modules/todo/todo.schema';
 import { sleepTypeDefs } from './modules/sleep/sleep.schema';
 import { learningTypeDefs } from './modules/learning/learning.schema';
 import { learningNoteTypeDefs } from './modules/learning-note/learning-note.schema';
+import { appIdeaTypeDefs } from './modules/app-idea/app-idea.schema';
 import { courseTypeDefs } from './modules/course/course.schema';
 import { sweeterWayTypeDefs } from './modules/sweeter-way/sweeter-way.schema';
 import { noteTypeDefs } from './modules/note/note.schema';
@@ -67,6 +68,7 @@ export const typeDefs = [
   sleepTypeDefs,
   learningTypeDefs,
   learningNoteTypeDefs,
+  appIdeaTypeDefs,
   courseTypeDefs,
   sweeterWayTypeDefs,
   noteTypeDefs,
