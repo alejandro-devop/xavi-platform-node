@@ -21,6 +21,7 @@ import { todoResolvers } from './modules/todo/todo.resolvers';
 import { sleepResolvers } from './modules/sleep/sleep.resolvers';
 import { learningResolvers } from './modules/learning/learning.resolvers';
 import { learningNoteResolvers } from './modules/learning-note/learning-note.resolvers';
+import { appIdeaResolvers } from './modules/app-idea/app-idea.resolvers';
 import { courseResolvers } from './modules/course/course.resolvers';
 import { sweeterWayResolvers } from './modules/sweeter-way/sweeter-way.resolvers';
 import { noteResolvers } from './modules/note/note.resolvers';
@@ -53,6 +54,7 @@ export const resolvers = mergeResolvers([
   sleepResolvers,
   learningResolvers,
   learningNoteResolvers,
+  appIdeaResolvers,
   courseResolvers,
   sweeterWayResolvers,
   noteResolvers,
