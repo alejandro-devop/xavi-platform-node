@@ -32,7 +32,11 @@ export function initializeDrizzle(): DrizzleDb {
       max: 10,
       min: 2,
       idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 5000,
+      // 15s, no 5s: Neon autosuspende, y la primera conexión tras un periodo
+      // de inactividad tiene que esperar a que despierte. Con 5s el
+      // `SELECT 1` de initializeServices() fallaba y tumbaba el arranque
+      // (process.exit(1)) en el primer request de la mañana.
+      connectionTimeoutMillis: 15000,
       keepAlive: true,
       keepAliveInitialDelayMillis: 10000,
     });
