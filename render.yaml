@@ -1,0 +1,67 @@
+# Blueprint de Render para xavi-api.
+#
+# Fase de pruebas: instancia free en paralelo al servicio de Cloud Run.
+# No sustituye a `.github/workflows/deploy.yml` todavía — ambos pueden
+# coexistir mientras se valida.
+#
+# Antes de aplicar, ver docs/render-migration.md.
+services:
+  - name: xavi-api
+    type: web
+    runtime: docker
+    plan: free
+    # Elegir la región más cercana a donde viva la base en Neon.
+    # us-east-2 de Neon ≈ ohio. Confirmar antes de desplegar: una región
+    # equivocada mete latencia en cada query.
+    region: ohio
+    dockerfilePath: ./Dockerfile
+    # Las rutas van con prefijo /api (app.ts monta `app.use('/api', routes)`).
+    # Verificado contra el contenedor: /health da 404, /api/health da 200.
+    healthCheckPath: /api/health
+
+    envVars:
+      - key: NODE_ENV
+        value: production
+
+      # El pre-deploy command no existe en instancias free, y el contenedor
+      # se reinicia cada vez que el servicio despierta del spin-down. Correr
+      # migraciones en cada arranque sería costoso e innecesario: se ejecutan
+      # a mano desde local (ver runbook).
+      - key: RUN_MIGRATIONS
+        value: 'false'
+
+      # Redis queda apagado a propósito. Hoy ya está inactivo en producción:
+      # el cliente lee REDIS_HOST/REDIS_PORT, no el REDIS_URL que inyecta
+      # Cloud Run, y ENABLE_REDIS_CACHE nunca se seteó allí.
+      - key: ENABLE_REDIS_CACHE
+        value: 'false'
+
+      - key: JWT_ACCESS_EXPIRES_IN
+        value: 24h
+      - key: JWT_REFRESH_EXPIRES_IN
+        value: 30d
+
+      - key: EMAIL_FROM
+        value: noreply@alejosworld.com
+      - key: EMAIL_OTP_EXPIRATION_MINUTES
+        value: '15'
+
+      - key: LOG_LEVEL
+        value: info
+
+      # Secretos: se cargan en el dashboard de Render al crear el blueprint.
+      # `sync: false` hace que Render los pida en vez de leerlos del repo.
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_ACCESS_SECRET
+        sync: false
+      - key: JWT_REFRESH_SECRET
+        sync: false
+      - key: CLAUDE_API_KEY
+        sync: false
+      - key: EMAIL_API_KEY
+        sync: false
+
+    # ALLOWED_ORIGINS no hace falta: src/shared/config/cors.ts ya trae
+    # localhost:5173, localhost:3000 y ambos dominios de Vercel en su lista
+    # built-in, permitidos siempre.
