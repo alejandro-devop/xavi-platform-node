@@ -339,6 +339,8 @@ describe('StandupService', () => {
         dayStartReminderTime: null,
         standupTodoFolderId: null,
         houseworkActivityId: null,
+        vidaDayStartTime: null,
+        vidaDayEndTime: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       });
@@ -362,6 +364,8 @@ describe('StandupService', () => {
         dayStartReminderTime: null,
         standupTodoFolderId: '10',
         houseworkActivityId: null,
+        vidaDayStartTime: null,
+        vidaDayEndTime: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       });

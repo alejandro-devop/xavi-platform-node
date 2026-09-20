@@ -23,6 +23,14 @@ export const userSettingsTypeDefs = gql`
     Activity canónica para el wizard Housework (organizar la casa).
     """
     houseworkActivityId: ID
+    """
+    Hora local en que empieza el día de Vida, formato HH:mm. Si es null el cliente usa 06:30.
+    """
+    vidaDayStartTime: String
+    """
+    Hora local en que termina el día de Vida, formato HH:mm. Si es null el cliente usa 23:00.
+    """
+    vidaDayEndTime: String
     createdAt: DateTime!
     updatedAt: DateTime!
   }
@@ -56,5 +64,13 @@ export const userSettingsTypeDefs = gql`
     ID de Activity canónica Housework (o null para limpiar).
     """
     houseworkActivityId: ID
+    """
+    Hora local HH:mm en que empieza el día de Vida (o null para limpiar).
+    """
+    vidaDayStartTime: String
+    """
+    Hora local HH:mm en que termina el día de Vida (o null para limpiar).
+    """
+    vidaDayEndTime: String
   }
 `;

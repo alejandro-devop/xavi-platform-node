@@ -17,4 +17,6 @@ export const updateUserSettingsInputSchema = z.object({
   dayStartReminderTime: timeSchema.optional(),
   standupTodoFolderId: folderIdString.nullable().optional(),
   houseworkActivityId: activityIdString.nullable().optional(),
+  vidaDayStartTime: timeSchema.optional(),
+  vidaDayEndTime: timeSchema.optional(),
 });

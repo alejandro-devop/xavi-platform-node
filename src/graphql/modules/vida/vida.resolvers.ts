@@ -77,6 +77,8 @@ export const vidaResolvers = {
         return await vidaService.createItem(uid(context), {
           activityId: input.activityId,
           days: input.days,
+          startTime: input.startTime ?? null,
+          durationMinutes: input.durationMinutes ?? null,
           notes: input.notes ?? null,
           orderIndex: input.orderIndex,
           clientId: input.clientId,

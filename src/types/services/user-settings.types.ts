@@ -14,6 +14,10 @@ export interface UserSettings {
   standupTodoFolderId: string | null;
   /** Activity canónica para el wizard Housework (organizar casa). */
   houseworkActivityId: string | null;
+  /** Hora local "HH:mm" en que empieza el día de Vida; null → el cliente usa 06:30. */
+  vidaDayStartTime: string | null;
+  /** Hora local "HH:mm" en que termina el día de Vida; null → el cliente usa 23:00. */
+  vidaDayEndTime: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -27,4 +31,8 @@ export interface UpdateUserSettingsInput {
   dayStartReminderTime?: string | null;
   standupTodoFolderId?: string | null;
   houseworkActivityId?: string | null;
+  /** Hora local "HH:mm" de inicio del día de Vida; null limpia el valor. */
+  vidaDayStartTime?: string | null;
+  /** Hora local "HH:mm" de fin del día de Vida; null limpia el valor. */
+  vidaDayEndTime?: string | null;
 }

@@ -47,6 +47,8 @@ function createSettingsRow(overrides: Record<string, unknown> = {}) {
     day_start_reminder_time: null,
     standup_todo_folder_id: null,
     housework_activity_id: null,
+    vida_day_start_time: null,
+    vida_day_end_time: null,
     created_at: now,
     updated_at: now,
     ...overrides,
@@ -75,6 +77,31 @@ describe('UserSettingsService', () => {
 
       expect(settings.dayStartReminderEnabled).toBe(true);
       expect(settings.dayStartReminderTime).toBe('07:30');
+    });
+
+    it('maps the Vida day hours with HH:mm time', async () => {
+      mockDbPool.query.mockResolvedValueOnce({
+        rows: [
+          createSettingsRow({
+            vida_day_start_time: '06:30:00',
+            vida_day_end_time: '23:00:00',
+          }),
+        ],
+      });
+
+      const settings = await userSettingsService.getMySettings(USER_ID);
+
+      expect(settings.vidaDayStartTime).toBe('06:30');
+      expect(settings.vidaDayEndTime).toBe('23:00');
+    });
+
+    it('leaves the Vida day hours null when they are not configured', async () => {
+      mockDbPool.query.mockResolvedValueOnce({ rows: [createSettingsRow()] });
+
+      const settings = await userSettingsService.getMySettings(USER_ID);
+
+      expect(settings.vidaDayStartTime).toBeNull();
+      expect(settings.vidaDayEndTime).toBeNull();
     });
 
     it('maps houseworkActivityId as string ID', async () => {
@@ -127,6 +154,55 @@ describe('UserSettingsService', () => {
       expect(settings.dayStartReminderTime).toBeNull();
       const [, params] = mockDbPool.query.mock.calls[1];
       expect(params).toEqual([null, USER_ID]);
+    });
+
+    it('updates the Vida day hours dynamically', async () => {
+      mockDbPool.query
+        .mockResolvedValueOnce({ rows: [createSettingsRow()] }) // getOrCreate
+        .mockResolvedValueOnce({
+          rows: [
+            createSettingsRow({
+              vida_day_start_time: '06:30:00',
+              vida_day_end_time: '23:00:00',
+            }),
+          ],
+        });
+
+      const settings = await userSettingsService.updateMySettings(USER_ID, {
+        vidaDayStartTime: '06:30',
+        vidaDayEndTime: '23:00',
+      });
+
+      expect(settings.vidaDayStartTime).toBe('06:30');
+      expect(settings.vidaDayEndTime).toBe('23:00');
+
+      const [sql, params] = mockDbPool.query.mock.calls[1];
+      expect(sql).toContain('vida_day_start_time = $1');
+      expect(sql).toContain('vida_day_end_time = $2');
+      expect(params).toEqual(['06:30', '23:00', USER_ID]);
+    });
+
+    it('clears the Vida day hours with null', async () => {
+      mockDbPool.query
+        .mockResolvedValueOnce({
+          rows: [
+            createSettingsRow({
+              vida_day_start_time: '06:30:00',
+              vida_day_end_time: '23:00:00',
+            }),
+          ],
+        })
+        .mockResolvedValueOnce({ rows: [createSettingsRow()] });
+
+      const settings = await userSettingsService.updateMySettings(USER_ID, {
+        vidaDayStartTime: null,
+        vidaDayEndTime: null,
+      });
+
+      expect(settings.vidaDayStartTime).toBeNull();
+      expect(settings.vidaDayEndTime).toBeNull();
+      const [, params] = mockDbPool.query.mock.calls[1];
+      expect(params).toEqual([null, null, USER_ID]);
     });
 
     it('sets houseworkActivityId after validating ownership', async () => {

@@ -22,6 +22,10 @@ export interface VidaItem {
   userId: number;
   activityId: string;
   days: VidaDayOfWeek[];
+  /** Hora local "HH:mm"; null mientras el ítem no tenga hora. */
+  startTime: string | null;
+  /** Duración en minutos (entero positivo); null mientras no tenga duración. */
+  durationMinutes: number | null;
   notes: string | null;
   isActive: boolean;
   orderIndex: number;
@@ -46,6 +50,10 @@ export interface VidaSuggestion {
 export interface CreateVidaItemInput {
   activityId: string;
   days: VidaDayOfWeek[];
+  /** Hora local "HH:mm"; null o ausente deja el ítem sin hora. */
+  startTime?: string | null;
+  /** Duración en minutos (entero positivo); null o ausente lo deja sin duración. */
+  durationMinutes?: number | null;
   notes?: string | null;
   orderIndex?: number;
   clientId?: string | null;
@@ -53,6 +61,10 @@ export interface CreateVidaItemInput {
 
 export interface UpdateVidaItemInput {
   days?: VidaDayOfWeek[];
+  /** Hora local "HH:mm"; null limpia la hora. */
+  startTime?: string | null;
+  /** Duración en minutos (entero positivo); null limpia la duración. */
+  durationMinutes?: number | null;
   notes?: string | null;
   isActive?: boolean;
   orderIndex?: number;

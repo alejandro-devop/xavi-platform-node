@@ -17,6 +17,8 @@ type VidaItemRow = {
   user_id: number;
   activity_id: number;
   days: string[] | null;
+  start_time: string | Date | null;
+  duration_minutes: number | null;
   notes: string | null;
   is_active: boolean;
   order_index: number;
@@ -32,7 +34,7 @@ type VidaTakenRow = {
   created_at: Date;
 };
 
-const VIDA_ITEM_RETURNING = `id, user_id, activity_id, days, notes, is_active, order_index, created_at, updated_at`;
+const VIDA_ITEM_RETURNING = `id, user_id, activity_id, days, start_time, duration_minutes, notes, is_active, order_index, created_at, updated_at`;
 const VIDA_TAKEN_RETURNING = `id, user_id, vida_item_id, date, created_at`;
 
 function formatDateForApi(value: Date | string): string {
@@ -40,6 +42,13 @@ function formatDateForApi(value: Date | string): string {
     return value.slice(0, 10);
   }
   return value.toISOString().slice(0, 10);
+}
+
+/** TIME de Postgres a "HH:mm" local; null se conserva como null. */
+function formatTimeForApi(value: string | Date | null): string | null {
+  if (value == null) return null;
+  if (typeof value === 'string') return value.slice(0, 5);
+  return value.toTimeString().slice(0, 5);
 }
 
 function normalizeDays(raw: string[] | null): VidaDayOfWeek[] {
@@ -61,6 +70,8 @@ function mapVidaItem(row: VidaItemRow): VidaItem {
     userId: row.user_id,
     activityId: String(row.activity_id),
     days: normalizeDays(row.days),
+    startTime: formatTimeForApi(row.start_time),
+    durationMinutes: row.duration_minutes == null ? null : Number(row.duration_minutes),
     notes: row.notes,
     isActive: row.is_active,
     orderIndex: row.order_index,
@@ -145,6 +156,10 @@ async function createItem(userId: number, input: CreateVidaItemInput): Promise<V
     throw new BadRequestError('clientId must be a UUID v7');
   }
 
+  if (input.durationMinutes != null && input.durationMinutes <= 0) {
+    throw new BadRequestError('durationMinutes must be greater than 0');
+  }
+
   const db = getDbPool();
 
   if (clientId != null) {
@@ -160,14 +175,16 @@ async function createItem(userId: number, input: CreateVidaItemInput): Promise<V
   const id = clientId && isUuidV7(clientId) ? clientId : generateUuidV7();
   const result = await db.query<VidaItemRow>(
     `INSERT INTO vida_items
-       (id, user_id, activity_id, days, notes, order_index, client_id)
-     VALUES ($1, $2, $3, $4::text[], $5, $6, $7)
+       (id, user_id, activity_id, days, start_time, duration_minutes, notes, order_index, client_id)
+     VALUES ($1, $2, $3, $4::text[], $5, $6, $7, $8, $9)
      RETURNING ${VIDA_ITEM_RETURNING}`,
     [
       id,
       userId,
       activityId,
       input.days,
+      input.startTime ?? null,
+      input.durationMinutes ?? null,
       input.notes ?? null,
       input.orderIndex ?? 0,
       clientId,
@@ -190,6 +207,19 @@ async function updateItem(
   if (input.days !== undefined) {
     updates.push(`days = $${paramIndex}::text[]`);
     params.push(input.days);
+    paramIndex += 1;
+  }
+  if (input.startTime !== undefined) {
+    updates.push(`start_time = $${paramIndex}`);
+    params.push(input.startTime);
+    paramIndex += 1;
+  }
+  if (input.durationMinutes !== undefined) {
+    if (input.durationMinutes !== null && input.durationMinutes <= 0) {
+      throw new BadRequestError('durationMinutes must be greater than 0');
+    }
+    updates.push(`duration_minutes = $${paramIndex}`);
+    params.push(input.durationMinutes);
     paramIndex += 1;
   }
   if (input.notes !== undefined) {

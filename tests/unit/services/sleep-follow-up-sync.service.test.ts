@@ -69,6 +69,8 @@ describe('sleepFollowUpSyncService', () => {
       dayStartReminderTime: null,
       standupTodoFolderId: null,
       houseworkActivityId: null,
+      vidaDayStartTime: null,
+      vidaDayEndTime: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -89,6 +91,8 @@ describe('sleepFollowUpSyncService', () => {
       dayStartReminderTime: null,
       standupTodoFolderId: null,
       houseworkActivityId: null,
+      vidaDayStartTime: null,
+      vidaDayEndTime: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -140,6 +144,8 @@ describe('sleepFollowUpSyncService', () => {
       dayStartReminderTime: null,
       standupTodoFolderId: null,
       houseworkActivityId: null,
+      vidaDayStartTime: null,
+      vidaDayEndTime: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     });

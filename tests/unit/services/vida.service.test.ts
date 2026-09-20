@@ -33,6 +33,8 @@ function createItemRow(overrides: Record<string, unknown> = {}) {
     user_id: USER_ID,
     activity_id: ACTIVITY_ID,
     days: ['friday', 'monday'],
+    start_time: null,
+    duration_minutes: null,
     notes: null,
     is_active: true,
     order_index: 0,
@@ -123,6 +125,60 @@ describe('VidaService', () => {
       expect(insertCall[1]?.[3]).toEqual(['friday', 'monday']);
     });
 
+    it('leaves startTime and durationMinutes null when they are not sent', async () => {
+      mockDbPool.query
+        .mockResolvedValueOnce({ rows: [{ id: ACTIVITY_ID }] })
+        .mockResolvedValueOnce({ rows: [createItemRow()] });
+
+      const item = await vidaService.createItem(USER_ID, {
+        activityId: String(ACTIVITY_ID),
+        days: ['friday'],
+      });
+
+      expect(item.startTime).toBeNull();
+      expect(item.durationMinutes).toBeNull();
+      const insertParams = mockDbPool.query.mock.calls[1][1];
+      expect(insertParams?.[4]).toBeNull();
+      expect(insertParams?.[5]).toBeNull();
+    });
+
+    it('stores startTime and durationMinutes when they are sent', async () => {
+      mockDbPool.query
+        .mockResolvedValueOnce({ rows: [{ id: ACTIVITY_ID }] })
+        .mockResolvedValueOnce({
+          rows: [createItemRow({ start_time: '07:30:00', duration_minutes: 45 })],
+        });
+
+      const item = await vidaService.createItem(USER_ID, {
+        activityId: String(ACTIVITY_ID),
+        days: ['friday'],
+        startTime: '07:30',
+        durationMinutes: 45,
+      });
+
+      expect(item.startTime).toBe('07:30');
+      expect(item.durationMinutes).toBe(45);
+      const [sql, insertParams] = mockDbPool.query.mock.calls[1];
+      expect(sql).toContain('start_time');
+      expect(sql).toContain('duration_minutes');
+      expect(insertParams?.[4]).toBe('07:30');
+      expect(insertParams?.[5]).toBe(45);
+    });
+
+    it('rejects a non-positive durationMinutes', async () => {
+      mockDbPool.query.mockResolvedValueOnce({ rows: [{ id: ACTIVITY_ID }] });
+
+      await expect(
+        vidaService.createItem(USER_ID, {
+          activityId: String(ACTIVITY_ID),
+          days: ['friday'],
+          durationMinutes: 0,
+        })
+      ).rejects.toThrow(BadRequestError);
+
+      expect(mockDbPool.query).toHaveBeenCalledTimes(1);
+    });
+
     it('returns existing row for the same clientId (idempotent)', async () => {
       mockDbPool.query
         .mockResolvedValueOnce({ rows: [{ id: ACTIVITY_ID }] })
@@ -164,6 +220,52 @@ describe('VidaService', () => {
       expect(item.days).toEqual(['wednesday']);
       expect(item.isActive).toBe(false);
     });
+
+    it('updates startTime and durationMinutes', async () => {
+      mockDbPool.query.mockResolvedValueOnce({ rows: [createItemRow()] }).mockResolvedValueOnce({
+        rows: [createItemRow({ start_time: '21:15:00', duration_minutes: 30 })],
+      });
+
+      const item = await vidaService.updateItem(USER_ID, ITEM_ID, {
+        startTime: '21:15',
+        durationMinutes: 30,
+      });
+
+      expect(item.startTime).toBe('21:15');
+      expect(item.durationMinutes).toBe(30);
+      const [sql, params] = mockDbPool.query.mock.calls[1];
+      expect(sql).toContain('start_time = $1');
+      expect(sql).toContain('duration_minutes = $2');
+      expect(params).toEqual(['21:15', 30, ITEM_ID, USER_ID]);
+    });
+
+    it('clears startTime and durationMinutes with null', async () => {
+      mockDbPool.query
+        .mockResolvedValueOnce({
+          rows: [createItemRow({ start_time: '21:15:00', duration_minutes: 30 })],
+        })
+        .mockResolvedValueOnce({ rows: [createItemRow()] });
+
+      const item = await vidaService.updateItem(USER_ID, ITEM_ID, {
+        startTime: null,
+        durationMinutes: null,
+      });
+
+      expect(item.startTime).toBeNull();
+      expect(item.durationMinutes).toBeNull();
+      const [, params] = mockDbPool.query.mock.calls[1];
+      expect(params).toEqual([null, null, ITEM_ID, USER_ID]);
+    });
+
+    it('rejects a non-positive durationMinutes', async () => {
+      mockDbPool.query.mockResolvedValueOnce({ rows: [createItemRow()] });
+
+      await expect(
+        vidaService.updateItem(USER_ID, ITEM_ID, { durationMinutes: -10 })
+      ).rejects.toThrow(BadRequestError);
+
+      expect(mockDbPool.query).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('deleteItem', () => {
@@ -199,6 +301,21 @@ describe('VidaService', () => {
       expect(suggestions).toHaveLength(1);
       expect(suggestions[0].item.id).toBe(ITEM_ID);
       expect(suggestions[0].takenToday).toBe(true);
+    });
+
+    it('carries startTime and durationMinutes in the suggested item', async () => {
+      mockDbPool.query
+        .mockResolvedValueOnce({
+          rows: [createItemRow({ days: ['friday'], start_time: '06:45:00', duration_minutes: 20 })],
+        })
+        .mockResolvedValueOnce({ rows: [] });
+
+      const suggestions = await vidaService.suggestionsForDate(USER_ID, DATE);
+
+      expect(suggestions[0].item.startTime).toBe('06:45');
+      expect(suggestions[0].item.durationMinutes).toBe(20);
+      expect(mockDbPool.query.mock.calls[0][0]).toContain('start_time');
+      expect(mockDbPool.query.mock.calls[0][0]).toContain('duration_minutes');
     });
   });
 

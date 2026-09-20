@@ -14,6 +14,8 @@ type UserSettingsRow = {
   day_start_reminder_time: string | Date | null;
   standup_todo_folder_id: number | null;
   housework_activity_id: number | null;
+  vida_day_start_time: string | Date | null;
+  vida_day_end_time: string | Date | null;
   created_at: Date;
   updated_at: Date;
 };
@@ -37,6 +39,8 @@ function mapRow(row: UserSettingsRow): UserSettings {
       row.standup_todo_folder_id != null ? String(row.standup_todo_folder_id) : null,
     houseworkActivityId:
       row.housework_activity_id != null ? String(row.housework_activity_id) : null,
+    vidaDayStartTime: formatTime(row.vida_day_start_time),
+    vidaDayEndTime: formatTime(row.vida_day_end_time),
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -133,6 +137,18 @@ export const userSettingsService = {
       params.push(
         input.houseworkActivityId === null ? null : parseInt(input.houseworkActivityId, 10)
       );
+      paramIndex++;
+    }
+
+    if (input.vidaDayStartTime !== undefined) {
+      updates.push(`vida_day_start_time = $${paramIndex}`);
+      params.push(input.vidaDayStartTime);
+      paramIndex++;
+    }
+
+    if (input.vidaDayEndTime !== undefined) {
+      updates.push(`vida_day_end_time = $${paramIndex}`);
+      params.push(input.vidaDayEndTime);
       paramIndex++;
     }
 

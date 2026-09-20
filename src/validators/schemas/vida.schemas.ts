@@ -3,6 +3,10 @@ import { z } from 'zod';
 const uuidString = z.string().uuid('Invalid UUID');
 const activityIdString = z.string().regex(/^\d+$/, 'Invalid activity ID');
 const dateString = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format (use YYYY-MM-DD)');
+const timeString = z
+  .string()
+  .regex(/^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/, 'Invalid time format (use HH:mm or HH:mm:ss)');
+const durationMinutes = z.number().int().positive('durationMinutes must be greater than 0');
 const clientIdString = z
   .string()
   .regex(
@@ -39,6 +43,8 @@ export const vidaDateArgsSchema = z.object({
 export const vidaItemCreateInputSchema = z.object({
   activityId: activityIdString,
   days: daysArray,
+  startTime: timeString.nullish(),
+  durationMinutes: durationMinutes.nullish(),
   notes: z.string().max(2000).nullish(),
   orderIndex: z.number().int().min(0).optional(),
   clientId: clientIdString.optional(),
@@ -48,6 +54,8 @@ export const vidaItemUpdateInputSchema = z
   .object({
     id: uuidString,
     days: daysArray.optional(),
+    startTime: timeString.nullish(),
+    durationMinutes: durationMinutes.nullish(),
     notes: z.string().max(2000).nullish(),
     isActive: z.boolean().optional(),
     orderIndex: z.number().int().min(0).optional(),
@@ -55,6 +63,8 @@ export const vidaItemUpdateInputSchema = z
   .refine(
     (d) =>
       d.days !== undefined ||
+      d.startTime !== undefined ||
+      d.durationMinutes !== undefined ||
       d.notes !== undefined ||
       d.isActive !== undefined ||
       d.orderIndex !== undefined,

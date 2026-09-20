@@ -19,6 +19,14 @@ export const vidaTypeDefs = gql`
     userId: Int!
     activityId: ID!
     days: [VidaDayOfWeek!]!
+    """
+    Hora local de inicio, formato HH:mm. Null mientras el ítem no tenga hora.
+    """
+    startTime: String
+    """
+    Duración en minutos (entero positivo). Null mientras el ítem no tenga duración.
+    """
+    durationMinutes: Int
     notes: String
     isActive: Boolean!
     orderIndex: Int!
@@ -66,6 +74,14 @@ export const vidaTypeDefs = gql`
   input VidaItemCreateInput {
     activityId: ID!
     days: [VidaDayOfWeek!]!
+    """
+    Hora local de inicio, formato HH:mm. Opcional.
+    """
+    startTime: String
+    """
+    Duración en minutos (entero positivo). Opcional.
+    """
+    durationMinutes: Int
     notes: String
     orderIndex: Int
     """UUID v7 del cliente para idempotencia offline."""
@@ -75,6 +91,14 @@ export const vidaTypeDefs = gql`
   input VidaItemUpdateInput {
     id: ID!
     days: [VidaDayOfWeek!]
+    """
+    Hora local HH:mm (o null para limpiar).
+    """
+    startTime: String
+    """
+    Duración en minutos, entero positivo (o null para limpiar).
+    """
+    durationMinutes: Int
     notes: String
     isActive: Boolean
     orderIndex: Int
