@@ -31,6 +31,21 @@ export const userSettingsTypeDefs = gql`
     Hora local en que termina el día de Vida, formato HH:mm. Si es null el cliente usa 23:00.
     """
     vidaDayEndTime: String
+    """
+    Hora local a la que se acuesta, formato HH:mm. Null si aún no configuró su noche.
+    """
+    vidaNightBedTime: String
+    """
+    Hora local a la que se levanta, formato HH:mm. **Puede ser anterior a
+    vidaNightBedTime**: una noche que cruza la medianoche («23:00 → 05:00») y una que
+    no la cruza («01:00 → 06:40») son las dos legales, y el servidor no compara una
+    con otra.
+    """
+    vidaNightWakeTime: String
+    """
+    Noches en las que aplica, nombradas por el día en que se acuesta. Null: todas.
+    """
+    vidaNightDays: [VidaDayOfWeek!]
     createdAt: DateTime!
     updatedAt: DateTime!
   }
@@ -72,5 +87,18 @@ export const userSettingsTypeDefs = gql`
     Hora local HH:mm en que termina el día de Vida (o null para limpiar).
     """
     vidaDayEndTime: String
+    """
+    Hora local HH:mm a la que se acuesta (o null para limpiar).
+    """
+    vidaNightBedTime: String
+    """
+    Hora local HH:mm a la que se levanta (o null para limpiar). **No tiene que ser
+    posterior a vidaNightBedTime.**
+    """
+    vidaNightWakeTime: String
+    """
+    Noches en las que aplica, por el día en que se acuesta (o null para limpiar).
+    """
+    vidaNightDays: [VidaDayOfWeek!]
   }
 `;

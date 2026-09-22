@@ -16,6 +16,9 @@ type UserSettingsRow = {
   housework_activity_id: number | null;
   vida_day_start_time: string | Date | null;
   vida_day_end_time: string | Date | null;
+  vida_night_bed_time: string | Date | null;
+  vida_night_wake_time: string | Date | null;
+  vida_night_days: string[] | null;
   created_at: Date;
   updated_at: Date;
 };
@@ -41,6 +44,9 @@ function mapRow(row: UserSettingsRow): UserSettings {
       row.housework_activity_id != null ? String(row.housework_activity_id) : null,
     vidaDayStartTime: formatTime(row.vida_day_start_time),
     vidaDayEndTime: formatTime(row.vida_day_end_time),
+    vidaNightBedTime: formatTime(row.vida_night_bed_time),
+    vidaNightWakeTime: formatTime(row.vida_night_wake_time),
+    vidaNightDays: row.vida_night_days ?? null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -149,6 +155,27 @@ export const userSettingsService = {
     if (input.vidaDayEndTime !== undefined) {
       updates.push(`vida_day_end_time = $${paramIndex}`);
       params.push(input.vidaDayEndTime);
+      paramIndex++;
+    }
+
+    // La noche. Las dos horas se guardan **sin compararlas entre sí**: una
+    // noche puede cruzar la medianoche («23:00 → 05:00») o no cruzarla
+    // («01:00 → 06:40»), y las dos son válidas.
+    if (input.vidaNightBedTime !== undefined) {
+      updates.push(`vida_night_bed_time = $${paramIndex}`);
+      params.push(input.vidaNightBedTime);
+      paramIndex++;
+    }
+
+    if (input.vidaNightWakeTime !== undefined) {
+      updates.push(`vida_night_wake_time = $${paramIndex}`);
+      params.push(input.vidaNightWakeTime);
+      paramIndex++;
+    }
+
+    if (input.vidaNightDays !== undefined) {
+      updates.push(`vida_night_days = $${paramIndex}`);
+      params.push(input.vidaNightDays);
       paramIndex++;
     }
 

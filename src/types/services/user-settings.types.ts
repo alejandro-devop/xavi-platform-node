@@ -18,6 +18,12 @@ export interface UserSettings {
   vidaDayStartTime: string | null;
   /** Hora local "HH:mm" en que termina el día de Vida; null → el cliente usa 23:00. */
   vidaDayEndTime: string | null;
+  /** Hora local "HH:mm" a la que se acuesta; null → no tiene noche configurada. */
+  vidaNightBedTime: string | null;
+  /** Hora local "HH:mm" a la que se levanta. Puede ser **anterior** a la de acostarse. */
+  vidaNightWakeTime: string | null;
+  /** Noches en las que aplica, por el día en que se acuesta; null → todas. */
+  vidaNightDays: string[] | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -35,4 +41,10 @@ export interface UpdateUserSettingsInput {
   vidaDayStartTime?: string | null;
   /** Hora local "HH:mm" de fin del día de Vida; null limpia el valor. */
   vidaDayEndTime?: string | null;
+  /** Hora local "HH:mm" a la que se acuesta; null limpia el valor. */
+  vidaNightBedTime?: string | null;
+  /** Hora local "HH:mm" a la que se levanta; null limpia el valor. */
+  vidaNightWakeTime?: string | null;
+  /** Noches en las que aplica; null limpia el valor. */
+  vidaNightDays?: string[] | null;
 }

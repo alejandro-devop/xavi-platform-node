@@ -205,6 +205,96 @@ describe('UserSettingsService', () => {
       expect(params).toEqual([null, null, USER_ID]);
     });
 
+    it('updates the Vida night, crossing midnight', async () => {
+      mockDbPool.query.mockResolvedValueOnce({ rows: [createSettingsRow()] }).mockResolvedValueOnce({
+        rows: [
+          createSettingsRow({
+            vida_night_bed_time: '23:00:00',
+            vida_night_wake_time: '05:00:00',
+            vida_night_days: ['monday', 'tuesday', 'wednesday', 'thursday', 'sunday'],
+          }),
+        ],
+      });
+
+      const settings = await userSettingsService.updateMySettings(USER_ID, {
+        vidaNightBedTime: '23:00',
+        vidaNightWakeTime: '05:00',
+        vidaNightDays: ['monday', 'tuesday', 'wednesday', 'thursday', 'sunday'],
+      });
+
+      expect(settings.vidaNightBedTime).toBe('23:00');
+      expect(settings.vidaNightWakeTime).toBe('05:00');
+      expect(settings.vidaNightDays).toEqual([
+        'monday',
+        'tuesday',
+        'wednesday',
+        'thursday',
+        'sunday',
+      ]);
+
+      const [sql, params] = mockDbPool.query.mock.calls[1];
+      expect(sql).toContain('vida_night_bed_time = $1');
+      expect(sql).toContain('vida_night_wake_time = $2');
+      expect(sql).toContain('vida_night_days = $3');
+      expect(params).toEqual([
+        '23:00',
+        '05:00',
+        ['monday', 'tuesday', 'wednesday', 'thursday', 'sunday'],
+        USER_ID,
+      ]);
+    });
+
+    // La noche que **no** cruza la medianoche: acostarse a la 1:00 y levantarse
+    // a las 6:40 es una noche entera dentro del mismo día. El servidor no
+    // compara una hora con la otra, y este test existe para que nadie añada esa
+    // comparación «arreglando» algo.
+    it('accepts a Vida night that does not cross midnight', async () => {
+      mockDbPool.query.mockResolvedValueOnce({ rows: [createSettingsRow()] }).mockResolvedValueOnce({
+        rows: [
+          createSettingsRow({
+            vida_night_bed_time: '01:00:00',
+            vida_night_wake_time: '06:40:00',
+          }),
+        ],
+      });
+
+      const settings = await userSettingsService.updateMySettings(USER_ID, {
+        vidaNightBedTime: '01:00',
+        vidaNightWakeTime: '06:40',
+      });
+
+      expect(settings.vidaNightBedTime).toBe('01:00');
+      expect(settings.vidaNightWakeTime).toBe('06:40');
+      const [, params] = mockDbPool.query.mock.calls[1];
+      expect(params).toEqual(['01:00', '06:40', USER_ID]);
+    });
+
+    it('clears the Vida night with null', async () => {
+      mockDbPool.query
+        .mockResolvedValueOnce({
+          rows: [
+            createSettingsRow({
+              vida_night_bed_time: '23:00:00',
+              vida_night_wake_time: '05:00:00',
+              vida_night_days: ['monday'],
+            }),
+          ],
+        })
+        .mockResolvedValueOnce({ rows: [createSettingsRow()] });
+
+      const settings = await userSettingsService.updateMySettings(USER_ID, {
+        vidaNightBedTime: null,
+        vidaNightWakeTime: null,
+        vidaNightDays: null,
+      });
+
+      expect(settings.vidaNightBedTime).toBeNull();
+      expect(settings.vidaNightWakeTime).toBeNull();
+      expect(settings.vidaNightDays).toBeNull();
+      const [, params] = mockDbPool.query.mock.calls[1];
+      expect(params).toEqual([null, null, null, USER_ID]);
+    });
+
     it('sets houseworkActivityId after validating ownership', async () => {
       mockGetActivityById.mockResolvedValueOnce({ id: ACTIVITY_ID } as never);
       mockDbPool.query
