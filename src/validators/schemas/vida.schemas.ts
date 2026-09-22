@@ -84,3 +84,9 @@ export const vidaUnmarkTakenTodayInputSchema = z.object({
   vidaItemId: uuidString,
   date: dateString,
 });
+
+export const vidaGoalCategorySetInputSchema = z.object({
+  categoryId: uuidString,
+  attached: z.boolean(),
+  goalId: uuidString.nullish(),
+});

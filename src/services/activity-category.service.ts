@@ -14,6 +14,7 @@ type CategoryRow = {
   description: string | null;
   icon: string | null;
   color: string | null;
+  goal_id: string | null;
   created_at: Date;
   updated_at: Date;
 };
@@ -27,6 +28,7 @@ function mapCategory(row: CategoryRow): ActivityCategory {
     description: row.description,
     icon: row.icon,
     color: row.color,
+    goalId: row.goal_id,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };

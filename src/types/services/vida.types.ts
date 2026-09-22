@@ -69,3 +69,25 @@ export interface UpdateVidaItemInput {
   isActive?: boolean;
   orderIndex?: number;
 }
+
+export interface VidaGoal {
+  id: string;
+  userId: number;
+  /** Identidad estable de la meta. La automática es 'work'. */
+  slug: string;
+  name: string;
+  icon: string | null;
+  color: string | null;
+  targetMinutes: number;
+  orderIndex: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface SetCategoryGoalInput {
+  categoryId: string;
+  /** false: se quita el puntero (goal_id = NULL). */
+  attached: boolean;
+  /** Meta explícita. Omitida con `attached: true`: la meta por defecto del usuario, creada si no existe. */
+  goalId?: string | null;
+}

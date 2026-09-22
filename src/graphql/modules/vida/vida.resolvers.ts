@@ -1,8 +1,10 @@
 import { activityService } from '../../../services/activity.service';
+import { vidaGoalService } from '../../../services/vida-goal.service';
 import { vidaService } from '../../../services/vida.service';
 import { NotFoundError } from '../../../shared/errors';
 import {
   vidaDateArgsSchema,
+  vidaGoalCategorySetInputSchema,
   vidaItemCreateInputSchema,
   vidaItemDeleteInputSchema,
   vidaItemUpdateInputSchema,
@@ -32,6 +34,18 @@ export const vidaResolvers = {
         if (error instanceof NotFoundError) return null;
         throw error;
       }
+    },
+  },
+
+  ActivityCategory: {
+    goal: async (
+      parent: { goalId: string | null },
+      _args: unknown,
+      context: { user?: { id: string | number } | null }
+    ) => {
+      if (!parent.goalId) return null;
+      requireAuth(context, 'ActivityCategory.goal');
+      return await vidaGoalService.getGoalById(parent.goalId, uid(context));
     },
   },
 
@@ -122,6 +136,19 @@ export const vidaResolvers = {
         return await vidaService.unmarkTakenToday(uid(context), input.vidaItemId, input.date);
       },
       'vidaUnmarkTakenToday'
+    ),
+
+    activityCategoryGoalSet: withValidatedResolver(
+      vidaGoalCategorySetInputSchema,
+      async (_parent, { input }, context) => {
+        requireAuth(context, 'activityCategoryGoalSet');
+        return await vidaGoalService.setCategoryGoal(uid(context), {
+          categoryId: input.categoryId,
+          attached: input.attached,
+          goalId: input.goalId ?? null,
+        });
+      },
+      'activityCategoryGoalSet'
     ),
   },
 };

@@ -51,6 +51,33 @@ export const vidaTypeDefs = gql`
     takenToday: Boolean!
   }
 
+  """
+  Una meta con minutos objetivo. Varias categorías pueden apuntar a la misma.
+  """
+  type VidaGoal {
+    id: ID!
+    userId: Int!
+    """
+    Identidad estable de la meta. La automática es 'work'.
+    """
+    slug: String!
+    name: String!
+    icon: String
+    color: String
+    targetMinutes: Int!
+    orderIndex: Int!
+    createdAt: DateTime!
+    updatedAt: DateTime!
+  }
+
+  extend type ActivityCategory {
+    """
+    Meta a la que apunta esta categoría, o null.
+    """
+    goalId: ID
+    goal: VidaGoal
+  }
+
   extend type Query {
     """
     Plantilla Vida del usuario. Por defecto solo ítems activos.
@@ -69,6 +96,23 @@ export const vidaTypeDefs = gql`
     vidaItemDelete(input: VidaItemDeleteInput!): Boolean!
     vidaMarkTakenToday(input: VidaMarkTakenTodayInput!): VidaTakenToday!
     vidaUnmarkTakenToday(input: VidaUnmarkTakenTodayInput!): Boolean!
+    """
+    Apunta (o desapunta) una categoría a una meta. Devuelve la categoría ya con su goalId.
+    """
+    activityCategoryGoalSet(input: ActivityCategoryGoalSetInput!): ActivityCategory!
+  }
+
+  input ActivityCategoryGoalSetInput {
+    categoryId: ID!
+    """
+    false quita el puntero. true lo pone.
+    """
+    attached: Boolean!
+    """
+    Meta explícita. Omitida con attached: true, se usa la meta por defecto del usuario,
+    creándola si no existe.
+    """
+    goalId: ID
   }
 
   input VidaItemCreateInput {

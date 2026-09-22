@@ -6,6 +6,8 @@ export interface ActivityCategory {
   description: string | null;
   icon: string | null;
   color: string | null;
+  /** Meta a la que apunta esta categoría (tabla vida_goals), o null. */
+  goalId: string | null;
   createdAt: Date;
   updatedAt: Date;
 }

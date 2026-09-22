@@ -1,9 +1,12 @@
 import {
+  vidaGoalCategorySetInputSchema,
   vidaItemCreateInputSchema,
   vidaItemUpdateInputSchema,
 } from '../../../src/validators/schemas/vida.schemas';
 
 const ITEM_ID = '018f0000-0000-7000-8000-000000000001';
+const CATEGORY_ID = '018f0000-0000-7000-8000-0000000000a9';
+const GOAL_ID = '018f0000-0000-7000-8000-0000000000b3';
 
 describe('vida item schedule validation', () => {
   describe('create', () => {
@@ -87,5 +90,46 @@ describe('vida item schedule validation', () => {
     it('still requires at least one field to update', () => {
       expect(() => vidaItemUpdateInputSchema.parse({ id: ITEM_ID })).toThrow();
     });
+  });
+});
+
+describe('vidaGoalCategorySetInputSchema', () => {
+  it('accepts attaching without an explicit goal', () => {
+    const parsed = vidaGoalCategorySetInputSchema.parse({
+      categoryId: CATEGORY_ID,
+      attached: true,
+    });
+
+    expect(parsed.attached).toBe(true);
+    expect(parsed.goalId).toBeUndefined();
+  });
+
+  it('accepts detaching', () => {
+    const parsed = vidaGoalCategorySetInputSchema.parse({
+      categoryId: CATEGORY_ID,
+      attached: false,
+    });
+
+    expect(parsed.attached).toBe(false);
+  });
+
+  it('accepts an explicit goalId', () => {
+    const parsed = vidaGoalCategorySetInputSchema.parse({
+      categoryId: CATEGORY_ID,
+      attached: true,
+      goalId: GOAL_ID,
+    });
+
+    expect(parsed.goalId).toBe(GOAL_ID);
+  });
+
+  it('rejects a missing attached', () => {
+    expect(() => vidaGoalCategorySetInputSchema.parse({ categoryId: CATEGORY_ID })).toThrow();
+  });
+
+  it('rejects a categoryId that is not a UUID', () => {
+    expect(() =>
+      vidaGoalCategorySetInputSchema.parse({ categoryId: 'nope', attached: true })
+    ).toThrow();
   });
 });
