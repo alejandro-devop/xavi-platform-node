@@ -90,6 +90,12 @@ export interface VidaGoal {
   updatedAt: Date;
 }
 
+export interface SetGoalDaysInput {
+  goalId: string;
+  /** 'monday'…'sunday'. Nunca vacío: el CHECK de la columna lo prohíbe. */
+  activeDays: string[];
+}
+
 export interface SetCategoryGoalInput {
   categoryId: string;
   /** false: se quita el puntero (goal_id = NULL). */

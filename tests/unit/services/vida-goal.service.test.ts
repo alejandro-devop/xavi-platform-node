@@ -267,6 +267,45 @@ describe('VidaGoalService', () => {
     });
   });
 
+  describe('setGoalDays', () => {
+    it('saves the days of an owned goal and returns the goal mapped', async () => {
+      mockDbPool.query
+        // getOwnedGoalRowOrThrow
+        .mockResolvedValueOnce({ rows: [goalRow()] })
+        // UPDATE … RETURNING *
+        .mockResolvedValueOnce({
+          rows: [goalRow({ active_days: ['monday', 'wednesday', 'saturday'] })],
+        });
+
+      const goal = await vidaGoalService.setGoalDays(USER_ID, {
+        goalId: GOAL_ID,
+        activeDays: ['monday', 'wednesday', 'saturday'],
+      });
+
+      expect(goal.activeDays).toEqual(['monday', 'wednesday', 'saturday']);
+      expect(statements(mockDbPool.query as unknown as jest.Mock)[1]).toContain(
+        'UPDATE vida_goals SET active_days'
+      );
+      expect((mockDbPool.query as unknown as jest.Mock).mock.calls[1][1]).toEqual([
+        ['monday', 'wednesday', 'saturday'],
+        GOAL_ID,
+        USER_ID,
+      ]);
+      // Un solo UPDATE: nada de transacción.
+      expect(mockDbPool.connect).not.toHaveBeenCalled();
+    });
+
+    it('refuses a goal that belongs to someone else, before the UPDATE', async () => {
+      mockDbPool.query.mockResolvedValueOnce({ rows: [goalRow({ user_id: OTHER_USER_ID })] });
+
+      await expect(
+        vidaGoalService.setGoalDays(USER_ID, { goalId: GOAL_ID, activeDays: ['monday'] })
+      ).rejects.toThrow(ForbiddenError);
+
+      expect(mockDbPool.query).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('listGoals', () => {
     it('maps active_days of every goal', async () => {
       mockDbPool.query.mockResolvedValueOnce({

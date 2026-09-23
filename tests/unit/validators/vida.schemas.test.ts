@@ -1,5 +1,6 @@
 import {
   vidaGoalCategorySetInputSchema,
+  vidaGoalDaysSetInputSchema,
   vidaItemCreateInputSchema,
   vidaItemUpdateInputSchema,
 } from '../../../src/validators/schemas/vida.schemas';
@@ -131,5 +132,47 @@ describe('vidaGoalCategorySetInputSchema', () => {
     expect(() =>
       vidaGoalCategorySetInputSchema.parse({ categoryId: 'nope', attached: true })
     ).toThrow();
+  });
+});
+
+describe('vidaGoalDaysSetInputSchema', () => {
+  it('accepts the five working days', () => {
+    const parsed = vidaGoalDaysSetInputSchema.parse({
+      goalId: GOAL_ID,
+      activeDays: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
+    });
+
+    expect(parsed.activeDays).toEqual(['monday', 'tuesday', 'wednesday', 'thursday', 'friday']);
+  });
+
+  it('accepts a single day', () => {
+    expect(
+      vidaGoalDaysSetInputSchema.parse({ goalId: GOAL_ID, activeDays: ['sunday'] }).activeDays
+    ).toEqual(['sunday']);
+  });
+
+  it('rejects an empty array: a goal with no days could never be measured', () => {
+    expect(() => vidaGoalDaysSetInputSchema.parse({ goalId: GOAL_ID, activeDays: [] })).toThrow(
+      /At least one day is required/
+    );
+  });
+
+  it('rejects duplicates', () => {
+    expect(() =>
+      vidaGoalDaysSetInputSchema.parse({ goalId: GOAL_ID, activeDays: ['monday', 'monday'] })
+    ).toThrow(/duplicates/);
+  });
+
+  it('rejects an unknown day', () => {
+    expect(() =>
+      vidaGoalDaysSetInputSchema.parse({ goalId: GOAL_ID, activeDays: ['lunes'] })
+    ).toThrow();
+  });
+
+  it('rejects a goalId that is not a UUID, and a missing activeDays', () => {
+    expect(() =>
+      vidaGoalDaysSetInputSchema.parse({ goalId: 'nope', activeDays: ['monday'] })
+    ).toThrow();
+    expect(() => vidaGoalDaysSetInputSchema.parse({ goalId: GOAL_ID })).toThrow();
   });
 });

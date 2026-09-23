@@ -2,7 +2,11 @@ import { activityCategoryService } from './activity-category.service';
 import { getDbPool } from '../shared/database/pool';
 import { ForbiddenError, NotFoundError } from '../shared/errors';
 import type { ActivityCategory } from '../types/services/activity-category.types';
-import type { SetCategoryGoalInput, VidaGoal } from '../types/services/vida.types';
+import type {
+  SetCategoryGoalInput,
+  SetGoalDaysInput,
+  VidaGoal,
+} from '../types/services/vida.types';
 
 /**
  * La única meta que esta feature sabe crear. Nace sola la primera vez que una
@@ -170,8 +174,32 @@ async function setCategoryGoal(
   return await activityCategoryService.getCategoryById(input.categoryId, userId);
 }
 
+/**
+ * Cambia los días en que una meta cuenta. **Sin transacción a propósito:** es
+ * un solo UPDATE de una sola fila, no hay `ensure` ni segundo escritor
+ * (`setCategoryGoal` abre BEGIN porque son dos escrituras).
+ *
+ * El array vacío no llega hasta aquí: lo rechaza el validador, y detrás está
+ * el CHECK (cardinality(active_days) >= 1) de la migración 070.
+ */
+async function setGoalDays(userId: number, input: SetGoalDaysInput): Promise<VidaGoal> {
+  const db = getDbPool();
+  // La meta es suya (lanza NotFound o Forbidden) antes de escribir nada.
+  await getOwnedGoalRowOrThrow(db, input.goalId, userId);
+
+  const result = await db.query<GoalRow>(
+    `UPDATE vida_goals SET active_days = $1, updated_at = NOW() WHERE id = $2 AND user_id = $3 RETURNING *`,
+    [input.activeDays, input.goalId, userId]
+  );
+  if (result.rows.length === 0) {
+    throw new ForbiddenError('You do not have permission to access this vida goal');
+  }
+  return mapGoal(result.rows[0]);
+}
+
 export const vidaGoalService = {
   listGoals,
   getGoalById,
   setCategoryGoal,
+  setGoalDays,
 };

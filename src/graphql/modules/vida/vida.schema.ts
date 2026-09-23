@@ -106,6 +106,18 @@ export const vidaTypeDefs = gql`
     Apunta (o desapunta) una categoría a una meta. Devuelve la categoría ya con su goalId.
     """
     activityCategoryGoalSet(input: ActivityCategoryGoalSetInput!): ActivityCategory!
+    """
+    Cambia los días en que una meta cuenta. Devuelve la meta entera.
+    """
+    vidaGoalDaysSet(input: VidaGoalDaysSetInput!): VidaGoal!
+  }
+
+  input VidaGoalDaysSetInput {
+    goalId: ID!
+    """
+    Al menos uno y sin repetidos. Una meta sin días no se podría medir nunca.
+    """
+    activeDays: [VidaDayOfWeek!]!
   }
 
   input ActivityCategoryGoalSetInput {

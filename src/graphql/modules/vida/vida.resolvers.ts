@@ -5,6 +5,7 @@ import { NotFoundError } from '../../../shared/errors';
 import {
   vidaDateArgsSchema,
   vidaGoalCategorySetInputSchema,
+  vidaGoalDaysSetInputSchema,
   vidaItemCreateInputSchema,
   vidaItemDeleteInputSchema,
   vidaItemUpdateInputSchema,
@@ -149,6 +150,18 @@ export const vidaResolvers = {
         });
       },
       'activityCategoryGoalSet'
+    ),
+
+    vidaGoalDaysSet: withValidatedResolver(
+      vidaGoalDaysSetInputSchema,
+      async (_parent, { input }, context) => {
+        requireAuth(context, 'vidaGoalDaysSet');
+        return await vidaGoalService.setGoalDays(uid(context), {
+          goalId: input.goalId,
+          activeDays: input.activeDays,
+        });
+      },
+      'vidaGoalDaysSet'
     ),
   },
 };

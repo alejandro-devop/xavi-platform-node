@@ -90,3 +90,8 @@ export const vidaGoalCategorySetInputSchema = z.object({
   attached: z.boolean(),
   goalId: uuidString.nullish(),
 });
+
+export const vidaGoalDaysSetInputSchema = z.object({
+  goalId: uuidString,
+  activeDays: daysArray,
+});
