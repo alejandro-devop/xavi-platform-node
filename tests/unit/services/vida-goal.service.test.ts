@@ -42,6 +42,7 @@ function goalRow(overrides: Record<string, unknown> = {}) {
     icon: WORK_GOAL.icon,
     color: WORK_GOAL.color,
     target_minutes: WORK_GOAL.targetMinutes,
+    active_days: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
     order_index: 0,
     created_at: now,
     updated_at: now,
@@ -108,6 +109,12 @@ describe('VidaGoalService', () => {
         '#0284c7',
         480,
       ]);
+
+      // El INSERT no lista active_days a propósito: el DEFAULT de la migración 070
+      // (lunes a viernes) es lo que hace nacer la meta con sus días, así que este
+      // upsert anticarrera no se toca. Si alguien añade la columna aquí, este test
+      // lo dice.
+      expect(upsert).not.toContain('active_days');
 
       expect(update).toContain('UPDATE activity_categories SET goal_id');
       expect(mockClient.query.mock.calls[2][1]).toEqual([GOAL_ID, CATEGORY_ID, USER_ID]);
@@ -218,11 +225,59 @@ describe('VidaGoalService', () => {
         slug: 'work',
         name: 'Trabajo',
         targetMinutes: 480,
+        activeDays: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
         orderIndex: 0,
       });
 
       mockDbPool.query.mockResolvedValueOnce({ rows: [goalRow({ user_id: OTHER_USER_ID })] });
       await expect(vidaGoalService.getGoalById(GOAL_ID, USER_ID)).rejects.toThrow(ForbiddenError);
+    });
+
+    it('carries whatever days the row has, not the five of the default', async () => {
+      // Una meta de siete días («Sueño») sale tal cual: el servicio no normaliza
+      // ni completa nada, los días son de la fila.
+      mockDbPool.query.mockResolvedValueOnce({
+        rows: [
+          goalRow({
+            slug: 'sleep',
+            name: 'Sueño',
+            active_days: [
+              'monday',
+              'tuesday',
+              'wednesday',
+              'thursday',
+              'friday',
+              'saturday',
+              'sunday',
+            ],
+          }),
+        ],
+      });
+
+      const goal = await vidaGoalService.getGoalById(GOAL_ID, USER_ID);
+      expect(goal.activeDays).toEqual([
+        'monday',
+        'tuesday',
+        'wednesday',
+        'thursday',
+        'friday',
+        'saturday',
+        'sunday',
+      ]);
+    });
+  });
+
+  describe('listGoals', () => {
+    it('maps active_days of every goal', async () => {
+      mockDbPool.query.mockResolvedValueOnce({
+        rows: [goalRow(), goalRow({ slug: 'sleep', active_days: ['saturday', 'sunday'] })],
+      });
+
+      const goals = await vidaGoalService.listGoals(USER_ID);
+      expect(goals.map((goal) => goal.activeDays)).toEqual([
+        ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
+        ['saturday', 'sunday'],
+      ]);
     });
   });
 });

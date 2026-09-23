@@ -30,6 +30,7 @@ type GoalRow = {
   icon: string | null;
   color: string | null;
   target_minutes: number;
+  active_days: string[];
   order_index: number;
   created_at: Date;
   updated_at: Date;
@@ -52,6 +53,7 @@ function mapGoal(row: GoalRow): VidaGoal {
     icon: row.icon,
     color: row.color,
     targetMinutes: row.target_minutes,
+    activeDays: row.active_days,
     orderIndex: row.order_index,
     createdAt: row.created_at,
     updatedAt: row.updated_at,

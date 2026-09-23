@@ -79,6 +79,12 @@ export interface VidaGoal {
   icon: string | null;
   color: string | null;
   targetMinutes: number;
+  /**
+   * Días de la semana en que esta meta cuenta ('monday'…'sunday'). Mismo
+   * vocabulario que `VidaItem.days` y que el enum VidaDayOfWeek del SDL.
+   * Nunca vacío: la columna tiene CHECK (cardinality >= 1) (migración 070).
+   */
+  activeDays: string[];
   orderIndex: number;
   createdAt: Date;
   updatedAt: Date;

@@ -65,6 +65,12 @@ export const vidaTypeDefs = gql`
     icon: String
     color: String
     targetMinutes: Int!
+    """
+    Días de la semana en que esta meta cuenta. Nunca vacío: una meta sin días
+    sería un arco que desaparece sin que nada lo explique. Nace de lunes a
+    viernes (DEFAULT de la migración 070).
+    """
+    activeDays: [VidaDayOfWeek!]!
     orderIndex: Int!
     createdAt: DateTime!
     updatedAt: DateTime!
