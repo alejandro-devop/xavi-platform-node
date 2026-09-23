@@ -248,6 +248,11 @@ export const activityTypeDefs = gql`
     id: ID!
     date: String
     startTime: String
+    """
+    Omitir el campo = no tocar la duración. Un número = cerrar la sesión con esa
+    duración. null = reabrir la sesión: vuelve a estar en marcha. Reabrir falla
+    si ya tienes otra sesión abierta.
+    """
     durationMinutes: Int
     notes: String
   }

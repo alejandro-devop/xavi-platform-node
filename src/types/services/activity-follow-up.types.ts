@@ -62,7 +62,13 @@ export interface CreateActivityFollowUpInput {
 export interface UpdateActivityFollowUpInput {
   date?: string;
   startTime?: string;
-  durationMinutes?: number;
+  /**
+   * Tres formas, tres significados:
+   * - ausente (`undefined`): no toques la duración.
+   * - número: cierra la sesión con esa duración.
+   * - `null`: **reabre** la sesión (vuelve a estar en marcha).
+   */
+  durationMinutes?: number | null;
   notes?: string | null;
 }
 

@@ -370,8 +370,8 @@
     "semantic_hash": ""
   },
   "src/graphql/modules/activity/activity.schema.ts": {
-    "mtime": 1788542899.2245357,
-    "ast_hash": "90b049a7abd1bddf16cfb1e1d8bad942",
+    "mtime": 1790184957.5757034,
+    "ast_hash": "bf84fd993d10d52cd86cfd8e60699a87",
     "semantic_hash": ""
   },
   "src/graphql/modules/budget/budget.resolvers.ts": {
@@ -680,8 +680,8 @@
     "semantic_hash": ""
   },
   "src/services/activity-follow-up.service.ts": {
-    "mtime": 1788542899.230535,
-    "ast_hash": "d36248177d62e0e41c17f683f66bfc6e",
+    "mtime": 1790184915.5889766,
+    "ast_hash": "acd6cc0fcb6efb001c0ab4d9785daca2",
     "semantic_hash": ""
   },
   "src/services/activity-todo-folders.service.ts": {
@@ -990,8 +990,8 @@
     "semantic_hash": ""
   },
   "src/types/services/activity-follow-up.types.ts": {
-    "mtime": 1788542899.2375345,
-    "ast_hash": "10a6b4afb9f79b82c5e6a8a05f622363",
+    "mtime": 1790184915.5889766,
+    "ast_hash": "fa6b7b4c53f9015418a5ae7893155028",
     "semantic_hash": ""
   },
   "src/types/services/activity.types.ts": {
@@ -1140,8 +1140,8 @@
     "semantic_hash": "3646f5e8baaf869acf79a2417a6cf604"
   },
   "src/validators/schemas/activity.schemas.ts": {
-    "mtime": 1788542899.2395344,
-    "ast_hash": "7de5d1e684365211d4f38efa8886edec",
+    "mtime": 1790184915.5889766,
+    "ast_hash": "0cfbcccbdb3de3dabf310835c69ccfe5",
     "semantic_hash": ""
   },
   "src/validators/schemas/budget.schemas.ts": {
@@ -1320,8 +1320,8 @@
     "semantic_hash": ""
   },
   "tests/unit/services/activity-follow-up.service.test.ts": {
-    "mtime": 1788542899.2425342,
-    "ast_hash": "1c52562e723e1832957f620309dedb49",
+    "mtime": 1790184855.7983673,
+    "ast_hash": "753fbdc39ea1b417573944f503425256",
     "semantic_hash": ""
   },
   "tests/unit/services/activity-todo-folders.service.test.ts": {
@@ -1700,13 +1700,13 @@
     "semantic_hash": ""
   },
   "src/graphql/modules/vida/vida.resolvers.ts": {
-    "mtime": 1790114849.139603,
-    "ast_hash": "63824cf25f82ee1f7a5fb763a3fb43f4",
+    "mtime": 1790161023.1758702,
+    "ast_hash": "45a64ca301ecc17020ab35766a5b9481",
     "semantic_hash": ""
   },
   "src/graphql/modules/vida/vida.schema.ts": {
-    "mtime": 1790137390.1620514,
-    "ast_hash": "2f3789dc7e86d29dade3bf14a129a6bd",
+    "mtime": 1790161009.8566792,
+    "ast_hash": "2fe3e6d630d81343d89fe828af7c7125",
     "semantic_hash": ""
   },
   "src/services/vida.service.ts": {
@@ -1715,13 +1715,13 @@
     "semantic_hash": ""
   },
   "src/types/services/vida.types.ts": {
-    "mtime": 1790137390.1610515,
-    "ast_hash": "631d75e42b35975f87b28047c0ef1d9a",
+    "mtime": 1790161009.8566792,
+    "ast_hash": "90739b94db30e5ecd7784fce16fb6136",
     "semantic_hash": ""
   },
   "src/validators/schemas/vida.schemas.ts": {
-    "mtime": 1790114849.1236029,
-    "ast_hash": "1ab56eff1bd4633a7c743a66a482dd77",
+    "mtime": 1790161009.8566792,
+    "ast_hash": "311f2381b1efa333919c4b16788d95c0",
     "semantic_hash": ""
   },
   "tests/unit/services/vida.service.test.ts": {
@@ -1890,8 +1890,8 @@
     "semantic_hash": ""
   },
   "src/services/vida-goal.service.ts": {
-    "mtime": 1790137390.1620514,
-    "ast_hash": "11045764ea08b0b9d9ca86e96e020dcd",
+    "mtime": 1790161561.9316788,
+    "ast_hash": "8945eb5bed89aebad3d459b3ca45902c",
     "semantic_hash": ""
   },
   "src/types/services/app-idea.types.ts": {
@@ -1925,8 +1925,8 @@
     "semantic_hash": ""
   },
   "tests/unit/services/vida-goal.service.test.ts": {
-    "mtime": 1790137410.4510612,
-    "ast_hash": "600df3512f21f22727dbc4b6059df43a",
+    "mtime": 1790161040.6523614,
+    "ast_hash": "5602092e7401ff84c801212ec4188dd1",
     "semantic_hash": ""
   },
   "tests/unit/validators/user-settings.schemas.test.ts": {
@@ -1935,8 +1935,13 @@
     "semantic_hash": ""
   },
   "tests/unit/validators/vida.schemas.test.ts": {
-    "mtime": 1790114941.658536,
-    "ast_hash": "34b4506961e3f4e03bc939ca9125359a",
+    "mtime": 1790161059.2938824,
+    "ast_hash": "0a4a1f71662155d5737b9ea1a310d5fd",
+    "semantic_hash": ""
+  },
+  "tests/unit/validators/activity.schemas.test.ts": {
+    "mtime": 1790184934.0988562,
+    "ast_hash": "9076d967cac9557e275ac99dd1349720",
     "semantic_hash": ""
   }
 }

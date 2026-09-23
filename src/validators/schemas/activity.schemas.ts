@@ -241,11 +241,15 @@ export const activityFollowUpEditInputSchema = z
     id: followUpIdString,
     date: dateString.optional(),
     startTime: timeString.optional(),
+    // `null` es un valor con significado: reabre la sesión. Sin `.nullable()`
+    // el campo nulo moría aquí ("Expected number, received null") y jamás
+    // llegaba al servicio.
     durationMinutes: z
       .number()
       .int()
       .positive()
       .max(24 * 60)
+      .nullable()
       .optional(),
     notes: z.string().nullable().optional(),
   })

@@ -1,4 +1,4 @@
-import { BadRequestError, ForbiddenError } from '../../../src/shared/errors';
+import { BadRequestError, ForbiddenError, NotFoundError } from '../../../src/shared/errors';
 import { activityFollowUpService } from '../../../src/services/activity-follow-up.service';
 import { mockDbPool, resetAllMocks } from '../../helpers/mocks';
 
@@ -292,5 +292,102 @@ describe('ActivityFollowUpService', () => {
         title: 'Barrer',
       })
     ).rejects.toBeInstanceOf(BadRequestError);
+  });
+  it('updateFollowUp reopens a closed follow-up when durationMinutes is null', async () => {
+    mockDbPool.query
+      .mockResolvedValueOnce({ rows: [createFollowUpRow()] })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [createFollowUpRow({ duration_minutes: null })] });
+
+    const followUp = await activityFollowUpService.updateFollowUp(String(FOLLOW_UP_ID), USER_ID, {
+      durationMinutes: null,
+    });
+
+    expect(followUp.isOpen).toBe(true);
+    expect(followUp.durationMinutes).toBeNull();
+    expect(followUp.endTime).toBeNull();
+    expect(followUp.endDate).toBeNull();
+    expect(followUp.endDateTime).toBeNull();
+
+    const [sql, params] = mockDbPool.query.mock.calls[2];
+    expect(sql).toContain('duration_minutes = $1');
+    expect(params).toEqual([null, FOLLOW_UP_ID]);
+  });
+
+  it('updateFollowUp rejects reopening when another follow-up is already open', async () => {
+    mockDbPool.query
+      .mockResolvedValueOnce({ rows: [createFollowUpRow()] })
+      .mockResolvedValueOnce({ rows: [{ id: 99 }] });
+
+    await expect(
+      activityFollowUpService.updateFollowUp(String(FOLLOW_UP_ID), USER_ID, {
+        durationMinutes: null,
+      })
+    ).rejects.toBeInstanceOf(BadRequestError);
+
+    expect(mockDbPool.query).toHaveBeenCalledTimes(2);
+  });
+
+  it('updateFollowUp reopening an already open follow-up is a no-op that writes once', async () => {
+    const openRow = createFollowUpRow({ duration_minutes: null });
+    mockDbPool.query
+      .mockResolvedValueOnce({ rows: [openRow] })
+      .mockResolvedValueOnce({ rows: [openRow] });
+
+    const followUp = await activityFollowUpService.updateFollowUp(String(FOLLOW_UP_ID), USER_ID, {
+      durationMinutes: null,
+    });
+
+    expect(followUp.isOpen).toBe(true);
+    expect(mockDbPool.query).toHaveBeenCalledTimes(2);
+  });
+
+  it('updateFollowUp leaves duration untouched when durationMinutes is omitted', async () => {
+    mockDbPool.query
+      .mockResolvedValueOnce({ rows: [createFollowUpRow()] })
+      .mockResolvedValueOnce({ rows: [createFollowUpRow({ notes: 'una nota' })] });
+
+    await activityFollowUpService.updateFollowUp(String(FOLLOW_UP_ID), USER_ID, {
+      notes: 'una nota',
+    });
+
+    const [sql] = mockDbPool.query.mock.calls[1];
+    expect(sql).not.toContain('duration_minutes');
+  });
+
+  it('updateFollowUp still rejects zero and negative durations', async () => {
+    mockDbPool.query.mockResolvedValue({ rows: [createFollowUpRow()] });
+
+    await expect(
+      activityFollowUpService.updateFollowUp(String(FOLLOW_UP_ID), USER_ID, {
+        durationMinutes: 0,
+      })
+    ).rejects.toBeInstanceOf(BadRequestError);
+
+    await expect(
+      activityFollowUpService.updateFollowUp(String(FOLLOW_UP_ID), USER_ID, {
+        durationMinutes: -30,
+      })
+    ).rejects.toBeInstanceOf(BadRequestError);
+  });
+
+  it('updateFollowUp refuses to reopen a follow-up owned by someone else', async () => {
+    mockDbPool.query.mockResolvedValueOnce({ rows: [createFollowUpRow({ user_id: 42 })] });
+
+    await expect(
+      activityFollowUpService.updateFollowUp(String(FOLLOW_UP_ID), USER_ID, {
+        durationMinutes: null,
+      })
+    ).rejects.toBeInstanceOf(ForbiddenError);
+
+    expect(mockDbPool.query).toHaveBeenCalledTimes(1);
+  });
+
+  it('updateFollowUp throws NotFoundError when the follow-up does not exist', async () => {
+    mockDbPool.query.mockResolvedValueOnce({ rows: [] });
+
+    await expect(
+      activityFollowUpService.updateFollowUp('404', USER_ID, { durationMinutes: null })
+    ).rejects.toBeInstanceOf(NotFoundError);
   });
 });

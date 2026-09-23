@@ -151,17 +151,27 @@ async function getOwnedFollowUpOrThrow(
   return row;
 }
 
-async function assertNoOpenFollowUp(userId: number): Promise<void> {
+async function assertNoOpenFollowUp(
+  userId: number,
+  options: { exceptFollowUpId?: number; message?: string } = {}
+): Promise<void> {
   const db = getDbPool();
+  const params: unknown[] = [userId];
+  let exceptClause = '';
+  if (options.exceptFollowUpId !== undefined) {
+    params.push(options.exceptFollowUpId);
+    exceptClause = ` AND id <> $${params.length}`;
+  }
   const result = await db.query<{ id: number }>(
     `SELECT id FROM activity_follow_ups
-     WHERE user_id = $1 AND duration_minutes IS NULL
+     WHERE user_id = $1 AND duration_minutes IS NULL${exceptClause}
      LIMIT 1`,
-    [userId]
+    params
   );
   if (result.rows.length > 0) {
     throw new BadRequestError(
-      'You already have an activity in progress. Finish or cancel it before starting another.'
+      options.message ??
+        'You already have an activity in progress. Finish or cancel it before starting another.'
     );
   }
 }
@@ -365,7 +375,20 @@ async function updateFollowUp(
     params.push(input.startTime);
   }
   if (input.durationMinutes !== undefined) {
-    if (input.durationMinutes < 1) {
+    // `null` significa reabrir: la sesión vuelve a estar en marcha.
+    // Ojo con el guardia de abajo: `null < 1` es `true` en JavaScript, así que
+    // el caso nulo tiene que salir ANTES de comparar, o nunca se reabre nada.
+    if (input.durationMinutes === null) {
+      if (existing.duration_minutes !== null) {
+        // Solo en la transición cerrada -> abierta. Si ya estaba abierta,
+        // reabrir es un no-op y no debe chocar contra sí misma.
+        await assertNoOpenFollowUp(userId, {
+          exceptFollowUpId: followUpId,
+          message:
+            'You already have another activity in progress. Finish or cancel that one before reopening this session.',
+        });
+      }
+    } else if (input.durationMinutes < 1) {
       throw new BadRequestError('Duration must be at least 1 minute');
     }
     updates.push(`duration_minutes = $${i++}`);
