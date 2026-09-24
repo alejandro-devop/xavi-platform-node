@@ -6,6 +6,18 @@ const followUpIdString = z.string().regex(/^\d+$/, 'Invalid follow-up ID');
 
 const dateString = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format (use YYYY-MM-DD)');
 
+/**
+ * Hora de reloj local «HH:mm» (se admiten los segundos que devuelve Postgres).
+ * Hermana de timeSchema en user-settings.schemas.ts, pero acotada a 00:00-23:59:
+ * la única validación que pide la feature es el formato, y una hora imposible
+ * como «99:99» debe salir como 400 y no como un error de Postgres.
+ * No se valida contra la fecha del seguimiento ni se rechaza una hora futura.
+ */
+const timeOfDaySchema = z
+  .string()
+  .regex(/^([01]\d|2[0-3]):[0-5]\d(:\d{2})?$/, 'Invalid time format (HH:MM)')
+  .nullable();
+
 const habitFrequency = z.enum(['daily', 'weekly', 'custom']);
 
 const legacyHabitFields = {
@@ -187,6 +199,7 @@ export const habitFollowUpAddInputSchema = z.object({
   isFailed: z.boolean().optional(),
   isLifeline: z.boolean().optional(),
   difficulty: z.number().int().min(0).max(4).nullable().optional(),
+  timeOfDay: timeOfDaySchema.optional(),
   clientId: z
     .string()
     .regex(
@@ -207,6 +220,7 @@ export const habitFollowUpEditInputSchema = z
     isFailed: z.boolean().optional(),
     archived: z.boolean().optional(),
     difficulty: z.number().int().min(0).max(4).nullable().optional(),
+    timeOfDay: timeOfDaySchema.optional(),
   })
   .refine(
     (d) =>
@@ -217,7 +231,8 @@ export const habitFollowUpEditInputSchema = z
       d.isAccomplished !== undefined ||
       d.isFailed !== undefined ||
       d.archived !== undefined ||
-      d.difficulty !== undefined,
+      d.difficulty !== undefined ||
+      d.timeOfDay !== undefined,
     { message: 'At least one field is required to update' }
   );
 

@@ -440,13 +440,13 @@
     "semantic_hash": "c292eae81afb9973d68e85c06f4bf8f1"
   },
   "src/graphql/modules/habit/habit.resolvers.ts": {
-    "mtime": 1788542899.2255354,
-    "ast_hash": "b802cc80854a89a5a0288628ea174369",
+    "mtime": 1790247399.1092608,
+    "ast_hash": "2d5992bb15f0c0c8fe9bf2c73383b177",
     "semantic_hash": ""
   },
   "src/graphql/modules/habit/habit.schema.ts": {
-    "mtime": 1788542899.2265353,
-    "ast_hash": "a1d1c835ae40d978f70033ad4f7d4e4d",
+    "mtime": 1790248425.8666725,
+    "ast_hash": "e0e03759c9978e7d71129a6e2a65d28d",
     "semantic_hash": ""
   },
   "src/graphql/modules/learning/learning.resolvers.ts": {
@@ -680,8 +680,8 @@
     "semantic_hash": ""
   },
   "src/services/activity-follow-up.service.ts": {
-    "mtime": 1790184915.5889766,
-    "ast_hash": "acd6cc0fcb6efb001c0ab4d9785daca2",
+    "mtime": 1790185767.349308,
+    "ast_hash": "1095839bba86da5aee8bbe70d9195547",
     "semantic_hash": ""
   },
   "src/services/activity-todo-folders.service.ts": {
@@ -745,8 +745,8 @@
     "semantic_hash": ""
   },
   "src/services/habit.service.ts": {
-    "mtime": 1788542899.232535,
-    "ast_hash": "7915a34114b4ef380f6e7308a15206db",
+    "mtime": 1790248403.8896852,
+    "ast_hash": "127ef24bbab12179043b846f72bed5fb",
     "semantic_hash": ""
   },
   "src/services/learning.service.ts": {
@@ -1035,8 +1035,8 @@
     "semantic_hash": "e9ad8c11fcbcf768f724e4bba6630e8a"
   },
   "src/types/services/habit.types.ts": {
-    "mtime": 1788542899.2385345,
-    "ast_hash": "38a459c570cd7fffdf8efa262721f32d",
+    "mtime": 1790248425.8506725,
+    "ast_hash": "a84d7193829ab70c6ceb4c4dacf8a82d",
     "semantic_hash": ""
   },
   "src/types/services/learning.types.ts": {
@@ -1165,8 +1165,8 @@
     "semantic_hash": "e208767a7122645f378c0241f4dd64a6"
   },
   "src/validators/schemas/habit.schemas.ts": {
-    "mtime": 1788542899.2405343,
-    "ast_hash": "e746adafec65d3cecce63d14a9a8146c",
+    "mtime": 1790247399.1092608,
+    "ast_hash": "88bea386fd8eef545048e9a030995f0d",
     "semantic_hash": ""
   },
   "src/validators/schemas/learning.schemas.ts": {
@@ -1942,6 +1942,21 @@
   "tests/unit/validators/activity.schemas.test.ts": {
     "mtime": 1790184934.0988562,
     "ast_hash": "9076d967cac9557e275ac99dd1349720",
+    "semantic_hash": ""
+  },
+  "migrations/071_habit_logs_time_of_day.sql": {
+    "mtime": 1790247326.3592832,
+    "ast_hash": "8865d08c5f44cb4fa4c570bc5df21e00",
+    "semantic_hash": ""
+  },
+  "tests/unit/validators/habit.schemas.test.ts": {
+    "mtime": 1790248528.438602,
+    "ast_hash": "55e2c06b58efdeff930695d7d031899e",
+    "semantic_hash": ""
+  },
+  "tests/unit/services/habit-follow-up-time-of-day.service.test.ts": {
+    "mtime": 1790248509.778616,
+    "ast_hash": "c1dc1b96fed882513c1a1018866cf479",
     "semantic_hash": ""
   }
 }

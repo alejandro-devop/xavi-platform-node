@@ -58,6 +58,8 @@ export interface HabitLog {
   isFailed: boolean;
   difficulty: number | null;
   isLifeline: boolean;
+  /** Hora de reloj local «HH:mm» a la que ocurrió. Null: el seguimiento no la trae. */
+  timeOfDay: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -186,6 +188,11 @@ export interface AddHabitLogInput {
   isFailed?: boolean;
   isLifeline?: boolean;
   difficulty?: number | null;
+  /**
+   * Hora de reloj local «HH:mm». Ausente o `null`: la fila se queda sin hora,
+   * que no es lo mismo que medianoche.
+   */
+  timeOfDay?: string | null;
   /** UUID v7 del cliente para idempotencia offline. */
   clientId?: string | null;
 }
@@ -199,6 +206,12 @@ export interface UpdateHabitFollowUpInput {
   isFailed?: boolean;
   archived?: boolean;
   difficulty?: number | null;
+  /**
+   * Hora de reloj local «HH:mm». Ausente: no se toca la que hubiera.
+   * `null`: se borra. La distinción es la de `durationMinutes` en
+   * activity-follow-up.service.ts:377, y aquí vale lo mismo.
+   */
+  timeOfDay?: string | null;
 }
 
 export interface ListHabitFollowUpsOptions {

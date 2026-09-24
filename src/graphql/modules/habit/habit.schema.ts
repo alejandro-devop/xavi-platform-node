@@ -138,6 +138,10 @@ export const habitTypeDefs = gql`
     isFailed: Boolean!
     difficulty: Int
     isLifeline: Boolean!
+    """
+    Hora de reloj local HH:mm a la que ocurrio. Null si el seguimiento no la trae.
+    """
+    timeOfDay: String
     createdAt: DateTime!
     updatedAt: DateTime!
     habit: Habit
@@ -318,6 +322,10 @@ export const habitTypeDefs = gql`
     isFailed: Boolean
     isLifeline: Boolean
     difficulty: Int
+    """
+    Hora de reloj local HH:mm. Si no viene, la fila se queda sin hora.
+    """
+    timeOfDay: String
     """UUID v7 del cliente para idempotencia offline."""
     clientId: ID
   }
@@ -332,6 +340,11 @@ export const habitTypeDefs = gql`
     isFailed: Boolean
     archived: Boolean
     difficulty: Int
+    """
+    Hora de reloj local HH:mm. Si no viene, la hora que hubiera se conserva;
+    null la borra.
+    """
+    timeOfDay: String
   }
 
   input HabitCategoryInput {

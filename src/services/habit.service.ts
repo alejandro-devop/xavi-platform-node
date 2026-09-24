@@ -81,6 +81,8 @@ type HabitLogRow = {
   is_failed: boolean;
   difficulty: number | null;
   is_lifeline: boolean;
+  /** Hora de reloj local «HH:mm» del seguimiento. Nula: no todas las filas la tienen. */
+  time_of_day: string | Date | null;
   created_at: Date;
   updated_at: Date;
 };
@@ -93,12 +95,23 @@ const HABIT_RETURNING = `id, user_id, name, description, frequency, target_count
   created_at, updated_at`;
 
 const LOG_RETURNING = `id, habit_id, user_id, completed_date, count, time, notes, story, archived,
-  is_accomplished, is_failed, difficulty, is_lifeline, created_at, updated_at`;
+  is_accomplished, is_failed, difficulty, is_lifeline, time_of_day, created_at, updated_at`;
 
 function formatDate(value: Date | string | null): string | null {
   if (value == null) return null;
   if (value instanceof Date) return value.toISOString().split('T')[0];
   return String(value).split('T')[0];
+}
+
+/**
+ * La hora se guarda y se devuelve como la misma cadena local «HH:mm»: ni zona
+ * horaria ni conversión a UTC. Copia deliberada de user-settings.service.ts:26:
+ * cada servicio tiene la suya, factorizarlas es otra tarea.
+ */
+function formatTime(value: string | Date | null): string | null {
+  if (value == null) return null;
+  if (typeof value === 'string') return value.slice(0, 5);
+  return value.toTimeString().slice(0, 5);
 }
 
 function mapHabit(row: HabitRow): Habit {
@@ -154,6 +167,7 @@ function mapHabitLog(row: HabitLogRow): HabitLog {
     isFailed: row.is_failed ?? false,
     difficulty: row.difficulty ?? null,
     isLifeline: row.is_lifeline ?? false,
+    timeOfDay: formatTime(row.time_of_day ?? null),
     createdAt: row.created_at,
     updatedAt: row.updated_at ?? row.created_at,
   };
@@ -610,8 +624,8 @@ async function addHabitLog(
     const insertResult = await db.query<HabitLogRow>(
       `INSERT INTO habit_logs
          (habit_id, user_id, completed_date, count, time, notes, story,
-          is_accomplished, is_failed, is_lifeline, difficulty, client_id)
-       VALUES ($1, $2, $3::date, 0, 0, $4, $5, FALSE, FALSE, TRUE, $6, $7)
+          is_accomplished, is_failed, is_lifeline, difficulty, client_id, time_of_day)
+       VALUES ($1, $2, $3::date, 0, 0, $4, $5, FALSE, FALSE, TRUE, $6, $7, $8)
        RETURNING ${LOG_RETURNING}`,
       [
         habitId,
@@ -621,6 +635,7 @@ async function addHabitLog(
         input.story ?? null,
         input.difficulty ?? null,
         clientId,
+        input.timeOfDay ?? null,
       ]
     );
     await applyStreakAfterFollowUp(habit, date, false, false, true);
@@ -651,14 +666,19 @@ async function addHabitLog(
       input.isAccomplished === true ||
       (input.isAccomplished !== false && mergedGoalMet && !isFailed);
 
+    // Misma regla que en updateHabitFollowUp: el flag distingue «no vino el
+    // campo» (se conserva la hora del toque anterior) de «vino vacío» (se
+    // borra). Las demás columnas sí usan COALESCE a propósito: ahí `null`
+    // siempre ha significado «no lo mando».
     const updateResult = await db.query<HabitLogRow>(
       `UPDATE habit_logs
        SET count = $1, time = $2, notes = COALESCE($3, notes), story = COALESCE($4, story),
            is_accomplished = $5, is_failed = $6, archived = FALSE,
            difficulty = COALESCE($7, difficulty),
            client_id = COALESCE(client_id, $8),
+           time_of_day = CASE WHEN $9::boolean THEN $10::time ELSE time_of_day END,
            updated_at = NOW()
-       WHERE id = $9
+       WHERE id = $11
        RETURNING ${LOG_RETURNING}`,
       [
         mergedCount,
@@ -669,6 +689,8 @@ async function addHabitLog(
         isFailed,
         input.difficulty ?? null,
         clientId,
+        input.timeOfDay !== undefined,
+        input.timeOfDay ?? null,
         existing.rows[0].id,
       ]
     );
@@ -678,8 +700,8 @@ async function addHabitLog(
     const insertResult = await db.query<HabitLogRow>(
       `INSERT INTO habit_logs
          (habit_id, user_id, completed_date, count, time, notes, story,
-          is_accomplished, is_failed, is_lifeline, difficulty, client_id)
-       VALUES ($1, $2, $3::date, $4, $5, $6, $7, $8, $9, FALSE, $10, $11)
+          is_accomplished, is_failed, is_lifeline, difficulty, client_id, time_of_day)
+       VALUES ($1, $2, $3::date, $4, $5, $6, $7, $8, $9, FALSE, $10, $11, $12)
        RETURNING ${LOG_RETURNING}`,
       [
         habitId,
@@ -693,6 +715,7 @@ async function addHabitLog(
         isFailed,
         input.difficulty ?? null,
         clientId,
+        input.timeOfDay ?? null,
       ]
     );
     logRow = insertResult.rows[0];
@@ -727,14 +750,32 @@ async function updateHabitFollowUp(
   const isAccomplished =
     input.isAccomplished ?? (goalMet && !isFailed ? true : log.is_accomplished);
 
+  // `time_of_day` no puede ir con COALESCE como sus vecinas: aquí «no vino el
+  // campo» y «vino vacío» significan cosas distintas —no la toques / bórrala—,
+  // igual que `durationMinutes` en activity-follow-up.service.ts:377. Con
+  // COALESCE, un `timeOfDay: null` devolvía 200 y dejaba la hora anterior.
   const result = await db.query<HabitLogRow>(
     `UPDATE habit_logs
      SET count = $1, time = $2, notes = COALESCE($3, notes), story = COALESCE($4, story),
          is_accomplished = $5, is_failed = $6, archived = COALESCE($7, archived),
-         difficulty = COALESCE($8, difficulty), updated_at = NOW()
-     WHERE id = $9
+         difficulty = COALESCE($8, difficulty),
+         time_of_day = CASE WHEN $9::boolean THEN $10::time ELSE time_of_day END,
+         updated_at = NOW()
+     WHERE id = $11
      RETURNING ${LOG_RETURNING}`,
-    [count, time, input.notes, input.story, isAccomplished, isFailed, input.archived, input.difficulty ?? null, id]
+    [
+      count,
+      time,
+      input.notes,
+      input.story,
+      isAccomplished,
+      isFailed,
+      input.archived,
+      input.difficulty ?? null,
+      input.timeOfDay !== undefined,
+      input.timeOfDay ?? null,
+      id,
+    ]
   );
 
   const date = formatDate(log.completed_date)!;
@@ -880,6 +921,7 @@ async function getHabitMyDay(userId: number, date: string): Promise<HabitMyDayEn
     is_failed: boolean | null;
     difficulty: number | null;
     is_lifeline: boolean | null;
+    time_of_day: string | Date | null;
     log_created_at: Date | null;
     log_updated_at: Date | null;
   };
@@ -891,7 +933,7 @@ async function getHabitMyDay(userId: number, date: string): Promise<HabitMyDayEn
       `SELECT h.*,
               hl.id AS log_id, hl.completed_date, hl.count, hl.time,
               hl.notes, hl.story, hl.archived, hl.is_accomplished, hl.is_failed,
-              hl.difficulty, hl.is_lifeline,
+              hl.difficulty, hl.is_lifeline, hl.time_of_day,
               hl.created_at AS log_created_at, hl.updated_at AS log_updated_at
        FROM habits h
        LEFT JOIN habit_logs hl
@@ -943,6 +985,7 @@ async function getHabitMyDay(userId: number, date: string): Promise<HabitMyDayEn
             is_failed: row.is_failed ?? false,
             difficulty: row.difficulty ?? null,
             is_lifeline: row.is_lifeline ?? false,
+            time_of_day: row.time_of_day ?? null,
             created_at: row.log_created_at!,
             updated_at: row.log_updated_at ?? row.log_created_at!,
           })
