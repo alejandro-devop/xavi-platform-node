@@ -1336,7 +1336,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "src_app_createapp",
-      "community": 74,
+      "community": 31,
       "norm_label": "createapp()"
     },
     {
@@ -1956,7 +1956,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "controllers_routine_controller",
-      "community": 49,
+      "community": 3,
       "norm_label": "routine.controller.ts"
     },
     {
@@ -1966,7 +1966,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "controllers_routine_controller_createroutine",
-      "community": 49,
+      "community": 3,
       "norm_label": "createroutine()"
     },
     {
@@ -1976,7 +1976,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "controllers_routine_controller_getroutines",
-      "community": 49,
+      "community": 3,
       "norm_label": "getroutines()"
     },
     {
@@ -1986,7 +1986,7 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "controllers_routine_controller_getroutinebyid",
-      "community": 49,
+      "community": 3,
       "norm_label": "getroutinebyid()"
     },
     {
@@ -1996,7 +1996,7 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "controllers_routine_controller_updateroutine",
-      "community": 49,
+      "community": 3,
       "norm_label": "updateroutine()"
     },
     {
@@ -2006,7 +2006,7 @@
       "source_location": "L52",
       "_origin": "ast",
       "id": "controllers_routine_controller_deleteroutine",
-      "community": 49,
+      "community": 3,
       "norm_label": "deleteroutine()"
     },
     {
@@ -2016,7 +2016,7 @@
       "source_location": "L58",
       "_origin": "ast",
       "id": "controllers_routine_controller_toggleroutineactive",
-      "community": 49,
+      "community": 3,
       "norm_label": "toggleroutineactive()"
     },
     {
@@ -2026,7 +2026,7 @@
       "source_location": "L64",
       "_origin": "ast",
       "id": "controllers_routine_controller_createroutinestep",
-      "community": 49,
+      "community": 3,
       "norm_label": "createroutinestep()"
     },
     {
@@ -2036,7 +2036,7 @@
       "source_location": "L77",
       "_origin": "ast",
       "id": "controllers_routine_controller_updateroutinestep",
-      "community": 49,
+      "community": 3,
       "norm_label": "updateroutinestep()"
     },
     {
@@ -2046,7 +2046,7 @@
       "source_location": "L89",
       "_origin": "ast",
       "id": "controllers_routine_controller_deleteroutinestep",
-      "community": 49,
+      "community": 3,
       "norm_label": "deleteroutinestep()"
     },
     {
@@ -2056,7 +2056,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "controllers_shopping_controller",
-      "community": 58,
+      "community": 56,
       "norm_label": "shopping.controller.ts"
     },
     {
@@ -2066,7 +2066,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "controllers_shopping_controller_parsepagelimit",
-      "community": 58,
+      "community": 56,
       "norm_label": "parsepagelimit()"
     },
     {
@@ -2076,7 +2076,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "controllers_shopping_controller_createshoppinglist",
-      "community": 58,
+      "community": 56,
       "norm_label": "createshoppinglist()"
     },
     {
@@ -2086,7 +2086,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "controllers_shopping_controller_getshoppinglists",
-      "community": 58,
+      "community": 56,
       "norm_label": "getshoppinglists()"
     },
     {
@@ -2096,7 +2096,7 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "controllers_shopping_controller_getshoppinglistbyid",
-      "community": 58,
+      "community": 56,
       "norm_label": "getshoppinglistbyid()"
     },
     {
@@ -2106,7 +2106,7 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "controllers_shopping_controller_updateshoppinglist",
-      "community": 58,
+      "community": 56,
       "norm_label": "updateshoppinglist()"
     },
     {
@@ -2116,7 +2116,7 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "controllers_shopping_controller_deleteshoppinglist",
-      "community": 58,
+      "community": 56,
       "norm_label": "deleteshoppinglist()"
     },
     {
@@ -2126,7 +2126,7 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "controllers_shopping_controller_createcatalogitem",
-      "community": 58,
+      "community": 56,
       "norm_label": "createcatalogitem()"
     },
     {
@@ -2136,7 +2136,7 @@
       "source_location": "L57",
       "_origin": "ast",
       "id": "controllers_shopping_controller_getcatalogitems",
-      "community": 58,
+      "community": 56,
       "norm_label": "getcatalogitems()"
     },
     {
@@ -2146,7 +2146,7 @@
       "source_location": "L68",
       "_origin": "ast",
       "id": "controllers_shopping_controller_getcatalogitembyid",
-      "community": 58,
+      "community": 56,
       "norm_label": "getcatalogitembyid()"
     },
     {
@@ -2156,7 +2156,7 @@
       "source_location": "L74",
       "_origin": "ast",
       "id": "controllers_shopping_controller_updatecatalogitem",
-      "community": 58,
+      "community": 56,
       "norm_label": "updatecatalogitem()"
     },
     {
@@ -2166,7 +2166,7 @@
       "source_location": "L81",
       "_origin": "ast",
       "id": "controllers_shopping_controller_deletecatalogitem",
-      "community": 58,
+      "community": 56,
       "norm_label": "deletecatalogitem()"
     },
     {
@@ -2176,7 +2176,7 @@
       "source_location": "L89",
       "_origin": "ast",
       "id": "controllers_shopping_controller_additemtoshoppinglist",
-      "community": 58,
+      "community": 56,
       "norm_label": "additemtoshoppinglist()"
     },
     {
@@ -2186,7 +2186,7 @@
       "source_location": "L100",
       "_origin": "ast",
       "id": "controllers_shopping_controller_getshoppinglistitems",
-      "community": 58,
+      "community": 56,
       "norm_label": "getshoppinglistitems()"
     },
     {
@@ -2196,7 +2196,7 @@
       "source_location": "L106",
       "_origin": "ast",
       "id": "controllers_shopping_controller_updateshoppinglistitem",
-      "community": 58,
+      "community": 56,
       "norm_label": "updateshoppinglistitem()"
     },
     {
@@ -2206,7 +2206,7 @@
       "source_location": "L116",
       "_origin": "ast",
       "id": "controllers_shopping_controller_deleteshoppinglistitem",
-      "community": 58,
+      "community": 56,
       "norm_label": "deleteshoppinglistitem()"
     },
     {
@@ -2946,7 +2946,7 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "course_course_resolvers_courseresolvers",
-      "community": 63,
+      "community": 1,
       "norm_label": "courseresolvers"
     },
     {
@@ -3336,7 +3336,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "note_note_resolvers",
-      "community": 70,
+      "community": 23,
       "norm_label": "note.resolvers.ts"
     },
     {
@@ -3346,7 +3346,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "note_note_resolvers_uid",
-      "community": 70,
+      "community": 23,
       "norm_label": "uid()"
     },
     {
@@ -3356,7 +3356,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "note_note_resolvers_noteresolvers",
-      "community": 70,
+      "community": 23,
       "norm_label": "noteresolvers"
     },
     {
@@ -3586,7 +3586,7 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "shopping_shopping_resolvers_shoppingresolvers",
-      "community": 52,
+      "community": 63,
       "norm_label": "shoppingresolvers"
     },
     {
@@ -3866,7 +3866,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "user_settings_user_settings_resolvers",
-      "community": 94,
+      "community": 14,
       "norm_label": "user-settings.resolvers.ts"
     },
     {
@@ -3876,7 +3876,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "user_settings_user_settings_resolvers_uid",
-      "community": 94,
+      "community": 14,
       "norm_label": "uid()"
     },
     {
@@ -3886,7 +3886,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "user_settings_user_settings_resolvers_usersettingsresolvers",
-      "community": 94,
+      "community": 14,
       "norm_label": "usersettingsresolvers"
     },
     {
@@ -4016,7 +4016,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "wallet_wallet_resolvers_walletresolvers",
-      "community": 63,
+      "community": 44,
       "norm_label": "walletresolvers"
     },
     {
@@ -4156,7 +4156,7 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "graphql_resolvers_resolvers",
-      "community": 54,
+      "community": 31,
       "norm_label": "resolvers"
     },
     {
@@ -4186,7 +4186,7 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "graphql_schema_typedefs",
-      "community": 54,
+      "community": 31,
       "norm_label": "typedefs"
     },
     {
@@ -4196,7 +4196,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "graphql_server",
-      "community": 54,
+      "community": 31,
       "norm_label": "server.ts"
     },
     {
@@ -4206,7 +4206,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "graphql_server_graphqlcontext",
-      "community": 54,
+      "community": 31,
       "norm_label": "graphqlcontext"
     },
     {
@@ -4226,7 +4226,7 @@
       "source_location": "L37",
       "_origin": "ast",
       "id": "graphql_server_getgraphqlcontext",
-      "community": 54,
+      "community": 31,
       "norm_label": "getgraphqlcontext()"
     },
     {
@@ -4596,7 +4596,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "routes_health",
-      "community": 105,
+      "community": 50,
       "norm_label": "health.ts"
     },
     {
@@ -4606,7 +4606,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "routes_health_router",
-      "community": 105,
+      "community": 50,
       "norm_label": "router"
     },
     {
@@ -4656,7 +4656,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "routes_routine",
-      "community": 49,
+      "community": 3,
       "norm_label": "routine.ts"
     },
     {
@@ -4706,7 +4706,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "routes_sleep_router",
-      "community": 50,
+      "community": 55,
       "norm_label": "router"
     },
     {
@@ -4916,7 +4916,7 @@
       "source_location": "L169",
       "_origin": "ast",
       "id": "services_activity_category_service_activitycategoryservice",
-      "community": 106,
+      "community": 17,
       "norm_label": "activitycategoryservice"
     },
     {
@@ -5346,7 +5346,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "services_activity_todo_folders_service",
-      "community": 9,
+      "community": 70,
       "norm_label": "activity-todo-folders.service.ts"
     },
     {
@@ -5356,7 +5356,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "services_activity_todo_folders_service_syncfolders",
-      "community": 9,
+      "community": 70,
       "norm_label": "syncfolders()"
     },
     {
@@ -5366,7 +5366,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "services_activity_todo_folders_service_getfolderidsforactivity",
-      "community": 9,
+      "community": 70,
       "norm_label": "getfolderidsforactivity()"
     },
     {
@@ -5376,7 +5376,7 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "services_activity_todo_folders_service_getfoldersforactivity",
-      "community": 9,
+      "community": 70,
       "norm_label": "getfoldersforactivity()"
     },
     {
@@ -5386,7 +5386,7 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "services_activity_todo_folders_service_listpendingtodosforactivity",
-      "community": 9,
+      "community": 70,
       "norm_label": "listpendingtodosforactivity()"
     },
     {
@@ -5396,7 +5396,7 @@
       "source_location": "L85",
       "_origin": "ast",
       "id": "services_activity_todo_folders_service_activitytodofoldersservice",
-      "community": 9,
+      "community": 70,
       "norm_label": "activitytodofoldersservice"
     },
     {
@@ -7756,7 +7756,7 @@
       "source_location": "L192",
       "_origin": "ast",
       "id": "services_note_service_noteservice",
-      "community": 70,
+      "community": 23,
       "norm_label": "noteservice"
     },
     {
@@ -7866,7 +7866,7 @@
       "source_location": "L133",
       "_origin": "ast",
       "id": "services_quarter_service_mapquarter",
-      "community": 8,
+      "community": 60,
       "norm_label": "mapquarter()"
     },
     {
@@ -7916,7 +7916,7 @@
       "source_location": "L212",
       "_origin": "ast",
       "id": "services_quarter_service_assertquarterownership",
-      "community": 8,
+      "community": 60,
       "norm_label": "assertquarterownership()"
     },
     {
@@ -7926,7 +7926,7 @@
       "source_location": "L225",
       "_origin": "ast",
       "id": "services_quarter_service_listprojects",
-      "community": 8,
+      "community": 12,
       "norm_label": "listprojects()"
     },
     {
@@ -8036,7 +8036,7 @@
       "source_location": "L376",
       "_origin": "ast",
       "id": "services_quarter_service_getactivequarter",
-      "community": 8,
+      "community": 60,
       "norm_label": "getactivequarter()"
     },
     {
@@ -8046,7 +8046,7 @@
       "source_location": "L388",
       "_origin": "ast",
       "id": "services_quarter_service_getquarterbyid",
-      "community": 8,
+      "community": 60,
       "norm_label": "getquarterbyid()"
     },
     {
@@ -8056,7 +8056,7 @@
       "source_location": "L394",
       "_origin": "ast",
       "id": "services_quarter_service_createquarter",
-      "community": 8,
+      "community": 60,
       "norm_label": "createquarter()"
     },
     {
@@ -8066,7 +8066,7 @@
       "source_location": "L404",
       "_origin": "ast",
       "id": "services_quarter_service_activatequarter",
-      "community": 8,
+      "community": 60,
       "norm_label": "activatequarter()"
     },
     {
@@ -8076,7 +8076,7 @@
       "source_location": "L414",
       "_origin": "ast",
       "id": "services_quarter_service_completequarter",
-      "community": 8,
+      "community": 60,
       "norm_label": "completequarter()"
     },
     {
@@ -8086,7 +8086,7 @@
       "source_location": "L425",
       "_origin": "ast",
       "id": "services_quarter_service_updatequarter",
-      "community": 8,
+      "community": 60,
       "norm_label": "updatequarter()"
     },
     {
@@ -8096,7 +8096,7 @@
       "source_location": "L448",
       "_origin": "ast",
       "id": "services_quarter_service_listquarterprojects",
-      "community": 8,
+      "community": 60,
       "norm_label": "listquarterprojects()"
     },
     {
@@ -8126,7 +8126,7 @@
       "source_location": "L500",
       "_origin": "ast",
       "id": "services_quarter_service_removeprojectfromquarter",
-      "community": 8,
+      "community": 60,
       "norm_label": "removeprojectfromquarter()"
     },
     {
@@ -8206,7 +8206,7 @@
       "source_location": "L605",
       "_origin": "ast",
       "id": "services_quarter_service_listweekscheduleslots",
-      "community": 8,
+      "community": 60,
       "norm_label": "listweekscheduleslots()"
     },
     {
@@ -8466,7 +8466,7 @@
       "source_location": "L350",
       "_origin": "ast",
       "id": "services_routine_service_routineservice",
-      "community": 49,
+      "community": 3,
       "norm_label": "routineservice"
     },
     {
@@ -9206,7 +9206,7 @@
       "source_location": "L285",
       "_origin": "ast",
       "id": "services_standup_service_standupservice",
-      "community": 60,
+      "community": 95,
       "norm_label": "standupservice"
     },
     {
@@ -9216,7 +9216,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "services_sweeter_way_bond_service",
-      "community": 18,
+      "community": 49,
       "norm_label": "sweeter-way-bond.service.ts"
     },
     {
@@ -9226,7 +9226,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "services_sweeter_way_bond_service_mapbondrow",
-      "community": 18,
+      "community": 49,
       "norm_label": "mapbondrow()"
     },
     {
@@ -9236,7 +9236,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "services_sweeter_way_bond_service_swbondservice",
-      "community": 18,
+      "community": 49,
       "norm_label": "swbondservice"
     },
     {
@@ -9396,7 +9396,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "services_todo_daily_template_service",
-      "community": 2,
+      "community": 58,
       "norm_label": "todo-daily-template.service.ts"
     },
     {
@@ -9406,7 +9406,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "services_todo_daily_template_service_templaterow",
-      "community": 2,
+      "community": 58,
       "norm_label": "templaterow"
     },
     {
@@ -9416,7 +9416,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "services_todo_daily_template_service_maptemplate",
-      "community": 2,
+      "community": 58,
       "norm_label": "maptemplate()"
     },
     {
@@ -9426,7 +9426,7 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "services_todo_daily_template_service_assertownership",
-      "community": 2,
+      "community": 58,
       "norm_label": "assertownership()"
     },
     {
@@ -9436,7 +9436,7 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "services_todo_daily_template_service_list",
-      "community": 2,
+      "community": 58,
       "norm_label": "list()"
     },
     {
@@ -9446,7 +9446,7 @@
       "source_location": "L60",
       "_origin": "ast",
       "id": "services_todo_daily_template_service_listbyday",
-      "community": 2,
+      "community": 58,
       "norm_label": "listbyday()"
     },
     {
@@ -9456,7 +9456,7 @@
       "source_location": "L69",
       "_origin": "ast",
       "id": "services_todo_daily_template_service_getbyid",
-      "community": 2,
+      "community": 58,
       "norm_label": "getbyid()"
     },
     {
@@ -9466,7 +9466,7 @@
       "source_location": "L74",
       "_origin": "ast",
       "id": "services_todo_daily_template_service_create",
-      "community": 2,
+      "community": 58,
       "norm_label": "create()"
     },
     {
@@ -9476,7 +9476,7 @@
       "source_location": "L110",
       "_origin": "ast",
       "id": "services_todo_daily_template_service_update",
-      "community": 2,
+      "community": 58,
       "norm_label": "update()"
     },
     {
@@ -9486,7 +9486,7 @@
       "source_location": "L161",
       "_origin": "ast",
       "id": "services_todo_daily_template_service_remove",
-      "community": 2,
+      "community": 58,
       "norm_label": "remove()"
     },
     {
@@ -9496,7 +9496,7 @@
       "source_location": "L167",
       "_origin": "ast",
       "id": "services_todo_daily_template_service_tododailytemplateservice",
-      "community": 2,
+      "community": 58,
       "norm_label": "tododailytemplateservice"
     },
     {
@@ -9626,7 +9626,7 @@
       "source_location": "L172",
       "_origin": "ast",
       "id": "services_todo_folder_service_todofolderservice",
-      "community": 48,
+      "community": 95,
       "norm_label": "todofolderservice"
     },
     {
@@ -9796,7 +9796,7 @@
       "source_location": "L208",
       "_origin": "ast",
       "id": "services_todo_tag_service_todotagservice",
-      "community": 43,
+      "community": 81,
       "norm_label": "todotagservice"
     },
     {
@@ -9846,7 +9846,7 @@
       "source_location": "L52",
       "_origin": "ast",
       "id": "services_todo_service_maptodo",
-      "community": 9,
+      "community": 54,
       "norm_label": "maptodo()"
     },
     {
@@ -9856,7 +9856,7 @@
       "source_location": "L75",
       "_origin": "ast",
       "id": "services_todo_service_mapsubtask",
-      "community": 9,
+      "community": 54,
       "norm_label": "mapsubtask()"
     },
     {
@@ -9866,7 +9866,7 @@
       "source_location": "L87",
       "_origin": "ast",
       "id": "services_todo_service_parsetodoid",
-      "community": 9,
+      "community": 54,
       "norm_label": "parsetodoid()"
     },
     {
@@ -9876,7 +9876,7 @@
       "source_location": "L93",
       "_origin": "ast",
       "id": "services_todo_service_parsesubtaskid",
-      "community": 9,
+      "community": 54,
       "norm_label": "parsesubtaskid()"
     },
     {
@@ -9886,7 +9886,7 @@
       "source_location": "L99",
       "_origin": "ast",
       "id": "services_todo_service_asserttodoownership",
-      "community": 9,
+      "community": 54,
       "norm_label": "asserttodoownership()"
     },
     {
@@ -9896,7 +9896,7 @@
       "source_location": "L105",
       "_origin": "ast",
       "id": "services_todo_service_gettodoroworthrow",
-      "community": 9,
+      "community": 54,
       "norm_label": "gettodoroworthrow()"
     },
     {
@@ -9906,7 +9906,7 @@
       "source_location": "L112",
       "_origin": "ast",
       "id": "services_todo_service_getownedtodoorthrow",
-      "community": 9,
+      "community": 54,
       "norm_label": "getownedtodoorthrow()"
     },
     {
@@ -9926,7 +9926,7 @@
       "source_location": "L139",
       "_origin": "ast",
       "id": "services_todo_service_getnextorderindexinfolder",
-      "community": 9,
+      "community": 54,
       "norm_label": "getnextorderindexinfolder()"
     },
     {
@@ -9946,7 +9946,7 @@
       "source_location": "L157",
       "_origin": "ast",
       "id": "services_todo_service_listsubtasksfortodo",
-      "community": 9,
+      "community": 54,
       "norm_label": "listsubtasksfortodo()"
     },
     {
@@ -9956,7 +9956,7 @@
       "source_location": "L166",
       "_origin": "ast",
       "id": "services_todo_service_createtodo",
-      "community": 9,
+      "community": 54,
       "norm_label": "createtodo()"
     },
     {
@@ -9976,7 +9976,7 @@
       "source_location": "L313",
       "_origin": "ast",
       "id": "services_todo_service_gettodobyid",
-      "community": 9,
+      "community": 54,
       "norm_label": "gettodobyid()"
     },
     {
@@ -9986,7 +9986,7 @@
       "source_location": "L328",
       "_origin": "ast",
       "id": "services_todo_service_updatetodo",
-      "community": 9,
+      "community": 54,
       "norm_label": "updatetodo()"
     },
     {
@@ -10006,7 +10006,7 @@
       "source_location": "L447",
       "_origin": "ast",
       "id": "services_todo_service_deletetodo",
-      "community": 9,
+      "community": 54,
       "norm_label": "deletetodo()"
     },
     {
@@ -10016,7 +10016,7 @@
       "source_location": "L454",
       "_origin": "ast",
       "id": "services_todo_service_completetodo",
-      "community": 9,
+      "community": 54,
       "norm_label": "completetodo()"
     },
     {
@@ -10026,7 +10026,7 @@
       "source_location": "L467",
       "_origin": "ast",
       "id": "services_todo_service_createsubtask",
-      "community": 9,
+      "community": 54,
       "norm_label": "createsubtask()"
     },
     {
@@ -10036,7 +10036,7 @@
       "source_location": "L480",
       "_origin": "ast",
       "id": "services_todo_service_updatesubtask",
-      "community": 9,
+      "community": 54,
       "norm_label": "updatesubtask()"
     },
     {
@@ -10046,7 +10046,7 @@
       "source_location": "L529",
       "_origin": "ast",
       "id": "services_todo_service_deletesubtask",
-      "community": 9,
+      "community": 54,
       "norm_label": "deletesubtask()"
     },
     {
@@ -10066,7 +10066,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "services_user_settings_service",
-      "community": 94,
+      "community": 14,
       "norm_label": "user-settings.service.ts"
     },
     {
@@ -10076,7 +10076,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "services_user_settings_service_usersettingsrow",
-      "community": 94,
+      "community": 14,
       "norm_label": "usersettingsrow"
     },
     {
@@ -10086,7 +10086,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "services_user_settings_service_formattime",
-      "community": 94,
+      "community": 14,
       "norm_label": "formattime()"
     },
     {
@@ -10096,7 +10096,7 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "services_user_settings_service_maprow",
-      "community": 94,
+      "community": 14,
       "norm_label": "maprow()"
     },
     {
@@ -10106,7 +10106,7 @@
       "source_location": "L55",
       "_origin": "ast",
       "id": "services_user_settings_service_getorcreatesettings",
-      "community": 94,
+      "community": 14,
       "norm_label": "getorcreatesettings()"
     },
     {
@@ -10116,7 +10116,7 @@
       "source_location": "L70",
       "_origin": "ast",
       "id": "services_user_settings_service_usersettingsservice",
-      "community": 94,
+      "community": 14,
       "norm_label": "usersettingsservice"
     },
     {
@@ -10136,7 +10136,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "services_vida_goal_service_work_goal",
-      "community": 17,
+      "community": 94,
       "norm_label": "work_goal"
     },
     {
@@ -10236,7 +10236,7 @@
       "source_location": "L200",
       "_origin": "ast",
       "id": "services_vida_goal_service_vidagoalservice",
-      "community": 17,
+      "community": 94,
       "norm_label": "vidagoalservice"
     },
     {
@@ -11456,7 +11456,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "database_drizzle",
-      "community": 13,
+      "community": 31,
       "norm_label": "drizzle.ts"
     },
     {
@@ -11466,7 +11466,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "database_drizzle_drizzledb",
-      "community": 13,
+      "community": 31,
       "norm_label": "drizzledb"
     },
     {
@@ -12206,7 +12206,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "errors_index",
-      "community": 18,
+      "community": 13,
       "norm_label": "index.ts"
     },
     {
@@ -12216,7 +12216,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "errors_index_apperror",
-      "community": 18,
+      "community": 13,
       "norm_label": "apperror"
     },
     {
@@ -12226,7 +12226,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "errors_index_apperror_constructor",
-      "community": 18,
+      "community": 13,
       "norm_label": ".constructor()"
     },
     {
@@ -12236,7 +12236,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "errors_index_validationerror",
-      "community": 18,
+      "community": 13,
       "norm_label": "validationerror"
     },
     {
@@ -12246,7 +12246,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "errors_index_validationerror_constructor",
-      "community": 18,
+      "community": 13,
       "norm_label": ".constructor()"
     },
     {
@@ -12256,7 +12256,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "errors_index_unauthorizederror",
-      "community": 54,
+      "community": 13,
       "norm_label": "unauthorizederror"
     },
     {
@@ -12266,7 +12266,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "errors_index_unauthorizederror_constructor",
-      "community": 54,
+      "community": 13,
       "norm_label": ".constructor()"
     },
     {
@@ -12296,7 +12296,7 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "errors_index_conflicterror",
-      "community": 18,
+      "community": 13,
       "norm_label": "conflicterror"
     },
     {
@@ -12306,7 +12306,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "errors_index_conflicterror_constructor",
-      "community": 18,
+      "community": 13,
       "norm_label": ".constructor()"
     },
     {
@@ -12336,7 +12336,7 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "errors_index_badrequesterror",
-      "community": 18,
+      "community": 49,
       "norm_label": "badrequesterror"
     },
     {
@@ -12346,7 +12346,7 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "errors_index_badrequesterror_constructor",
-      "community": 18,
+      "community": 49,
       "norm_label": ".constructor()"
     },
     {
@@ -12376,7 +12376,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "middleware_auth",
-      "community": 54,
+      "community": 31,
       "norm_label": "auth.ts"
     },
     {
@@ -12386,7 +12386,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "middleware_auth_authenticateduser",
-      "community": 54,
+      "community": 31,
       "norm_label": "authenticateduser"
     },
     {
@@ -12396,7 +12396,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "middleware_auth_request",
-      "community": 54,
+      "community": 31,
       "norm_label": "request"
     },
     {
@@ -12406,7 +12406,7 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "middleware_auth_authmiddleware",
-      "community": 54,
+      "community": 31,
       "norm_label": "authmiddleware()"
     },
     {
@@ -12426,7 +12426,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "middleware_error_handler",
-      "community": 18,
+      "community": 13,
       "norm_label": "error-handler.ts"
     },
     {
@@ -12476,7 +12476,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "middleware_validate",
-      "community": 18,
+      "community": 13,
       "norm_label": "validate.ts"
     },
     {
@@ -12486,7 +12486,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "middleware_validate_validate",
-      "community": 45,
+      "community": 74,
       "norm_label": "validate()"
     },
     {
@@ -12896,7 +12896,7 @@
       "source_location": "L53",
       "_origin": "ast",
       "id": "redis_client_getredisclient",
-      "community": 54,
+      "community": 31,
       "norm_label": "getredisclient()"
     },
     {
@@ -13196,7 +13196,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "utils_async_handler",
-      "community": 55,
+      "community": 45,
       "norm_label": "async-handler.ts"
     },
     {
@@ -13206,7 +13206,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "utils_async_handler_asyncfunction",
-      "community": 55,
+      "community": 45,
       "norm_label": "asyncfunction"
     },
     {
@@ -13216,7 +13216,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "utils_async_handler_asynchandler",
-      "community": 55,
+      "community": 45,
       "norm_label": "asynchandler()"
     },
     {
@@ -13616,7 +13616,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "utils_jwt",
-      "community": 54,
+      "community": 31,
       "norm_label": "jwt.ts"
     },
     {
@@ -13626,7 +13626,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "utils_jwt_jwtpayload",
-      "community": 54,
+      "community": 31,
       "norm_label": "jwtpayload"
     },
     {
@@ -13636,7 +13636,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "utils_jwt_refreshtokenpayload",
-      "community": 54,
+      "community": 31,
       "norm_label": "refreshtokenpayload"
     },
     {
@@ -13666,7 +13666,7 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "utils_jwt_verifyaccesstoken",
-      "community": 54,
+      "community": 31,
       "norm_label": "verifyaccesstoken()"
     },
     {
@@ -13816,7 +13816,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "utils_response",
-      "community": 105,
+      "community": 50,
       "norm_label": "response.ts"
     },
     {
@@ -13826,7 +13826,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "utils_response_successresponse",
-      "community": 105,
+      "community": 50,
       "norm_label": "successresponse"
     },
     {
@@ -13836,7 +13836,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "utils_response_errorresponse",
-      "community": 54,
+      "community": 13,
       "norm_label": "errorresponse"
     },
     {
@@ -16316,7 +16316,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "services_todo_daily_template_types",
-      "community": 2,
+      "community": 58,
       "norm_label": "todo-daily-template.types.ts"
     },
     {
@@ -16326,7 +16326,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "services_todo_daily_template_types_todopriority",
-      "community": 2,
+      "community": 58,
       "norm_label": "todopriority"
     },
     {
@@ -16336,7 +16336,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "services_todo_daily_template_types_tododailytemplate",
-      "community": 2,
+      "community": 58,
       "norm_label": "tododailytemplate"
     },
     {
@@ -16346,7 +16346,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "services_todo_daily_template_types_createtododailytemplateinput",
-      "community": 2,
+      "community": 58,
       "norm_label": "createtododailytemplateinput"
     },
     {
@@ -16356,7 +16356,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "services_todo_daily_template_types_updatetododailytemplateinput",
-      "community": 2,
+      "community": 58,
       "norm_label": "updatetododailytemplateinput"
     },
     {
@@ -16366,7 +16366,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "services_todo_folder_types",
-      "community": 9,
+      "community": 70,
       "norm_label": "todo-folder.types.ts"
     },
     {
@@ -16386,7 +16386,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "services_todo_folder_types_createtodofolderinput",
-      "community": 9,
+      "community": 70,
       "norm_label": "createtodofolderinput"
     },
     {
@@ -16396,7 +16396,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "services_todo_folder_types_updatetodofolderinput",
-      "community": 9,
+      "community": 70,
       "norm_label": "updatetodofolderinput"
     },
     {
@@ -16436,7 +16436,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "services_todo_tag_types_updatetodotaginput",
-      "community": 43,
+      "community": 81,
       "norm_label": "updatetodotaginput"
     },
     {
@@ -16576,7 +16576,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "services_user_settings_types",
-      "community": 94,
+      "community": 14,
       "norm_label": "user-settings.types.ts"
     },
     {
@@ -16586,7 +16586,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "services_user_settings_types_usersettings",
-      "community": 94,
+      "community": 14,
       "norm_label": "usersettings"
     },
     {
@@ -16596,7 +16596,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "services_user_settings_types_updateusersettingsinput",
-      "community": 94,
+      "community": 14,
       "norm_label": "updateusersettingsinput"
     },
     {
@@ -17746,7 +17746,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "validators_routine_validator",
-      "community": 49,
+      "community": 3,
       "norm_label": "routine.validator.ts"
     },
     {
@@ -17756,7 +17756,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "validators_routine_validator_daysofweekenum",
-      "community": 49,
+      "community": 3,
       "norm_label": "daysofweekenum"
     },
     {
@@ -17766,7 +17766,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "validators_routine_validator_createroutineschema",
-      "community": 49,
+      "community": 3,
       "norm_label": "createroutineschema"
     },
     {
@@ -17776,7 +17776,7 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "validators_routine_validator_getroutinesschema",
-      "community": 49,
+      "community": 3,
       "norm_label": "getroutinesschema"
     },
     {
@@ -17786,7 +17786,7 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "validators_routine_validator_getroutineschema",
-      "community": 49,
+      "community": 3,
       "norm_label": "getroutineschema"
     },
     {
@@ -17796,7 +17796,7 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "validators_routine_validator_updateroutineschema",
-      "community": 49,
+      "community": 3,
       "norm_label": "updateroutineschema"
     },
     {
@@ -17806,7 +17806,7 @@
       "source_location": "L57",
       "_origin": "ast",
       "id": "validators_routine_validator_deleteroutineschema",
-      "community": 49,
+      "community": 3,
       "norm_label": "deleteroutineschema"
     },
     {
@@ -17816,7 +17816,7 @@
       "source_location": "L63",
       "_origin": "ast",
       "id": "validators_routine_validator_toggleroutineactiveschema",
-      "community": 49,
+      "community": 3,
       "norm_label": "toggleroutineactiveschema"
     },
     {
@@ -17826,7 +17826,7 @@
       "source_location": "L71",
       "_origin": "ast",
       "id": "validators_routine_validator_createroutinestepschema",
-      "community": 49,
+      "community": 3,
       "norm_label": "createroutinestepschema"
     },
     {
@@ -17836,7 +17836,7 @@
       "source_location": "L83",
       "_origin": "ast",
       "id": "validators_routine_validator_updateroutinestepschema",
-      "community": 49,
+      "community": 3,
       "norm_label": "updateroutinestepschema"
     },
     {
@@ -17846,7 +17846,7 @@
       "source_location": "L96",
       "_origin": "ast",
       "id": "validators_routine_validator_deleteroutinestepschema",
-      "community": 49,
+      "community": 3,
       "norm_label": "deleteroutinestepschema"
     },
     {
@@ -18446,7 +18446,7 @@
       "source_location": "L78",
       "_origin": "ast",
       "id": "schemas_budget_schemas_createbudgetupdateschema",
-      "community": 37,
+      "community": 44,
       "norm_label": "createbudgetupdateschema()"
     },
     {
@@ -19676,7 +19676,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "schemas_note_schemas",
-      "community": 70,
+      "community": 23,
       "norm_label": "note.schemas.ts"
     },
     {
@@ -19686,7 +19686,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "schemas_note_schemas_tagidstring",
-      "community": 70,
+      "community": 23,
       "norm_label": "tagidstring"
     },
     {
@@ -19696,7 +19696,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "schemas_note_schemas_noteidargschema",
-      "community": 70,
+      "community": 23,
       "norm_label": "noteidargschema"
     },
     {
@@ -19706,7 +19706,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "schemas_note_schemas_noteaddinputschema",
-      "community": 70,
+      "community": 23,
       "norm_label": "noteaddinputschema"
     },
     {
@@ -19716,7 +19716,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "schemas_note_schemas_noteeditinputschema",
-      "community": 70,
+      "community": 23,
       "norm_label": "noteeditinputschema"
     },
     {
@@ -19726,7 +19726,7 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "schemas_note_schemas_noteslistargsschema",
-      "community": 70,
+      "community": 23,
       "norm_label": "noteslistargsschema"
     },
     {
@@ -21266,7 +21266,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "schemas_user_settings_schemas",
-      "community": 120,
+      "community": 14,
       "norm_label": "user-settings.schemas.ts"
     },
     {
@@ -21276,7 +21276,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "schemas_user_settings_schemas_uuidstring",
-      "community": 120,
+      "community": 14,
       "norm_label": "uuidstring"
     },
     {
@@ -21286,7 +21286,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "schemas_user_settings_schemas_folderidstring",
-      "community": 120,
+      "community": 14,
       "norm_label": "folderidstring"
     },
     {
@@ -21296,7 +21296,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "schemas_user_settings_schemas_activityidstring",
-      "community": 120,
+      "community": 14,
       "norm_label": "activityidstring"
     },
     {
@@ -21306,7 +21306,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "schemas_user_settings_schemas_timeschema",
-      "community": 120,
+      "community": 14,
       "norm_label": "timeschema"
     },
     {
@@ -21316,7 +21316,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "schemas_user_settings_schemas_vidadayofweek",
-      "community": 120,
+      "community": 14,
       "norm_label": "vidadayofweek"
     },
     {
@@ -21326,7 +21326,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "schemas_user_settings_schemas_nightdaysarray",
-      "community": 120,
+      "community": 14,
       "norm_label": "nightdaysarray"
     },
     {
@@ -21336,7 +21336,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "schemas_user_settings_schemas_updateusersettingsinputschema",
-      "community": 120,
+      "community": 14,
       "norm_label": "updateusersettingsinputschema"
     },
     {
@@ -22646,7 +22646,7 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "helpers_mocks_mockredisclient",
-      "community": 41,
+      "community": 31,
       "norm_label": "mockredisclient"
     },
     {
@@ -22726,7 +22726,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "controllers_auth_controller_test",
-      "community": 54,
+      "community": 13,
       "norm_label": "auth.controller.test.ts"
     },
     {
@@ -22736,7 +22736,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "controllers_auth_controller_test_mockgetdbpool",
-      "community": 54,
+      "community": 13,
       "norm_label": "mockgetdbpool"
     },
     {
@@ -22746,7 +22746,7 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "controllers_auth_controller_test_v4_uuidv4",
-      "community": 54,
+      "community": 13,
       "norm_label": "{ v4: uuidv4 }"
     },
     {
@@ -22756,7 +22756,7 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "controllers_auth_controller_test_sendpasswordresetemailmock",
-      "community": 54,
+      "community": 13,
       "norm_label": "sendpasswordresetemailmock"
     },
     {
@@ -22896,7 +22896,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "middleware_auth_test",
-      "community": 54,
+      "community": 31,
       "norm_label": "auth.test.ts"
     },
     {
@@ -23233,7 +23233,7 @@
       "label": "baseHabit",
       "file_type": "code",
       "source_file": "tests/unit/services/habit-streak.test.ts",
-      "source_location": "L9",
+      "source_location": "L27",
       "_origin": "ast",
       "id": "services_habit_streak_test_basehabit",
       "community": 75,
@@ -23253,7 +23253,7 @@
       "label": "mockGetDbPool",
       "file_type": "code",
       "source_file": "tests/unit/services/habit-sync-streak.test.ts",
-      "source_location": "L10",
+      "source_location": "L24",
       "_origin": "ast",
       "id": "services_habit_sync_streak_test_mockgetdbpool",
       "community": 18,
@@ -23386,7 +23386,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "services_shopping_service_test",
-      "community": 18,
+      "community": 35,
       "norm_label": "shopping.service.test.ts"
     },
     {
@@ -23396,7 +23396,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "services_shopping_service_test_mockgetdbpool",
-      "community": 18,
+      "community": 35,
       "norm_label": "mockgetdbpool"
     },
     {
@@ -23406,7 +23406,7 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "services_shopping_service_test_mocktransactionsuccess",
-      "community": 18,
+      "community": 35,
       "norm_label": "mocktransactionsuccess()"
     },
     {
@@ -23416,7 +23416,7 @@
       "source_location": "L334",
       "_origin": "ast",
       "id": "services_shopping_service_test_listrow",
-      "community": 18,
+      "community": 35,
       "norm_label": "listrow()"
     },
     {
@@ -23426,7 +23426,7 @@
       "source_location": "L344",
       "_origin": "ast",
       "id": "services_shopping_service_test_joinrow",
-      "community": 18,
+      "community": 35,
       "norm_label": "joinrow()"
     },
     {
@@ -23526,7 +23526,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "services_standup_service_test",
-      "community": 60,
+      "community": 95,
       "norm_label": "standup.service.test.ts"
     },
     {
@@ -23536,7 +23536,7 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "services_standup_service_test_mockgetdbpool",
-      "community": 60,
+      "community": 95,
       "norm_label": "mockgetdbpool"
     },
     {
@@ -23546,7 +23546,7 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "services_standup_service_test_mockcreatetodo",
-      "community": 60,
+      "community": 95,
       "norm_label": "mockcreatetodo"
     },
     {
@@ -23556,7 +23556,7 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "services_standup_service_test_mockgettodobyid",
-      "community": 60,
+      "community": 95,
       "norm_label": "mockgettodobyid"
     },
     {
@@ -23566,7 +23566,7 @@
       "source_location": "L48",
       "_origin": "ast",
       "id": "services_standup_service_test_mockgetfolderbyid",
-      "community": 60,
+      "community": 95,
       "norm_label": "mockgetfolderbyid"
     },
     {
@@ -23576,7 +23576,7 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "services_standup_service_test_mockgetmysettings",
-      "community": 60,
+      "community": 95,
       "norm_label": "mockgetmysettings"
     },
     {
@@ -23586,7 +23586,7 @@
       "source_location": "L64",
       "_origin": "ast",
       "id": "services_standup_service_test_memberrow",
-      "community": 60,
+      "community": 95,
       "norm_label": "memberrow()"
     },
     {
@@ -23596,7 +23596,7 @@
       "source_location": "L78",
       "_origin": "ast",
       "id": "services_standup_service_test_dayrow",
-      "community": 60,
+      "community": 95,
       "norm_label": "dayrow()"
     },
     {
@@ -23606,7 +23606,7 @@
       "source_location": "L93",
       "_origin": "ast",
       "id": "services_standup_service_test_itemrow",
-      "community": 60,
+      "community": 95,
       "norm_label": "itemrow()"
     },
     {
@@ -23616,7 +23616,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "services_sweeter_way_bond_service_test",
-      "community": 18,
+      "community": 49,
       "norm_label": "sweeter-way-bond.service.test.ts"
     },
     {
@@ -23626,7 +23626,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "services_sweeter_way_bond_service_test_mockgetdbpool",
-      "community": 18,
+      "community": 49,
       "norm_label": "mockgetdbpool"
     },
     {
@@ -23636,7 +23636,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "services_sweeter_way_bond_service_test_now",
-      "community": 18,
+      "community": 49,
       "norm_label": "now"
     },
     {
@@ -23646,7 +23646,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "services_sweeter_way_bond_service_test_makebondrow",
-      "community": 18,
+      "community": 49,
       "norm_label": "makebondrow()"
     },
     {
@@ -23656,7 +23656,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "services_sweeter_way_list_service_test",
-      "community": 18,
+      "community": 49,
       "norm_label": "sweeter-way-list.service.test.ts"
     },
     {
@@ -23666,7 +23666,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "services_sweeter_way_list_service_test_mockgetdbpool",
-      "community": 18,
+      "community": 49,
       "norm_label": "mockgetdbpool"
     },
     {
@@ -23676,7 +23676,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "services_sweeter_way_list_service_test_mockgetactivebond",
-      "community": 18,
+      "community": 49,
       "norm_label": "mockgetactivebond"
     },
     {
@@ -23686,7 +23686,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "services_sweeter_way_list_service_test_now",
-      "community": 18,
+      "community": 49,
       "norm_label": "now"
     },
     {
@@ -23696,7 +23696,7 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "services_sweeter_way_list_service_test_active_bond",
-      "community": 18,
+      "community": 49,
       "norm_label": "active_bond"
     },
     {
@@ -23706,7 +23706,7 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "services_sweeter_way_list_service_test_makelistrow",
-      "community": 18,
+      "community": 49,
       "norm_label": "makelistrow()"
     },
     {
@@ -23716,7 +23716,7 @@
       "source_location": "L55",
       "_origin": "ast",
       "id": "services_sweeter_way_list_service_test_makeitemrow",
-      "community": 18,
+      "community": 49,
       "norm_label": "makeitemrow()"
     },
     {
@@ -23776,7 +23776,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "services_todo_folder_service_test",
-      "community": 18,
+      "community": 95,
       "norm_label": "todo-folder.service.test.ts"
     },
     {
@@ -23786,7 +23786,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "services_todo_folder_service_test_mockgetdbpool",
-      "community": 18,
+      "community": 95,
       "norm_label": "mockgetdbpool"
     },
     {
@@ -23796,7 +23796,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "services_todo_folder_service_test_createfolderrow",
-      "community": 18,
+      "community": 95,
       "norm_label": "createfolderrow()"
     },
     {
@@ -23876,7 +23876,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "services_user_settings_service_test",
-      "community": 48,
+      "community": 18,
       "norm_label": "user-settings.service.test.ts"
     },
     {
@@ -23886,7 +23886,7 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "services_user_settings_service_test_mockgetdbpool",
-      "community": 48,
+      "community": 18,
       "norm_label": "mockgetdbpool"
     },
     {
@@ -23896,7 +23896,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "services_user_settings_service_test_mockgetactivitybyid",
-      "community": 48,
+      "community": 18,
       "norm_label": "mockgetactivitybyid"
     },
     {
@@ -23906,7 +23906,7 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "services_user_settings_service_test_createsettingsrow",
-      "community": 48,
+      "community": 18,
       "norm_label": "createsettingsrow()"
     },
     {
@@ -23916,7 +23916,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "services_vida_goal_service_test",
-      "community": 17,
+      "community": 94,
       "norm_label": "vida-goal.service.test.ts"
     },
     {
@@ -23926,7 +23926,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "services_vida_goal_service_test_mockgetdbpool",
-      "community": 17,
+      "community": 94,
       "norm_label": "mockgetdbpool"
     },
     {
@@ -23936,7 +23936,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "services_vida_goal_service_test_categoryrow",
-      "community": 17,
+      "community": 94,
       "norm_label": "categoryrow()"
     },
     {
@@ -23946,7 +23946,7 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "services_vida_goal_service_test_goalrow",
-      "community": 17,
+      "community": 94,
       "norm_label": "goalrow()"
     },
     {
@@ -23956,7 +23956,7 @@
       "source_location": "L54",
       "_origin": "ast",
       "id": "services_vida_goal_service_test_statements",
-      "community": 17,
+      "community": 94,
       "norm_label": "statements()"
     },
     {
@@ -23966,7 +23966,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "services_vida_service_test",
-      "community": 18,
+      "community": 49,
       "norm_label": "vida.service.test.ts"
     },
     {
@@ -23976,7 +23976,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "services_vida_service_test_mockgetdbpool",
-      "community": 18,
+      "community": 49,
       "norm_label": "mockgetdbpool"
     },
     {
@@ -23986,7 +23986,7 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "services_vida_service_test_createitemrow",
-      "community": 18,
+      "community": 49,
       "norm_label": "createitemrow()"
     },
     {
@@ -23996,7 +23996,7 @@
       "source_location": "L47",
       "_origin": "ast",
       "id": "services_vida_service_test_createtakenrow",
-      "community": 18,
+      "community": 49,
       "norm_label": "createtakenrow()"
     },
     {
@@ -24226,7 +24226,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "validators_user_settings_schemas_test",
-      "community": 120,
+      "community": 14,
       "norm_label": "user-settings.schemas.test.ts"
     },
     {
@@ -50252,6 +50252,17 @@
       "target": "services_habit_streak"
     },
     {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/unit/services/habit-streak.test.ts",
+      "source_location": "L24",
+      "weight": 1.0,
+      "source": "tests_unit_services_habit_streak_test_ts_services_habit_streak_test",
+      "target": "services_habit_streak_habitstreakfields",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
@@ -50456,9 +50467,9 @@
       "source_file": "tests/unit/services/habit-follow-up-time-of-day.service.test.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_habit_follow_up_time_of_day_service_test",
-      "target": "services_habit_service",
-      "confidence_score": 1.0
+      "target": "services_habit_service"
     },
     {
       "relation": "imports_from",
@@ -51939,9 +51950,9 @@
       "source_file": "tests/unit/services/habit-follow-up-time-of-day.service.test.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_habit_follow_up_time_of_day_service_test",
-      "target": "services_habit_service_habitservice",
-      "confidence_score": 1.0
+      "target": "services_habit_service_habitservice"
     },
     {
       "relation": "imports",
@@ -67172,9 +67183,9 @@
       "source_file": "tests/unit/services/habit-follow-up-time-of-day.service.test.ts",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_habit_follow_up_time_of_day_service_test",
-      "target": "database_pool",
-      "confidence_score": 1.0
+      "target": "database_pool"
     },
     {
       "relation": "imports_from",
@@ -67513,9 +67524,9 @@
       "source_file": "tests/unit/services/habit-follow-up-time-of-day.service.test.ts",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_habit_follow_up_time_of_day_service_test",
-      "target": "database_pool_getdbpool",
-      "confidence_score": 1.0
+      "target": "database_pool_getdbpool"
     },
     {
       "relation": "imports",
@@ -83581,9 +83592,9 @@
       "source_file": "tests/unit/services/habit-follow-up-time-of-day.service.test.ts",
       "source_location": "L81",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_habit_follow_up_time_of_day_service_test",
-      "target": "services_habit_follow_up_time_of_day_service_test_habitlogsinsert",
-      "confidence_score": 1.0
+      "target": "services_habit_follow_up_time_of_day_service_test_habitlogsinsert"
     },
     {
       "relation": "contains",
@@ -83591,9 +83602,9 @@
       "source_file": "tests/unit/services/habit-follow-up-time-of-day.service.test.ts",
       "source_location": "L75",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_habit_follow_up_time_of_day_service_test",
-      "target": "services_habit_follow_up_time_of_day_service_test_habitlogsupdate",
-      "confidence_score": 1.0
+      "target": "services_habit_follow_up_time_of_day_service_test_habitlogsupdate"
     },
     {
       "relation": "contains",
@@ -83601,9 +83612,9 @@
       "source_file": "tests/unit/services/habit-follow-up-time-of-day.service.test.ts",
       "source_location": "L15",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_habit_follow_up_time_of_day_service_test",
-      "target": "services_habit_follow_up_time_of_day_service_test_habitrow",
-      "confidence_score": 1.0
+      "target": "services_habit_follow_up_time_of_day_service_test_habitrow"
     },
     {
       "relation": "contains",
@@ -83611,9 +83622,9 @@
       "source_file": "tests/unit/services/habit-follow-up-time-of-day.service.test.ts",
       "source_location": "L35",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_habit_follow_up_time_of_day_service_test",
-      "target": "services_habit_follow_up_time_of_day_service_test_logrow",
-      "confidence_score": 1.0
+      "target": "services_habit_follow_up_time_of_day_service_test_logrow"
     },
     {
       "relation": "contains",
@@ -83621,9 +83632,9 @@
       "source_file": "tests/unit/services/habit-follow-up-time-of-day.service.test.ts",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_habit_follow_up_time_of_day_service_test",
-      "target": "services_habit_follow_up_time_of_day_service_test_mockgetdbpool",
-      "confidence_score": 1.0
+      "target": "services_habit_follow_up_time_of_day_service_test_mockgetdbpool"
     },
     {
       "relation": "contains",
@@ -83631,9 +83642,9 @@
       "source_file": "tests/unit/services/habit-follow-up-time-of-day.service.test.ts",
       "source_location": "L58",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_habit_follow_up_time_of_day_service_test",
-      "target": "services_habit_follow_up_time_of_day_service_test_mockpool",
-      "confidence_score": 1.0
+      "target": "services_habit_follow_up_time_of_day_service_test_mockpool"
     },
     {
       "relation": "contains",
@@ -84557,5 +84568,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "3a3a8be5af7e88eb21a02d203212321958aa0c6c"
+  "built_at_commit": "db734c1dcdb41ccd35d5f875364a95147b014170"
 }

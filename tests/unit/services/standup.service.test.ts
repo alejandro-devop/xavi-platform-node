@@ -341,6 +341,9 @@ describe('StandupService', () => {
         houseworkActivityId: null,
         vidaDayStartTime: null,
         vidaDayEndTime: null,
+        vidaNightBedTime: null,
+        vidaNightWakeTime: null,
+        vidaNightDays: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       });
@@ -366,6 +369,9 @@ describe('StandupService', () => {
         houseworkActivityId: null,
         vidaDayStartTime: null,
         vidaDayEndTime: null,
+        vidaNightBedTime: null,
+        vidaNightWakeTime: null,
+        vidaNightDays: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       });

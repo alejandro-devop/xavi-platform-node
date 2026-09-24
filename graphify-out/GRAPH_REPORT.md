@@ -1,16 +1,16 @@
 # Graph Report - xavi-platform-node  (2026-09-24)
 
 ## Corpus Check
-- 392 files · ~168,760 words
+- 392 files · ~169,496 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 2447 nodes · 5652 edges · 127 communities (98 shown, 29 thin omitted)
+- 2447 nodes · 5653 edges · 125 communities (97 shown, 28 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `3a3a8be5`
+- Built from commit: `db734c1d`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -114,7 +114,6 @@
 - [[_COMMUNITY_Community 102|Community 102]]
 - [[_COMMUNITY_Community 103|Community 103]]
 - [[_COMMUNITY_Community 104|Community 104]]
-- [[_COMMUNITY_Community 105|Community 105]]
 - [[_COMMUNITY_Community 106|Community 106]]
 - [[_COMMUNITY_Community 107|Community 107]]
 - [[_COMMUNITY_Community 108|Community 108]]
@@ -126,7 +125,6 @@
 - [[_COMMUNITY_Community 115|Community 115]]
 - [[_COMMUNITY_Community 117|Community 117]]
 - [[_COMMUNITY_Community 119|Community 119]]
-- [[_COMMUNITY_Community 120|Community 120]]
 - [[_COMMUNITY_Community 121|Community 121]]
 - [[_COMMUNITY_Community 128|Community 128]]
 - [[_COMMUNITY_Community 131|Community 131]]
@@ -164,7 +162,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (127 total, 29 thin omitted)
+## Communities (125 total, 28 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.07
@@ -172,15 +170,15 @@ Nodes (48): learningResolvers, learningPriority, learningProgressAddInputSchema,
 
 ### Community 1 - "Community 1"
 Cohesion: 0.05
-Nodes (73): courseAddInputSchema, courseDifficulty, courseEditInputSchema, courseIdArgSchema, courseIdString, courseLessonAddInputSchema, courseLessonEditInputSchema, courseLessonProgressInputSchema (+65 more)
+Nodes (74): courseResolvers, courseAddInputSchema, courseDifficulty, courseEditInputSchema, courseIdArgSchema, courseIdString, courseLessonAddInputSchema, courseLessonEditInputSchema (+66 more)
 
 ### Community 2 - "Community 2"
-Cohesion: 0.06
-Nodes (46): dayOfWeek, todoDailyTemplateAddInputSchema, todoDailyTemplateEditInputSchema, todoDailyTemplateIdArgSchema, todoDailyTemplatesDayArgSchema, todoPriority, folderIdString, hexColor (+38 more)
+Cohesion: 0.09
+Nodes (32): dayOfWeek, todoDailyTemplateAddInputSchema, todoDailyTemplateEditInputSchema, todoDailyTemplateIdArgSchema, todoDailyTemplatesDayArgSchema, todoPriority, folderIdString, hexColor (+24 more)
 
 ### Community 3 - "Community 3"
-Cohesion: 0.09
-Nodes (41): routineResolvers, dayOfWeek, routineAddInputSchema, routineEditInputSchema, routineIdArgSchema, routineIdString, routinesListArgsSchema, routineStepAddInputSchema (+33 more)
+Cohesion: 0.06
+Nodes (61): createRoutine(), createRoutineStep(), deleteRoutine(), deleteRoutineStep(), getRoutineById(), getRoutines(), toggleRoutineActive(), updateRoutine() (+53 more)
 
 ### Community 4 - "Community 4"
 Cohesion: 0.07
@@ -199,12 +197,12 @@ Cohesion: 0.16
 Nodes (9): activityTypeDefs, activityDayPlanTypeDefs, expenseTypeDefs, baseTypeDefs, habitTypeDefs, quarterTypeDefs, shoppingTypeDefs, userSettingsTypeDefs (+1 more)
 
 ### Community 8 - "Community 8"
-Cohesion: 0.05
-Nodes (70): activateQuarter(), addObjective(), addProjectToQuarter(), assertProjectAccess(), assertQuarterOwnership(), completeQuarter(), createProject(), createQuarter() (+62 more)
+Cohesion: 0.06
+Nodes (58): addObjective(), addProjectToQuarter(), assertProjectAccess(), createProject(), createSessionLog(), createWeekScheduleSlot(), deleteProject(), deleteSessionLog() (+50 more)
 
 ### Community 9 - "Community 9"
-Cohesion: 0.08
-Nodes (44): activityTodoFoldersService, getFolderIdsForActivity(), getFoldersForActivity(), listPendingTodosForActivity(), syncFolders(), CreateTodoFolderInput, TodoFolder, UpdateTodoFolderInput (+36 more)
+Cohesion: 0.15
+Nodes (20): TodoFolder, FolderIdKey, listOrderClause(), listTodos(), loadSubtasksCounts(), reorderTodosInFolder(), SubtaskRow, TodoRow (+12 more)
 
 ### Community 10 - "Community 10"
 Cohesion: 0.10
@@ -216,15 +214,15 @@ Nodes (54): addSessionSubtask(), assertNoOpenFollowUp(), attachSelectedSubtasks(
 
 ### Community 12 - "Community 12"
 Cohesion: 0.13
-Nodes (32): createAccount(), createCategory(), createTransaction(), deleteAccount(), deleteCategory(), deleteTransaction(), getAccountById(), getAccounts() (+24 more)
+Nodes (33): createAccount(), createCategory(), createTransaction(), deleteAccount(), deleteCategory(), deleteTransaction(), getAccountById(), getAccounts() (+25 more)
 
 ### Community 13 - "Community 13"
-Cohesion: 0.17
-Nodes (8): DrizzleDb, ErrorMetadata, LogLevel, MonitoringAdapter, logger, DatadogMonitoringAdapter, SentryMonitoringAdapter, mockLogger
+Cohesion: 0.12
+Nodes (15): mockGetDbPool, sendPasswordResetEmailMock, { v4: uuidv4 }, ErrorMetadata, LogLevel, MonitoringAdapter, AppError, ConflictError (+7 more)
 
 ### Community 14 - "Community 14"
-Cohesion: 0.08
-Nodes (31): assertDateString(), DayRow, daysBetween(), formatDateForApi(), getDayByDate(), getOwnedDayOrThrow(), getOwnedItemOrThrow(), getOwnedMemberOrThrow() (+23 more)
+Cohesion: 0.05
+Nodes (46): activityIdString, folderIdString, nightDaysArray, timeSchema, updateUserSettingsInputSchema, uuidString, vidaDayOfWeek, assertDateString() (+38 more)
 
 ### Community 15 - "Community 15"
 Cohesion: 0.13
@@ -235,12 +233,12 @@ Cohesion: 0.08
 Nodes (35): activityResolvers, activitiesListArgsSchema, activityAddInputSchema, activityCategoryAddInputSchema, activityCategoryEditInputSchema, activityCategoryIdArgSchema, activityDayFollowUpsArgsSchema, activityEditInputSchema (+27 more)
 
 ### Community 17 - "Community 17"
-Cohesion: 0.14
-Nodes (15): ensureDefaultGoal(), getGoalById(), getOwnedGoalRowOrThrow(), GoalRow, listGoals(), mapGoal(), QueryRunner, setCategoryGoal() (+7 more)
+Cohesion: 0.21
+Nodes (13): activityCategoryService, ensureDefaultGoal(), getGoalById(), getOwnedGoalRowOrThrow(), GoalRow, listGoals(), mapGoal(), QueryRunner (+5 more)
 
 ### Community 18 - "Community 18"
-Cohesion: 0.05
-Nodes (32): mockGetDbPool, successResponse, AppError, BadRequestError, ConflictError, ForbiddenError, NotFoundError, ValidationError (+24 more)
+Cohesion: 0.07
+Nodes (20): mockGetDbPool, successResponse, ForbiddenError, NotFoundError, mockDbPool, resetAllMocks(), mockGetDbPool, mockGetDbPool (+12 more)
 
 ### Community 19 - "Community 19"
 Cohesion: 0.11
@@ -259,8 +257,8 @@ Cohesion: 0.13
 Nodes (22): commonSchemas, createExistsValidator(), validateAtLeastOne(), validateConditionalField(), validateDateRange(), validateDateWithinRange(), validateExactlyOne(), validateFieldsMatch() (+14 more)
 
 ### Community 23 - "Community 23"
-Cohesion: 0.17
-Nodes (16): mockErrorHandler, mockErrorHandler, CreateWalletTransferInput, createWalletTransferInputSchema, walletTransferIdSchema, walletTransferService, GraphQLContext, logOperation() (+8 more)
+Cohesion: 0.11
+Nodes (23): mockErrorHandler, mockErrorHandler, noteResolvers, noteAddInputSchema, noteEditInputSchema, noteIdArgSchema, notesListArgsSchema, tagIdString (+15 more)
 
 ### Community 24 - "Community 24"
 Cohesion: 0.13
@@ -291,8 +289,8 @@ Cohesion: 0.08
 Nodes (25): devDependencies, drizzle-kit, eslint, eslint-config-prettier, eslint-plugin-prettier, jest, prettier, supertest (+17 more)
 
 ### Community 31 - "Community 31"
-Cohesion: 0.24
-Nodes (14): initializeServices(), shutdownServices(), closeDrizzle(), getDrizzlePool(), initializeDrizzle(), closeDbPool(), initializeDbPool(), shutdownDbPool() (+6 more)
+Cohesion: 0.11
+Nodes (28): initializeServices(), shutdownServices(), closeDrizzle(), DrizzleDb, getDrizzlePool(), initializeDrizzle(), closeDbPool(), initializeDbPool() (+20 more)
 
 ### Community 32 - "Community 32"
 Cohesion: 0.08
@@ -307,8 +305,8 @@ Cohesion: 0.07
 Nodes (50): activityDayPlanService, addDayPlanItem(), assertActivitiesOwned(), DayPlanItemRow, formatDateForApi(), formatTime(), getDayPlan(), mapDayPlanItem() (+42 more)
 
 ### Community 35 - "Community 35"
-Cohesion: 0.14
-Nodes (12): fetchListItemsForList(), fetchListItemsForLists(), mapItemRow(), mapListItemRows(), PaginatedShoppingItems, PaginatedShoppingLists, parseMoney(), ShoppingItem (+4 more)
+Cohesion: 0.11
+Nodes (13): fetchListItemsForList(), fetchListItemsForLists(), mapItemRow(), mapListItemRows(), PaginatedShoppingItems, PaginatedShoppingLists, parseMoney(), ShoppingItem (+5 more)
 
 ### Community 36 - "Community 36"
 Cohesion: 0.19
@@ -316,7 +314,7 @@ Nodes (13): walletBudgets, walletExpenses, walletTransfers, walletWallets, Creat
 
 ### Community 37 - "Community 37"
 Cohesion: 0.13
-Nodes (21): budgetResolvers, walletFrequencies, ApplyBudgetToExpenses, applyBudgetToExpensesSchema, BudgetClosuresFilter, budgetClosuresFilterSchema, BudgetFilter, budgetFilterSchema (+13 more)
+Nodes (20): budgetResolvers, walletFrequencies, ApplyBudgetToExpenses, applyBudgetToExpensesSchema, BudgetClosuresFilter, budgetClosuresFilterSchema, BudgetFilter, budgetFilterSchema (+12 more)
 
 ### Community 38 - "Community 38"
 Cohesion: 0.17
@@ -331,24 +329,24 @@ Cohesion: 0.20
 Nodes (16): createHabit(), deleteHabit(), getHabitById(), getHabitLogs(), getHabits(), getHabitStats(), logHabitCompletion(), updateHabit() (+8 more)
 
 ### Community 41 - "Community 41"
-Cohesion: 0.12
-Nodes (22): getDb(), createMockCategory(), createMockExpense(), createMockUser(), createMockWallet(), mockDb, mockRedisClient, toSnakeCase() (+14 more)
+Cohesion: 0.13
+Nodes (21): getDb(), createMockCategory(), createMockExpense(), createMockUser(), createMockWallet(), mockDb, toSnakeCase(), mockGetDb (+13 more)
 
 ### Community 42 - "Community 42"
 Cohesion: 0.13
 Nodes (20): activityIdForWorkoutSchema, activityIdString, activityWorkoutExerciseIdsSchema, exerciseBodyRegion, exerciseCreateInputSchema, exerciseDeleteInputSchema, exerciseHistoryArgsSchema, exerciseIdArgSchema (+12 more)
 
 ### Community 43 - "Community 43"
-Cohesion: 0.17
-Nodes (21): createNote(), deleteNote(), getNoteById(), getNoteRowOrThrow(), getOwnedNoteOrThrow(), listNotes(), listTagsForNote(), loadTagsForNoteIds() (+13 more)
+Cohesion: 0.19
+Nodes (19): createNote(), deleteNote(), getNoteById(), getNoteRowOrThrow(), getOwnedNoteOrThrow(), listNotes(), listTagsForNote(), loadTagsForNoteIds() (+11 more)
 
 ### Community 44 - "Community 44"
-Cohesion: 0.11
-Nodes (25): walletExpenseCategories, expenseCategoryResolvers, mockExpenseCategoryService, CategoryId, categoryIdSchema, CategoryTypeFilter, categoryTypeFilterSchema, createExpenseCategoryInputSchema() (+17 more)
+Cohesion: 0.10
+Nodes (27): walletExpenseCategories, expenseCategoryResolvers, mockExpenseCategoryService, createBudgetUpdateSchema(), CategoryId, categoryIdSchema, CategoryTypeFilter, categoryTypeFilterSchema (+19 more)
 
 ### Community 45 - "Community 45"
-Cohesion: 0.23
-Nodes (13): completeActivity(), createActivity(), deleteActivity(), getActivities(), getActivityById(), updateActivity(), validate(), completeActivitySchema (+5 more)
+Cohesion: 0.20
+Nodes (14): completeActivity(), createActivity(), deleteActivity(), getActivities(), getActivityById(), updateActivity(), AsyncFunction, asyncHandler() (+6 more)
 
 ### Community 46 - "Community 46"
 Cohesion: 0.19
@@ -359,56 +357,56 @@ Cohesion: 0.14
 Nodes (25): assertActivityOwned(), createItem(), dayOfWeekFromDateString(), deleteItem(), formatDateForApi(), formatTimeForApi(), getOwnedItemOrThrow(), listItems() (+17 more)
 
 ### Community 48 - "Community 48"
-Cohesion: 0.08
-Nodes (15): activityFollowUpService, mockGetActivityById, mockGetDbPool, activityService, mockGetDbPool, sleepFollowUpSyncService, mockActivityService, mockFollowUpService (+7 more)
+Cohesion: 0.10
+Nodes (12): activityFollowUpService, mockGetActivityById, mockGetDbPool, activityService, mockGetDbPool, sleepFollowUpSyncService, mockActivityService, mockFollowUpService (+4 more)
 
 ### Community 49 - "Community 49"
-Cohesion: 0.16
-Nodes (20): createRoutine(), createRoutineStep(), deleteRoutine(), deleteRoutineStep(), getRoutineById(), getRoutines(), toggleRoutineActive(), updateRoutine() (+12 more)
+Cohesion: 0.12
+Nodes (9): BadRequestError, swBondService, mockGetDbPool, NOW, ACTIVE_BOND, mockGetActiveBond, mockGetDbPool, NOW (+1 more)
 
 ### Community 50 - "Community 50"
-Cohesion: 0.12
-Nodes (17): documentation, EndpointDoc, getDocumentation(), getDocumentationJson(), ModuleDoc, router, router, router (+9 more)
+Cohesion: 0.11
+Nodes (18): documentation, EndpointDoc, getDocumentation(), getDocumentationJson(), ModuleDoc, router, router, router (+10 more)
 
 ### Community 51 - "Community 51"
 Cohesion: 0.11
 Nodes (26): BulkDeleteScheduledExpenses, bulkDeleteScheduledExpensesSchema, BulkUpdateScheduledExpenses, bulkUpdateScheduledExpensesSchema, PayScheduledExpense, payScheduledExpenseSchema, repeatTypeEnum, ScheduledExpenseFilter (+18 more)
 
 ### Community 52 - "Community 52"
-Cohesion: 0.20
-Nodes (15): shoppingCatalogItemAddInputSchema, shoppingCatalogItemIdArgSchema, shoppingCatalogItemUpdateInputSchema, shoppingListAddInputSchema, shoppingListIdArgSchema, shoppingListItemAddInputSchema, shoppingListItemCreateWithCatalogInputSchema, shoppingListItemIdsBatchSchema (+7 more)
+Cohesion: 0.21
+Nodes (14): shoppingCatalogItemAddInputSchema, shoppingCatalogItemIdArgSchema, shoppingCatalogItemUpdateInputSchema, shoppingListAddInputSchema, shoppingListIdArgSchema, shoppingListItemAddInputSchema, shoppingListItemCreateWithCatalogInputSchema, shoppingListItemIdsBatchSchema (+6 more)
 
 ### Community 53 - "Community 53"
 Cohesion: 0.19
 Nodes (16): generateUuidV7(), isUuidV7(), CategoryRow, createCategory(), deleteCategory(), ensureDefaultCategoryId(), getCategoryById(), getCategoryRowOrThrow() (+8 more)
 
 ### Community 54 - "Community 54"
-Cohesion: 0.14
-Nodes (16): mockGetDbPool, sendPasswordResetEmailMock, { v4: uuidv4 }, UnauthorizedError, resolvers, typeDefs, getGraphQLContext(), GraphQLContext (+8 more)
+Cohesion: 0.21
+Nodes (17): assertTodoOwnership(), completeTodo(), createSubtask(), createTodo(), deleteSubtask(), deleteTodo(), getNextOrderIndexInFolder(), getOwnedTodoOrThrow() (+9 more)
 
 ### Community 55 - "Community 55"
-Cohesion: 0.18
-Nodes (15): createSleepLog(), deleteSleepLog(), getSleepLogById(), getSleepLogs(), getSleepStats(), updateSleepLog(), sleepService, AsyncFunction (+7 more)
+Cohesion: 0.21
+Nodes (14): createSleepLog(), deleteSleepLog(), getSleepLogById(), getSleepLogs(), getSleepStats(), updateSleepLog(), router, sleepService (+6 more)
 
 ### Community 56 - "Community 56"
-Cohesion: 0.20
-Nodes (16): addItemToShoppingListSchema, createCatalogItemSchema, createShoppingListSchema, deleteCatalogItemSchema, deleteShoppingListItemSchema, deleteShoppingListSchema, getCatalogItemSchema, getCatalogItemsSchema (+8 more)
+Cohesion: 0.11
+Nodes (31): addItemToShoppingList(), createCatalogItem(), createShoppingList(), deleteCatalogItem(), deleteShoppingList(), deleteShoppingListItem(), getCatalogItemById(), getCatalogItems() (+23 more)
 
 ### Community 57 - "Community 57"
 Cohesion: 0.17
 Nodes (19): createLearningResource(), deleteLearningResource(), deleteProgressSession(), getLearningResourceById(), getLearningResources(), getProgressSessions(), logProgress(), updateLearningResource() (+11 more)
 
 ### Community 58 - "Community 58"
-Cohesion: 0.14
-Nodes (15): addItemToShoppingList(), createCatalogItem(), createShoppingList(), deleteCatalogItem(), deleteShoppingList(), deleteShoppingListItem(), getCatalogItemById(), getCatalogItems() (+7 more)
+Cohesion: 0.20
+Nodes (14): assertOwnership(), create(), getById(), list(), listByDay(), mapTemplate(), remove(), TemplateRow (+6 more)
 
 ### Community 59 - "Community 59"
 Cohesion: 0.25
 Nodes (4): swEmailService, swNotificationService, mockGetDbPool, NOW
 
 ### Community 60 - "Community 60"
-Cohesion: 0.20
-Nodes (6): standupService, mockCreateTodo, mockGetDbPool, mockGetFolderById, mockGetMySettings, mockGetTodoById
+Cohesion: 0.27
+Nodes (11): activateQuarter(), assertQuarterOwnership(), completeQuarter(), createQuarter(), getActiveQuarter(), getQuarterById(), listQuarterProjects(), listWeekScheduleSlots() (+3 more)
 
 ### Community 61 - "Community 61"
 Cohesion: 0.21
@@ -419,8 +417,8 @@ Cohesion: 0.18
 Nodes (21): assertHabitOwnership(), assertHabitVisibleForUser(), completeHabit(), createHabit(), deleteHabit(), formatDate(), formatTime(), getHabitById() (+13 more)
 
 ### Community 63 - "Community 63"
-Cohesion: 0.14
-Nodes (13): healthResolvers, courseResolvers, creditCardResolvers, frequencyResolvers, habitResolvers, periodResolvers, quarterResolvers, scheduledExpenseResolvers (+5 more)
+Cohesion: 0.15
+Nodes (12): healthResolvers, creditCardResolvers, frequencyResolvers, habitResolvers, periodResolvers, quarterResolvers, scheduledExpenseResolvers, shoppingResolvers (+4 more)
 
 ### Community 64 - "Community 64"
 Cohesion: 0.23
@@ -447,8 +445,8 @@ Cohesion: 0.22
 Nodes (15): createAppIdea(), deleteAppIdea(), getAppIdeaById(), getIdeaRowOrThrow(), getOwnedIdeaOrThrow(), IdeaRow, listAppIdeas(), mapIdea() (+7 more)
 
 ### Community 70 - "Community 70"
-Cohesion: 0.29
-Nodes (7): noteResolvers, noteAddInputSchema, noteEditInputSchema, noteIdArgSchema, notesListArgsSchema, tagIdString, noteService
+Cohesion: 0.28
+Nodes (7): activityTodoFoldersService, getFolderIdsForActivity(), getFoldersForActivity(), listPendingTodosForActivity(), syncFolders(), CreateTodoFolderInput, UpdateTodoFolderInput
 
 ### Community 71 - "Community 71"
 Cohesion: 0.20
@@ -459,11 +457,11 @@ Cohesion: 0.23
 Nodes (6): expenseExtractionResolvers, expenseExtractionInputSchema, expenseExtractionService, extractionOutputSchema, ExtractedExpense, ExtractExpenseFromImageInput
 
 ### Community 74 - "Community 74"
-Cohesion: 0.21
-Nodes (8): BUILTIN_ALLOWED_ORIGINS, getAllowedOrigins(), getCorsOptions(), ownerMiddleware(), errorHandler(), requestLogger(), router, createApp()
+Cohesion: 0.20
+Nodes (8): BUILTIN_ALLOWED_ORIGINS, getAllowedOrigins(), getCorsOptions(), ownerMiddleware(), errorHandler(), requestLogger(), validate(), router
 
 ### Community 75 - "Community 75"
-Cohesion: 0.18
+Cohesion: 0.19
 Nodes (15): addHabitLog(), applyStreakAfterFollowUp(), getLifelinesUsedThisWeek(), removeHabitFollowUp(), syncHabitStreakFromLogs(), addDaysToDateString(), applyFailedStreak(), applyLifelineToEndDate() (+7 more)
 
 ### Community 76 - "Community 76"
@@ -487,8 +485,8 @@ Cohesion: 0.67
 Nodes (3): getPoolConfig(), MigrationRecord, status()
 
 ### Community 81 - "Community 81"
-Cohesion: 0.24
-Nodes (15): assertTagsOwnedByUser(), createTag(), deleteTag(), findTagByName(), getOwnedTagOrThrow(), getTagById(), getTagRowOrThrow(), listTags() (+7 more)
+Cohesion: 0.20
+Nodes (17): assertTagsOwnedByUser(), createTag(), deleteTag(), findTagByName(), getOwnedTagOrThrow(), getTagById(), getTagRowOrThrow(), listTags() (+9 more)
 
 ### Community 92 - "Community 92"
 Cohesion: 0.15
@@ -499,12 +497,12 @@ Cohesion: 0.27
 Nodes (11): deleteMeasure(), getMeasureById(), getMeasureRowOrThrow(), getOwnedMeasureOrThrow(), habitMeasureService, listMeasures(), mapMeasure(), MeasureRow (+3 more)
 
 ### Community 94 - "Community 94"
-Cohesion: 0.27
-Nodes (8): formatTime(), getOrCreateSettings(), mapRow(), UserSettingsRow, userSettingsService, UpdateUserSettingsInput, UserSettings, userSettingsResolvers
+Cohesion: 0.29
+Nodes (3): mockGetDbPool, vidaGoalService, WORK_GOAL
 
 ### Community 95 - "Community 95"
-Cohesion: 0.40
-Nodes (10): createFolder(), deleteFolder(), FolderRow, getFolderById(), getFolderRowOrThrow(), getOwnedFolderOrThrow(), mapFolder(), parseFolderId() (+2 more)
+Cohesion: 0.13
+Nodes (18): standupService, mockCreateTodo, mockGetDbPool, mockGetFolderById, mockGetMySettings, mockGetTodoById, createFolder(), deleteFolder() (+10 more)
 
 ### Community 97 - "Community 97"
 Cohesion: 0.22
@@ -515,16 +513,12 @@ Cohesion: 0.25
 Nodes (4): habitRow, logRow, mockGetDbPool, habitService
 
 ### Community 106 - "Community 106"
-Cohesion: 0.23
-Nodes (14): activityCategoryService, CategoryRow, createCategory(), deleteCategory(), ensureDefaultCategoryId(), getCategoryById(), getCategoryRowOrThrow(), getOwnedCategoryOrThrow() (+6 more)
+Cohesion: 0.25
+Nodes (13): CategoryRow, createCategory(), deleteCategory(), ensureDefaultCategoryId(), getCategoryById(), getCategoryRowOrThrow(), getOwnedCategoryOrThrow(), listCategories() (+5 more)
 
 ### Community 114 - "Community 114"
 Cohesion: 0.27
 Nodes (8): appIdeaResolvers, appIdeaAddInputSchema, appIdeaEditInputSchema, appIdeaIdArgSchema, appIdeasListArgsSchema, appIdeaStatuses, appIdeaStatusSchema, appIdeaService
-
-### Community 120 - "Community 120"
-Cohesion: 0.25
-Nodes (7): activityIdString, folderIdString, nightDaysArray, timeSchema, updateUserSettingsInputSchema, uuidString, vidaDayOfWeek
 
 ### Community 128 - "Community 128"
 Cohesion: 0.33
@@ -535,24 +529,24 @@ Cohesion: 0.50
 Nodes (4): getUserInfo(), safeDispatchBondSideEffects(), safeDispatchItemSideEffects(), safeDispatchLogSideEffects()
 
 ## Knowledge Gaps
-- **473 isolated node(s):** `name`, `version`, `description`, `main`, `node` (+468 more)
+- **472 isolated node(s):** `name`, `version`, `description`, `main`, `node` (+467 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **29 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **28 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `getDbPool()` connect `Community 12` to `Community 0`, `Community 1`, `Community 2`, `Community 3`, `Community 131`, `Community 6`, `Community 8`, `Community 9`, `Community 10`, `Community 11`, `Community 14`, `Community 17`, `Community 18`, `Community 19`, `Community 20`, `Community 21`, `Community 25`, `Community 31`, `Community 34`, `Community 35`, `Community 39`, `Community 43`, `Community 47`, `Community 48`, `Community 53`, `Community 54`, `Community 59`, `Community 60`, `Community 62`, `Community 69`, `Community 75`, `Community 76`, `Community 77`, `Community 81`, `Community 93`, `Community 94`, `Community 95`, `Community 97`, `Community 101`, `Community 106`?**
+- **Why does `getDbPool()` connect `Community 12` to `Community 0`, `Community 1`, `Community 3`, `Community 131`, `Community 6`, `Community 8`, `Community 9`, `Community 10`, `Community 11`, `Community 13`, `Community 14`, `Community 17`, `Community 18`, `Community 19`, `Community 20`, `Community 21`, `Community 25`, `Community 31`, `Community 34`, `Community 35`, `Community 39`, `Community 43`, `Community 47`, `Community 48`, `Community 49`, `Community 53`, `Community 54`, `Community 58`, `Community 59`, `Community 60`, `Community 62`, `Community 69`, `Community 70`, `Community 75`, `Community 76`, `Community 77`, `Community 81`, `Community 93`, `Community 94`, `Community 95`, `Community 97`, `Community 101`, `Community 106`?**
   _High betweenness centrality (0.245) - this node is a cross-community bridge._
-- **Why does `BadRequestError` connect `Community 18` to `Community 0`, `Community 1`, `Community 3`, `Community 6`, `Community 8`, `Community 9`, `Community 10`, `Community 11`, `Community 12`, `Community 13`, `Community 14`, `Community 20`, `Community 21`, `Community 25`, `Community 33`, `Community 34`, `Community 35`, `Community 36`, `Community 39`, `Community 41`, `Community 46`, `Community 47`, `Community 48`, `Community 51`, `Community 53`, `Community 54`, `Community 60`, `Community 73`, `Community 76`, `Community 81`, `Community 93`, `Community 95`, `Community 106`?**
+- **Why does `BadRequestError` connect `Community 49` to `Community 0`, `Community 1`, `Community 3`, `Community 6`, `Community 8`, `Community 9`, `Community 10`, `Community 11`, `Community 12`, `Community 13`, `Community 14`, `Community 18`, `Community 20`, `Community 21`, `Community 25`, `Community 33`, `Community 34`, `Community 35`, `Community 36`, `Community 39`, `Community 41`, `Community 46`, `Community 47`, `Community 48`, `Community 51`, `Community 53`, `Community 70`, `Community 73`, `Community 76`, `Community 81`, `Community 93`, `Community 95`, `Community 106`?**
   _High betweenness centrality (0.050) - this node is a cross-community bridge._
-- **Why does `NotFoundError` connect `Community 18` to `Community 0`, `Community 1`, `Community 2`, `Community 3`, `Community 6`, `Community 8`, `Community 9`, `Community 10`, `Community 11`, `Community 12`, `Community 13`, `Community 14`, `Community 17`, `Community 20`, `Community 21`, `Community 23`, `Community 25`, `Community 34`, `Community 35`, `Community 39`, `Community 41`, `Community 42`, `Community 43`, `Community 46`, `Community 47`, `Community 48`, `Community 51`, `Community 53`, `Community 60`, `Community 68`, `Community 69`, `Community 76`, `Community 77`, `Community 81`, `Community 92`, `Community 93`, `Community 95`, `Community 97`, `Community 106`?**
+- **Why does `NotFoundError` connect `Community 18` to `Community 0`, `Community 1`, `Community 3`, `Community 6`, `Community 8`, `Community 9`, `Community 10`, `Community 11`, `Community 12`, `Community 13`, `Community 14`, `Community 17`, `Community 20`, `Community 21`, `Community 23`, `Community 25`, `Community 34`, `Community 35`, `Community 39`, `Community 41`, `Community 42`, `Community 43`, `Community 46`, `Community 47`, `Community 48`, `Community 49`, `Community 51`, `Community 53`, `Community 58`, `Community 68`, `Community 69`, `Community 76`, `Community 77`, `Community 81`, `Community 92`, `Community 93`, `Community 95`, `Community 97`, `Community 106`?**
   _High betweenness centrality (0.044) - this node is a cross-community bridge._
 - **What connects `name`, `version`, `description` to the rest of the system?**
-  _473 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _472 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.07184325108853411 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
-  _Cohesion score 0.05189873417721519 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.05092592592592592 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
-  _Cohesion score 0.06127946127946128 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.08771929824561403 - nodes in this community are weakly interconnected._

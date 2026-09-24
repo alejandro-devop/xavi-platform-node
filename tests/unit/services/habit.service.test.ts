@@ -149,13 +149,20 @@ describe('HabitService', () => {
   });
 
   describe('addHabitLog', () => {
+    // Secuencia real de consultas hoy (FEAT-024): hábito → log existente →
+    // INSERT del log → frontera `MAX(completed_date) AS latest` →
+    // `syncHabitStreakFromLogs` (streak, max_streak y el UPDATE final).
+    // La versión vieja de este caso devolvía `{ completed_date }` donde el
+    // código espera `{ latest }` y se quedaba corta de una consulta, así que
+    // reventaba con «Cannot read properties of undefined (reading 'max_streak')».
     it('creates log when date is available', async () => {
       mockDbPool.query
         .mockResolvedValueOnce({ rows: [createHabitRow()] })
         .mockResolvedValueOnce({ rows: [] })
         .mockResolvedValueOnce({ rows: [createLogRow()] })
-        .mockResolvedValueOnce({ rows: [{ completed_date: '2024-06-01' }] })
-        .mockResolvedValueOnce({ rows: [{ count: '1' }] })
+        .mockResolvedValueOnce({ rows: [{ latest: '2024-06-01' }] })
+        .mockResolvedValueOnce({ rows: [{ streak: 3 }] })
+        .mockResolvedValueOnce({ rows: [{ max_streak: 7 }] })
         .mockResolvedValueOnce({ rows: [] });
 
       const log = await habitService.addHabitLog(String(HABIT_ID), USER_ID, {
@@ -165,6 +172,34 @@ describe('HabitService', () => {
 
       expect(log.habitId).toBe(String(HABIT_ID));
       expect(log.isAccomplished).toBe(true);
+      // Y la racha se resincroniza desde los logs con lo que dice la base.
+      expect(mockDbPool.query).toHaveBeenNthCalledWith(
+        7,
+        expect.stringContaining('UPDATE habits'),
+        [3, 7, HABIT_ID]
+      );
+    });
+
+    it('does not reset end_date nor restart_count when back-filling a past day', async () => {
+      // Hay un log posterior (2024-06-05), así que 2024-06-01 no es frontera:
+      // registrar un fallo ahí NO debe tocar `end_date` ni `restart_count`.
+      mockDbPool.query
+        .mockResolvedValueOnce({ rows: [createHabitRow({ period_days: 30 })] })
+        .mockResolvedValueOnce({ rows: [] })
+        .mockResolvedValueOnce({ rows: [createLogRow({ is_accomplished: false, is_failed: true })] })
+        .mockResolvedValueOnce({ rows: [{ latest: '2024-06-05' }] })
+        .mockResolvedValueOnce({ rows: [{ streak: 0 }] })
+        .mockResolvedValueOnce({ rows: [{ max_streak: 7 }] })
+        .mockResolvedValueOnce({ rows: [] });
+
+      await habitService.addHabitLog(String(HABIT_ID), USER_ID, {
+        completedDate: '2024-06-01',
+        isFailed: true,
+      });
+
+      const sqlSeen = mockDbPool.query.mock.calls.map((call: unknown[]) => String(call[0]));
+      expect(sqlSeen.some((sql) => sql.includes('restart_count'))).toBe(false);
+      expect(mockDbPool.query).toHaveBeenCalledTimes(7);
     });
   });
 
