@@ -29,6 +29,7 @@ import { quarterResolvers } from './modules/quarter/quarter.resolvers';
 import { userSettingsResolvers } from './modules/user-settings/user-settings.resolvers';
 import { creditCardResolvers } from './modules/credit-card/credit-card.resolvers';
 import { walletTransferResolvers } from './modules/wallet-transfer/wallet-transfer.resolvers';
+import { walletCleanSlateResolvers } from './modules/wallet-clean-slate/wallet-clean-slate.resolvers';
 
 // Merge all resolvers
 export const resolvers = mergeResolvers([
@@ -62,4 +63,5 @@ export const resolvers = mergeResolvers([
   userSettingsResolvers,
   creditCardResolvers,
   walletTransferResolvers,
+  walletCleanSlateResolvers,
 ]);
