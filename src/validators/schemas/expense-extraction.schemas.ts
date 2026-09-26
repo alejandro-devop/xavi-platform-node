@@ -17,4 +17,10 @@ export const expenseExtractionInputSchema = z.object({
       errorMap: () => ({ message: 'Unsupported image type (use jpeg, png, webp or gif)' }),
     })
   ),
+  // What the user says about the expense ("almuerzo con el equipo",
+  // "regalo para mamá"). Optional; blank counts as absent.
+  note: z.preprocess(
+    (value) => (typeof value === 'string' && value.trim() === '' ? undefined : value),
+    z.string().trim().max(300, 'La nota es muy larga (máximo 300 caracteres)').optional()
+  ),
 });

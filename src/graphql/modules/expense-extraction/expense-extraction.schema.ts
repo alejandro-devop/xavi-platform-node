@@ -29,6 +29,8 @@ export const expenseExtractionTypeDefs = gql`
     imageBase64: String!
     "One of: image/jpeg, image/png, image/webp, image/gif"
     mediaType: String!
+    "Optional note from the user about the expense (max 300 chars), used to pick the category and write the description"
+    note: String
   }
 
   extend type Mutation {

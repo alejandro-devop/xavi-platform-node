@@ -80,9 +80,7 @@ function buildSystemPrompt(
   categories: { id: string; name: string; type: string }[],
   today: string
 ): string {
-  const categoryList = categories
-    .map((c) => `- ${c.id} | ${c.name} (${c.type})`)
-    .join('\n');
+  const categoryList = categories.map((c) => `- ${c.id} | ${c.name} (${c.type})`).join('\n');
 
   return `You extract structured expense data from receipt photos and app screenshots (bank apps, Nequi, Daviplata, delivery apps, etc.), mostly from Colombia.
 
@@ -142,6 +140,17 @@ export const expenseExtractionService = {
                 type: 'text',
                 text: 'Extract the expense data from this image.',
               },
+              // The user's own words about the expense. It helps with what the
+              // image can't say (what it was for), so it steers the category
+              // and description; amounts and dates still come from the image.
+              ...(input.note
+                ? [
+                    {
+                      type: 'text' as const,
+                      text: `The user added this note about the expense. Use it to choose the category and to write the description; take the amount and date from the image unless the note states them explicitly.\n<user_note>\n${input.note}\n</user_note>`,
+                    },
+                  ]
+                : []),
             ],
           },
         ],
