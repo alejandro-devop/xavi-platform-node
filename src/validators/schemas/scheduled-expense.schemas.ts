@@ -115,6 +115,7 @@ export const bulkUpdateScheduledExpensesSchema = z.object({
  */
 export const bulkDeleteScheduledExpensesSchema = z.object({
   parentId: z.string().uuid('Invalid parent ID format'),
+  onlyPending: z.boolean().optional(),
 });
 
 // Export types inferred from schemas

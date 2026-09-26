@@ -80,6 +80,11 @@ export const scheduledExpenseTypeDefs = gql`
 
   input BulkDeleteScheduledExpensesInput {
     parentId: ID!
+    """
+    Borrar solo las pendientes y conservar las pagadas (que quedan sueltas,
+    fuera de la serie). Sin esto, una serie con algún pago no se puede borrar.
+    """
+    onlyPending: Boolean
   }
 
   extend type Query {

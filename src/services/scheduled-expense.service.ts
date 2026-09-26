@@ -548,6 +548,37 @@ export const scheduledExpenseService = {
       throw new NotFoundError('No scheduled expenses found with this parent ID');
     }
 
+    if (input.onlyPending) {
+      await db.transaction(async (tx) => {
+        // Las pagadas se sueltan de la serie antes de nada: `parent_id` borra en
+        // cascada, y borrar un padre pendiente se llevaría con él a sus hijos
+        // ya pagados, que son historial.
+        await tx
+          .update(walletScheduledExpenses)
+          .set({ parentId: null, updatedAt: new Date() })
+          .where(
+            and(
+              eq(walletScheduledExpenses.userId, userId),
+              eq(walletScheduledExpenses.parentId, input.parentId),
+              eq(walletScheduledExpenses.isPaid, true)
+            )
+          );
+        await tx
+          .delete(walletScheduledExpenses)
+          .where(
+            and(
+              eq(walletScheduledExpenses.userId, userId),
+              eq(walletScheduledExpenses.isPaid, false),
+              or(
+                eq(walletScheduledExpenses.id, input.parentId),
+                eq(walletScheduledExpenses.parentId, input.parentId)
+              )
+            )
+          );
+      });
+      return true;
+    }
+
     // Check if any are paid
     const anyPaid = expenses.some((e) => e.isPaid);
     if (anyPaid) {

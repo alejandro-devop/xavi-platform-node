@@ -66,4 +66,9 @@ export interface BulkUpdateScheduledExpensesInput {
 
 export interface BulkDeleteScheduledExpensesInput {
   parentId: string;
+  /**
+   * Borrar solo las pendientes de la serie y conservar las pagadas como
+   * historial. Sin esto, una serie con algún pago no se puede borrar.
+   */
+  onlyPending?: boolean;
 }
