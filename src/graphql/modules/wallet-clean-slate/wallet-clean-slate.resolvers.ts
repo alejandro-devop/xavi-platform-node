@@ -6,17 +6,17 @@ import type { WalletCleanSlateInput } from '../../../types/services/wallet-clean
 
 export const walletCleanSlateResolvers = {
   Mutation: {
-    walletCleanSlate: withValidatedResolver(
+    walletCleanSlateProtocol: withValidatedResolver(
       walletCleanSlateInputSchema,
       async (
         _parent: unknown,
         { input }: { input: WalletCleanSlateInput },
         context: GraphQLContext
       ) => {
-        requireAuth(context, 'walletCleanSlate');
+        requireAuth(context, 'walletCleanSlateProtocol');
         return walletCleanSlateService.cleanSlate(Number(context.user!.id), input);
       },
-      'walletCleanSlate'
+      'walletCleanSlateProtocol'
     ),
   },
 };

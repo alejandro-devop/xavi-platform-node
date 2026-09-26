@@ -57,8 +57,9 @@ export const walletCleanSlateTypeDefs = gql`
   extend type Mutation {
     """
     Clean slate protocol: borra o reinicia los datos de finanzas elegidos, en
-    una sola transacción.
+    una sola transacción. No confundir con walletCleanSlate (sin argumentos,
+    borra todas las billeteras), que es anterior y ningún cliente usa.
     """
-    walletCleanSlate(input: WalletCleanSlateInput!): WalletCleanSlateResult!
+    walletCleanSlateProtocol(input: WalletCleanSlateInput!): WalletCleanSlateResult!
   }
 `;

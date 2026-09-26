@@ -32,6 +32,9 @@ import type {
  * - **Borrar billeteras arrastra** por cascada sus movimientos, transferencias,
  *   programados y presupuestos. Por eso se marcan también aquí: así el conteo
  *   dice la verdad sobre lo que desapareció.
+ * - **No es `walletService.cleanSlate`**, la mutation `walletCleanSlate` de
+ *   antes: esa no recibe opciones y borra todas las billeteras. Esta se expone
+ *   como `walletCleanSlateProtocol`.
  * - **Las categorías de sistema se conservan.** No se pueden borrar ni una a
  *   una (`expenseCategoryService.deleteCategory`).
  */
