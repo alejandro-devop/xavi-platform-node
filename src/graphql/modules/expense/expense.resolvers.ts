@@ -7,7 +7,7 @@ import { withErrorHandling, requireAuth } from '../../utils/error-handler';
 import { withValidatedResolver } from '../../utils/validation';
 import {
   expenseInputSchema,
-  expenseUpdateSchema,
+  expenseUpdateArgsSchema,
   expenseIdSchema,
   expenseFilterSchema,
 } from '../../../validators/schemas/expense.schemas';
@@ -44,7 +44,7 @@ export const expenseResolvers = {
     ),
 
     walletExpenseUpdate: withValidatedResolver(
-      expenseUpdateSchema,
+      expenseUpdateArgsSchema,
       async (_: any, { id, input }: any, context: any) => {
         requireAuth(context, 'walletExpenseUpdate');
         return await expenseService.updateExpense(id, context.user.id, input);

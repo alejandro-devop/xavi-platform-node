@@ -39,6 +39,19 @@ export const expenseUpdateSchema = z.object({
 });
 
 /**
+ * Los argumentos de `walletExpenseUpdate`: `id` e `input` juntos.
+ *
+ * `withValidation` valida todos los argumentos, no solo `input`, cuando la
+ * mutación trae algo más (aquí, `id`). Con solo `expenseUpdateSchema`, zod
+ * descartaba `id` e `input` por desconocidos y el servicio recibía `undefined`:
+ * cualquier edición de un gasto acababa en "Expense not found".
+ */
+export const expenseUpdateArgsSchema = z.object({
+  id: z.string().uuid('Invalid expense ID format'),
+  input: expenseUpdateSchema,
+});
+
+/**
  * Expense ID Schema - For operations requiring expense ID
  */
 export const expenseIdSchema = z.object({
