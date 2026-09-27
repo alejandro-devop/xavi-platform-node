@@ -99,6 +99,48 @@ async function main() {
   assert.equal(r3.walletName, 'Efectivo');
   assert.equal(r3.categoryName, null);
 
+  // Siri con la billetera nombrada: manda sobre la principal.
+  const r4 = await walletCaptureService.capture(1, {
+    amount: 5000,
+    description: 'Tinto',
+    ref: 'ref-siri-0002',
+    source: 'siri',
+    walletId: bancolombia,
+  });
+  assert.equal(r4.walletName, 'Bancolombia');
+  assert.equal(r4.kind, 'expense');
+
+  // Tarjeta de crédito: un cargo, no un gasto de billetera. Sube la deuda.
+  const [tarjeta] = await q(
+    `INSERT INTO wallet_credit_cards (id, user_id, name, credit_limit, current_debt, cutoff_day, payment_day)
+     VALUES (gen_random_uuid(), 1, 'Visa Oro', 8000000, 1000000, 15, 30) RETURNING id`
+  );
+  const cargo = {
+    amount: 45000,
+    description: 'Almuerzo',
+    ref: 'ref-apple-0002',
+    source: 'apple_pay',
+    date: '2026-09-27',
+    cardName: 'Visa Oro',
+    creditCardId: tarjeta.id,
+  };
+  const r5 = await walletCaptureService.capture(1, cargo);
+  assert.equal(r5.kind, 'charge');
+  assert.equal(r5.walletName, 'Visa Oro');
+  assert.equal(r5.categoryName, 'Comida');
+  const [deuda] = await q('SELECT current_debt FROM wallet_credit_cards WHERE id = $1', [
+    tarjeta.id,
+  ]);
+  assert.equal(Number(deuda.current_debt), 1045000);
+  const [saldoIgual] = await q('SELECT balance FROM wallet_wallets WHERE id = $1', [bancolombia]);
+  assert.equal(Number(saldoIgual.balance), 950000, 'un cargo no toca las billeteras');
+
+  // Reintentar el mismo cargo no lo duplica.
+  const r6 = await walletCaptureService.capture(1, { ...cargo, ref: 'ref-apple-0002' });
+  assert.equal(r6.duplicate, true);
+  const [{ cargos }] = await q('SELECT count(*)::int AS cargos FROM wallet_credit_card_charges');
+  assert.equal(cargos, 1);
+
   console.log('wallet-capture: OK');
 }
 

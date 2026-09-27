@@ -21,6 +21,8 @@ const captureSchema = z.object({
   source: z.enum(['apple_pay', 'siri', 'shortcut']),
   date: z.string().date().optional(),
   cardName: z.string().trim().max(120).optional(),
+  walletId: z.string().uuid().optional(),
+  creditCardId: z.string().uuid().optional(),
 });
 
 router.post(
