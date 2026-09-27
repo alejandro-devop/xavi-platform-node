@@ -32,6 +32,7 @@ import { creditCardTypeDefs } from './modules/credit-card/credit-card.schema';
 import { walletTransferTypeDefs } from './modules/wallet-transfer/wallet-transfer.schema';
 import { walletCleanSlateTypeDefs } from './modules/wallet-clean-slate/wallet-clean-slate.schema';
 import { walletCategoryHistoryTypeDefs } from './modules/wallet-category-history/wallet-category-history.schema';
+import { walletCaptureTypeDefs } from './modules/wallet-capture/wallet-capture.schema';
 
 // Base Query and Mutation types
 const baseTypeDefs = gql`
@@ -80,4 +81,5 @@ export const typeDefs = [
   walletTransferTypeDefs,
   walletCleanSlateTypeDefs,
   walletCategoryHistoryTypeDefs,
+  walletCaptureTypeDefs,
 ];

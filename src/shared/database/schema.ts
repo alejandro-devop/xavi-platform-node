@@ -195,6 +195,9 @@ export const walletExpenses = pgTable('wallet_expenses', {
   transferId: uuid('transfer_id').references((): any => walletTransfers.id, {
     onDelete: 'cascade',
   }),
+  // Migración 073: gastos anotados desde fuera de la app (Siri, Apple Pay).
+  source: varchar('source', { length: 20 }),
+  captureRef: varchar('capture_ref', { length: 64 }),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
