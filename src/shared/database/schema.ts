@@ -127,6 +127,11 @@ export const walletBudgets = pgTable('wallet_budgets', {
   frequencyId: uuid('frequency_id').references(() => walletFrequencies.id, {
     onDelete: 'set null',
   }),
+  // Opcional (migración 072): lo que le queda al presupuesto cuenta en esta
+  // categoría en el reporte.
+  categoryId: uuid('category_id').references(() => walletExpenseCategories.id, {
+    onDelete: 'set null',
+  }),
   name: varchar('name', { length: 255 }).notNull(),
   description: text('description'),
   icon: varchar('icon', { length: 50 }),

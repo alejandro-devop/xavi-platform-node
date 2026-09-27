@@ -6,6 +6,10 @@ export const budgetTypeDefs = gql`
     userId: ID!
     walletId: ID
     frequencyId: ID
+    """
+    Opcional. Lo que le queda al presupuesto cuenta en esta categoría.
+    """
+    categoryId: ID
     name: String!
     description: String
     icon: String
@@ -81,6 +85,7 @@ export const budgetTypeDefs = gql`
   input WalletBudgetInput {
     walletId: ID
     frequencyId: ID
+    categoryId: ID
     name: String!
     description: String
     icon: String
@@ -93,6 +98,10 @@ export const budgetTypeDefs = gql`
   input WalletBudgetUpdateInput {
     walletId: ID
     frequencyId: ID
+    """
+    null quita la categoría.
+    """
+    categoryId: ID
     name: String
     description: String
     icon: String

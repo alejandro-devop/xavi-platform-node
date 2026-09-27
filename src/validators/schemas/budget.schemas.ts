@@ -17,6 +17,7 @@ export const createBudgetInputSchema = (userId: number) =>
     .object({
       walletId: z.string().uuid('Invalid wallet ID format').nullable().optional(),
       frequencyId: z.string().uuid('Invalid frequency ID format').nullable().optional(),
+      categoryId: z.string().uuid('Invalid category ID format').nullable().optional(),
       name: z
         .string()
         .trim()
@@ -53,6 +54,7 @@ export const budgetInputSchema = z
   .object({
     walletId: z.string().uuid('Invalid wallet ID format').nullable().optional(),
     frequencyId: z.string().uuid('Invalid frequency ID format').nullable().optional(),
+    categoryId: z.string().uuid('Invalid category ID format').nullable().optional(),
     name: z
       .string()
       .trim()
@@ -80,6 +82,7 @@ export const createBudgetUpdateSchema = (userId: number, budgetId?: string) =>
     .object({
       walletId: z.string().uuid('Invalid wallet ID format').nullable().optional(),
       frequencyId: z.string().uuid('Invalid frequency ID format').nullable().optional(),
+      categoryId: z.string().uuid('Invalid category ID format').nullable().optional(),
       name: z
         .string()
         .trim()
@@ -131,6 +134,7 @@ export const budgetUpdateSchema = z
   .object({
     walletId: z.string().uuid('Invalid wallet ID format').nullable().optional(),
     frequencyId: z.string().uuid('Invalid frequency ID format').nullable().optional(),
+    categoryId: z.string().uuid('Invalid category ID format').nullable().optional(),
     name: z
       .string()
       .min(3, 'Name must be at least 3 characters')

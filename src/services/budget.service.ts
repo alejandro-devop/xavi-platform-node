@@ -4,6 +4,7 @@ import {
   walletBudgets,
   walletBudgetClosures,
   walletExpenses,
+  walletExpenseCategories,
   walletFrequencies,
   walletScheduledExpenses,
   walletWallets,
@@ -102,6 +103,17 @@ export const budgetService = {
       });
     }
 
+    if (input.categoryId) {
+      await checkRecordExists({
+        table: walletExpenseCategories,
+        idValue: input.categoryId,
+        scopeField: walletExpenseCategories.userId,
+        scopeValue: userId,
+        notFoundMessage: 'Category not found',
+        forbiddenMessage: 'You do not have permission to use this category',
+      });
+    }
+
     if (input.frequencyId) {
       await checkRecordExists({
         table: walletFrequencies,
@@ -121,6 +133,7 @@ export const budgetService = {
         userId,
         walletId: input.walletId || null,
         frequencyId: input.frequencyId || null,
+        categoryId: input.categoryId || null,
         name: input.name,
         description: input.description || null,
         icon: input.icon || null,
@@ -162,6 +175,17 @@ export const budgetService = {
       });
     }
 
+    if (input.categoryId !== undefined && input.categoryId !== null) {
+      await checkRecordExists({
+        table: walletExpenseCategories,
+        idValue: input.categoryId,
+        scopeField: walletExpenseCategories.userId,
+        scopeValue: userId,
+        notFoundMessage: 'Category not found',
+        forbiddenMessage: 'You do not have permission to use this category',
+      });
+    }
+
     if (input.frequencyId !== undefined && input.frequencyId !== null) {
       await checkRecordExists({
         table: walletFrequencies,
@@ -177,6 +201,7 @@ export const budgetService = {
 
     if (input.walletId !== undefined) updateData.walletId = input.walletId;
     if (input.frequencyId !== undefined) updateData.frequencyId = input.frequencyId;
+    if (input.categoryId !== undefined) updateData.categoryId = input.categoryId;
     if (input.name !== undefined) updateData.name = input.name;
     if (input.description !== undefined) updateData.description = input.description;
     if (input.icon !== undefined) updateData.icon = input.icon;

@@ -3,6 +3,7 @@ export interface Budget {
   userId: number;
   walletId?: string | null;
   frequencyId?: string | null;
+  categoryId?: string | null;
   name: string;
   description?: string | null;
   icon?: string | null;
@@ -18,6 +19,7 @@ export interface Budget {
 export interface CreateBudgetInput {
   walletId?: string | null;
   frequencyId?: string | null;
+  categoryId?: string | null;
   name: string;
   description?: string | null;
   icon?: string | null;
@@ -30,6 +32,7 @@ export interface CreateBudgetInput {
 export interface UpdateBudgetInput {
   walletId?: string | null;
   frequencyId?: string | null;
+  categoryId?: string | null;
   name?: string;
   description?: string | null;
   icon?: string | null;
