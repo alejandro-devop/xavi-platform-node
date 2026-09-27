@@ -30,6 +30,7 @@ import { userSettingsResolvers } from './modules/user-settings/user-settings.res
 import { creditCardResolvers } from './modules/credit-card/credit-card.resolvers';
 import { walletTransferResolvers } from './modules/wallet-transfer/wallet-transfer.resolvers';
 import { walletCleanSlateResolvers } from './modules/wallet-clean-slate/wallet-clean-slate.resolvers';
+import { walletCategoryHistoryResolvers } from './modules/wallet-category-history/wallet-category-history.resolvers';
 
 // Merge all resolvers
 export const resolvers = mergeResolvers([
@@ -64,4 +65,5 @@ export const resolvers = mergeResolvers([
   creditCardResolvers,
   walletTransferResolvers,
   walletCleanSlateResolvers,
+  walletCategoryHistoryResolvers,
 ]);
