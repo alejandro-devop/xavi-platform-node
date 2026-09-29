@@ -6,7 +6,9 @@ export const expenseExtractionTypeDefs = gql`
   Nothing is persisted — the user reviews and confirms via walletExpenseAdd.
   """
   type WalletExpenseExtraction {
+    "Amount in the currency printed on the image (not converted to COP)"
     amount: Float
+    "ISO 4217 code of that currency (e.g. COP, USD), null when it cannot be determined"
     currency: String
     "Transaction date as YYYY-MM-DD, null when not visible in the image"
     date: String

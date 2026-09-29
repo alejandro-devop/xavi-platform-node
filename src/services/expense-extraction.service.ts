@@ -17,11 +17,12 @@ const extractionOutputSchema = {
     amount: {
       anyOf: [{ type: 'number' }, { type: 'null' }],
       description:
-        'Total amount of the transaction as a plain number. Null if it cannot be determined.',
+        'Total amount of the transaction as a plain number, in the currency printed on the image (never converted). Null if it cannot be determined.',
     },
     currency: {
       anyOf: [{ type: 'string' }, { type: 'null' }],
-      description: 'ISO 4217 currency code (e.g. COP, USD). Null if not visible.',
+      description:
+        'ISO 4217 code of the currency the amount is printed in (e.g. COP, USD, EUR). Null if it cannot be determined.',
     },
     date: {
       anyOf: [{ type: 'string' }, { type: 'null' }],
@@ -64,6 +65,17 @@ const extractionOutputSchema = {
   additionalProperties: false,
 } as const;
 
+/**
+ * Normalize the model's currency to an uppercase ISO 4217 code.
+ * Anything that doesn't look like a 3-letter code becomes null, so the app
+ * can treat "unknown" and "garbage" the same way.
+ */
+export function normalizeCurrency(value: unknown): string | null {
+  if (typeof value !== 'string') return null;
+  const code = value.trim().toUpperCase();
+  return /^[A-Z]{3}$/.test(code) ? code : null;
+}
+
 let client: Anthropic | null = null;
 
 function getClient(): Anthropic {
@@ -90,6 +102,13 @@ Amount rules:
 - Colombian format uses dots as thousand separators: "$25.000" means 25000 COP, not 25.
 - Prefer the final total paid (after tips/taxes/discounts) over subtotals.
 - For bank screenshots, extract the transaction amount, never the account balance.
+
+Currency rules:
+- Report the currency the amount is printed in as an ISO 4217 code, and keep the amount in that currency — never convert it.
+- "US$", "USD", "U$S" or an English-language receipt from a US store charged in dollars means USD; "€"/"EUR" means EUR.
+- A bare "$" on a Colombian receipt or app (Nequi, Daviplata, Bancolombia, etc.) means COP.
+- Foreign currencies usually have cents: "$695.88" in USD is 695.88, not 69588.
+- If the currency cannot be determined, return null.
 
 Category: pick the id of the best-matching category from this list, or null if none clearly fits. Never invent ids.
 ${categoryList}
@@ -178,6 +197,8 @@ export const expenseExtractionService = {
     }
 
     const extracted = JSON.parse(textBlock.text) as ExtractedExpense;
+
+    extracted.currency = normalizeCurrency(extracted.currency);
 
     // Defense in depth: never return a category id that isn't the user's.
     if (extracted.categoryId && !categories.some((c) => c.id === extracted.categoryId)) {
