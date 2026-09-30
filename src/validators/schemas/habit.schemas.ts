@@ -154,6 +154,7 @@ const habitEditFields = [
   'orderIndex',
   'status',
   'hidden',
+  'purposeId',
 ] as const;
 
 const habitStatus = z.enum(['active', 'completed', 'archived']);
@@ -305,6 +306,7 @@ export const habitMeasureIdArgSchema = z.object({
 
 export const habitPurposeInputSchema = z.object({
   name: z.string().min(1).max(255),
+  description: z.string().nullable().optional(),
   icon: z.string().max(100).nullable().optional(),
   placement: z.enum(['pool', 'want', 'avoid']).optional(),
   orderIndex: z.number().int().min(0).optional(),
@@ -314,11 +316,12 @@ export const habitPurposeEditInputSchema = z
   .object({
     id: habitIdString,
     name: z.string().min(1).max(255).optional(),
+    description: z.string().nullable().optional(),
     icon: z.string().max(100).nullable().optional(),
     placement: z.enum(['pool', 'want', 'avoid']).optional(),
     orderIndex: z.number().int().min(0).optional(),
   })
   .refine(
-    (d) => ['name', 'icon', 'placement', 'orderIndex'].some((k) => d[k as keyof typeof d] !== undefined),
+    (d) => ['name', 'description', 'icon', 'placement', 'orderIndex'].some((k) => d[k as keyof typeof d] !== undefined),
     { message: 'At least one field required' }
   );
