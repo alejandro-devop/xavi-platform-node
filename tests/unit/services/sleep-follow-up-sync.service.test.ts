@@ -74,6 +74,7 @@ describe('sleepFollowUpSyncService', () => {
       vidaNightBedTime: null,
       vidaNightWakeTime: null,
       vidaNightDays: null,
+      vidaPomodoro: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -99,6 +100,7 @@ describe('sleepFollowUpSyncService', () => {
       vidaNightBedTime: null,
       vidaNightWakeTime: null,
       vidaNightDays: null,
+      vidaPomodoro: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -118,6 +120,8 @@ describe('sleepFollowUpSyncService', () => {
       endDateTime: '2024-06-01T08:30:00',
       notes: 'Sueño: Deep sleep',
       linkedTodoId: null,
+      pomodoroBlocks: null,
+      pomodoroBreaks: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -155,6 +159,7 @@ describe('sleepFollowUpSyncService', () => {
       vidaNightBedTime: null,
       vidaNightWakeTime: null,
       vidaNightDays: null,
+      vidaPomodoro: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -186,6 +191,8 @@ describe('sleepFollowUpSyncService', () => {
       endDateTime: '2024-06-02T06:00:00',
       notes: 'Registro automático de sueño',
       linkedTodoId: null,
+      pomodoroBlocks: null,
+      pomodoroBreaks: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     });

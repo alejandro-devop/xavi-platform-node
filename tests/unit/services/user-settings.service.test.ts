@@ -34,6 +34,14 @@ const mockGetActivityById = activityService.getActivityById as jest.MockedFuncti
 
 const USER_ID = 1;
 const ACTIVITY_ID = '42';
+const POMODORO = {
+  enabled: true,
+  categoryIds: ['0190a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b'],
+  workMinutes: 25,
+  breakMinutes: 5,
+  longBreakMinutes: 15,
+  longBreakEvery: 4,
+};
 
 function createSettingsRow(overrides: Record<string, unknown> = {}) {
   const now = new Date('2026-07-16T12:00:00Z');
@@ -113,9 +121,66 @@ describe('UserSettingsService', () => {
 
       expect(settings.houseworkActivityId).toBe('42');
     });
+    it('maps the Vida Pomodoro from JSONB and null when not configured', async () => {
+      mockDbPool.query.mockResolvedValueOnce({
+        rows: [createSettingsRow({ vida_pomodoro: POMODORO })],
+      });
+      const settings = await userSettingsService.getMySettings(USER_ID);
+      expect(settings.vidaPomodoro).toEqual(POMODORO);
+
+      mockDbPool.query.mockResolvedValueOnce({ rows: [createSettingsRow({ vida_pomodoro: null })] });
+      const empty = await userSettingsService.getMySettings(USER_ID);
+      expect(empty.vidaPomodoro).toBeNull();
+    });
   });
 
   describe('updateMySettings', () => {
+    it('replaces the Vida Pomodoro whole as JSONB and reads it back', async () => {
+      mockDbPool.query
+        .mockResolvedValueOnce({ rows: [createSettingsRow()] })
+        .mockResolvedValueOnce({ rows: [createSettingsRow({ vida_pomodoro: POMODORO })] });
+
+      const settings = await userSettingsService.updateMySettings(USER_ID, {
+        vidaPomodoro: POMODORO,
+      });
+
+      expect(settings.vidaPomodoro).toEqual(POMODORO);
+      const [sql, params] = mockDbPool.query.mock.calls[1];
+      expect(sql).toContain('vida_pomodoro = $1::jsonb');
+      expect(params).toEqual([JSON.stringify(POMODORO), USER_ID]);
+    });
+
+    it('clears the Vida Pomodoro with null', async () => {
+      mockDbPool.query
+        .mockResolvedValueOnce({ rows: [createSettingsRow({ vida_pomodoro: POMODORO })] })
+        .mockResolvedValueOnce({ rows: [createSettingsRow({ vida_pomodoro: null })] });
+
+      const settings = await userSettingsService.updateMySettings(USER_ID, {
+        vidaPomodoro: null,
+      });
+
+      expect(settings.vidaPomodoro).toBeNull();
+      const [sql, params] = mockDbPool.query.mock.calls[1];
+      expect(sql).toContain('vida_pomodoro = $1::jsonb');
+      expect(params).toEqual([null, USER_ID]);
+    });
+
+    it('leaves the Vida Pomodoro untouched when omitted', async () => {
+      mockDbPool.query
+        .mockResolvedValueOnce({ rows: [createSettingsRow({ vida_pomodoro: POMODORO })] })
+        .mockResolvedValueOnce({
+          rows: [createSettingsRow({ vida_pomodoro: POMODORO, hide_hidden_habits: false })],
+        });
+
+      const settings = await userSettingsService.updateMySettings(USER_ID, {
+        hideHiddenHabits: false,
+      });
+
+      expect(settings.vidaPomodoro).toEqual(POMODORO);
+      const [sql] = mockDbPool.query.mock.calls[1];
+      expect(sql).not.toContain('vida_pomodoro');
+    });
+
     it('updates day start reminder fields dynamically', async () => {
       mockDbPool.query
         .mockResolvedValueOnce({ rows: [createSettingsRow()] }) // getOrCreate

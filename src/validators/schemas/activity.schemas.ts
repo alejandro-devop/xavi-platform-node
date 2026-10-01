@@ -252,12 +252,17 @@ export const activityFollowUpEditInputSchema = z
       .nullable()
       .optional(),
     notes: z.string().nullable().optional(),
+    // Conteos Pomodoro de la sesión. `null` limpia el dato.
+    pomodoroBlocks: z.number().int().min(0).max(100).nullable().optional(),
+    pomodoroBreaks: z.number().int().min(0).max(100).nullable().optional(),
   })
   .refine(
     (d) =>
       d.date !== undefined ||
       d.startTime !== undefined ||
       d.durationMinutes !== undefined ||
-      d.notes !== undefined,
+      d.notes !== undefined ||
+      d.pomodoroBlocks !== undefined ||
+      d.pomodoroBreaks !== undefined,
     { message: 'At least one field is required to update' }
   );

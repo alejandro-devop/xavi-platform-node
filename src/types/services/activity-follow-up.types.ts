@@ -24,6 +24,10 @@ export interface ActivityFollowUp {
   endDateTime: string | null;
   notes: string | null;
   linkedTodoId: string | null;
+  /** Bloques de trabajo Pomodoro de la sesión; null → sin dato. */
+  pomodoroBlocks: number | null;
+  /** Descansos Pomodoro de la sesión; null → sin dato. */
+  pomodoroBreaks: number | null;
   createdAt: Date;
   updatedAt: Date;
   sessionSubtasks?: ActivityFollowUpSubtask[];
@@ -70,6 +74,10 @@ export interface UpdateActivityFollowUpInput {
    */
   durationMinutes?: number | null;
   notes?: string | null;
+  /** Bloques Pomodoro; null limpia el valor. */
+  pomodoroBlocks?: number | null;
+  /** Descansos Pomodoro; null limpia el valor. */
+  pomodoroBreaks?: number | null;
 }
 
 export interface ListActivityFollowUpsOptions {

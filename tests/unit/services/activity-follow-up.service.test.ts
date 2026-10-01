@@ -390,4 +390,77 @@ describe('ActivityFollowUpService', () => {
       activityFollowUpService.updateFollowUp('404', USER_ID, { durationMinutes: null })
     ).rejects.toBeInstanceOf(NotFoundError);
   });
+  it('maps pomodoro counts and leaves them null when the row has none', async () => {
+    mockDbPool.query.mockResolvedValueOnce({
+      rows: [createFollowUpRow({ pomodoro_blocks: 4, pomodoro_breaks: 3 })],
+    });
+    const withCounts = await activityFollowUpService.getFollowUpById(
+      String(FOLLOW_UP_ID),
+      USER_ID
+    );
+    expect(withCounts.pomodoroBlocks).toBe(4);
+    expect(withCounts.pomodoroBreaks).toBe(3);
+
+    mockDbPool.query.mockResolvedValueOnce({
+      rows: [createFollowUpRow({ duration_minutes: null, pomodoro_blocks: 1, pomodoro_breaks: 0 })],
+    });
+    const open = await activityFollowUpService.getOpenFollowUp(USER_ID);
+    expect(open?.pomodoroBlocks).toBe(1);
+    expect(open?.pomodoroBreaks).toBe(0);
+
+    mockDbPool.query.mockResolvedValueOnce({ rows: [createFollowUpRow()] });
+    const [listed] = await activityFollowUpService.listFollowUps(USER_ID);
+    expect(listed.pomodoroBlocks).toBeNull();
+    expect(listed.pomodoroBreaks).toBeNull();
+  });
+
+  it('updateFollowUp persists pomodoro counts and returns them', async () => {
+    mockDbPool.query
+      .mockResolvedValueOnce({ rows: [createFollowUpRow()] })
+      .mockResolvedValueOnce({
+        rows: [createFollowUpRow({ pomodoro_blocks: 4, pomodoro_breaks: 3 })],
+      });
+
+    const followUp = await activityFollowUpService.updateFollowUp(String(FOLLOW_UP_ID), USER_ID, {
+      pomodoroBlocks: 4,
+      pomodoroBreaks: 3,
+    });
+
+    expect(followUp.pomodoroBlocks).toBe(4);
+    expect(followUp.pomodoroBreaks).toBe(3);
+    const [sql, params] = mockDbPool.query.mock.calls[1];
+    expect(sql).toContain('pomodoro_blocks = $1');
+    expect(sql).toContain('pomodoro_breaks = $2');
+    expect(sql).not.toContain('duration_minutes');
+    expect(params).toEqual([4, 3, FOLLOW_UP_ID]);
+  });
+
+  it('updateFollowUp clears pomodoro counts with null', async () => {
+    mockDbPool.query
+      .mockResolvedValueOnce({
+        rows: [createFollowUpRow({ pomodoro_blocks: 4, pomodoro_breaks: 3 })],
+      })
+      .mockResolvedValueOnce({ rows: [createFollowUpRow()] });
+
+    const followUp = await activityFollowUpService.updateFollowUp(String(FOLLOW_UP_ID), USER_ID, {
+      pomodoroBlocks: null,
+      pomodoroBreaks: null,
+    });
+
+    expect(followUp.pomodoroBlocks).toBeNull();
+    expect(followUp.pomodoroBreaks).toBeNull();
+    const [, params] = mockDbPool.query.mock.calls[1];
+    expect(params).toEqual([null, null, FOLLOW_UP_ID]);
+  });
+
+  it('updateFollowUp leaves pomodoro counts untouched when omitted', async () => {
+    mockDbPool.query
+      .mockResolvedValueOnce({ rows: [createFollowUpRow()] })
+      .mockResolvedValueOnce({ rows: [createFollowUpRow({ notes: 'x' })] });
+
+    await activityFollowUpService.updateFollowUp(String(FOLLOW_UP_ID), USER_ID, { notes: 'x' });
+
+    const [sql] = mockDbPool.query.mock.calls[1];
+    expect(sql).not.toContain('pomodoro');
+  });
 });

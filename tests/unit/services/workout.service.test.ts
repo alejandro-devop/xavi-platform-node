@@ -194,6 +194,8 @@ describe('WorkoutService', () => {
         endDateTime: null,
         notes: null,
         linkedTodoId: null,
+        pomodoroBlocks: null,
+        pomodoroBreaks: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       });
@@ -230,6 +232,8 @@ describe('WorkoutService', () => {
         endDateTime: '2026-07-17T10:45:00',
         notes: null,
         linkedTodoId: null,
+        pomodoroBlocks: null,
+        pomodoroBreaks: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       });
@@ -256,6 +260,8 @@ describe('WorkoutService', () => {
         endDateTime: null,
         notes: null,
         linkedTodoId: null,
+        pomodoroBlocks: null,
+        pomodoroBreaks: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       });
@@ -295,6 +301,8 @@ describe('WorkoutService', () => {
         endDateTime: null,
         notes: null,
         linkedTodoId: null,
+        pomodoroBlocks: null,
+        pomodoroBreaks: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       });
@@ -329,6 +337,8 @@ describe('WorkoutService', () => {
         endDateTime: '2026-07-17T10:45:00',
         notes: null,
         linkedTodoId: null,
+        pomodoroBlocks: null,
+        pomodoroBreaks: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       });

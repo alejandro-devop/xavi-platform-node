@@ -2,7 +2,11 @@ import { activityCategoryService } from './activity-category.service';
 import { activityService } from './activity.service';
 import { todoFolderService } from './todo-folder.service';
 import { getDbPool } from '../shared/database/pool';
-import type { UpdateUserSettingsInput, UserSettings } from '../types/services/user-settings.types';
+import type {
+  UpdateUserSettingsInput,
+  UserSettings,
+  VidaPomodoro,
+} from '../types/services/user-settings.types';
 
 type UserSettingsRow = {
   user_id: number;
@@ -19,6 +23,7 @@ type UserSettingsRow = {
   vida_night_bed_time: string | Date | null;
   vida_night_wake_time: string | Date | null;
   vida_night_days: string[] | null;
+  vida_pomodoro: VidaPomodoro | null;
   created_at: Date;
   updated_at: Date;
 };
@@ -27,6 +32,19 @@ function formatTime(value: string | Date | null): string | null {
   if (value == null) return null;
   if (typeof value === 'string') return value.slice(0, 5);
   return value.toTimeString().slice(0, 5);
+}
+
+/** El JSONB llega ya parseado por pg; se normaliza para no filtrar claves extra. */
+function mapPomodoro(value: VidaPomodoro | null | undefined): VidaPomodoro | null {
+  if (value == null) return null;
+  return {
+    enabled: value.enabled,
+    categoryIds: value.categoryIds ?? [],
+    workMinutes: value.workMinutes,
+    breakMinutes: value.breakMinutes,
+    longBreakMinutes: value.longBreakMinutes ?? null,
+    longBreakEvery: value.longBreakEvery ?? null,
+  };
 }
 
 function mapRow(row: UserSettingsRow): UserSettings {
@@ -47,6 +65,7 @@ function mapRow(row: UserSettingsRow): UserSettings {
     vidaNightBedTime: formatTime(row.vida_night_bed_time),
     vidaNightWakeTime: formatTime(row.vida_night_wake_time),
     vidaNightDays: row.vida_night_days ?? null,
+    vidaPomodoro: mapPomodoro(row.vida_pomodoro),
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -176,6 +195,14 @@ export const userSettingsService = {
     if (input.vidaNightDays !== undefined) {
       updates.push(`vida_night_days = $${paramIndex}`);
       params.push(input.vidaNightDays);
+      paramIndex++;
+    }
+
+    // El Pomodoro se reemplaza entero. Se manda como texto JSON con cast
+    // explícito: pg serializaría un objeto igual, pero así no hay duda.
+    if (input.vidaPomodoro !== undefined) {
+      updates.push(`vida_pomodoro = $${paramIndex}::jsonb`);
+      params.push(input.vidaPomodoro === null ? null : JSON.stringify(input.vidaPomodoro));
       paramIndex++;
     }
 

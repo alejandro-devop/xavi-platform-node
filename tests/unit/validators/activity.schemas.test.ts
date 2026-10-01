@@ -50,3 +50,46 @@ describe('activityFollowUpEditInputSchema — durationMinutes', () => {
     ).not.toThrow();
   });
 });
+
+describe('activityFollowUpEditInputSchema — pomodoroBlocks / pomodoroBreaks', () => {
+  it('accepts the counts on their own as the field to update', () => {
+    const parsed = activityFollowUpEditInputSchema.parse({
+      id: FOLLOW_UP_ID,
+      pomodoroBlocks: 4,
+    });
+    expect(parsed.pomodoroBlocks).toBe(4);
+
+    expect(() =>
+      activityFollowUpEditInputSchema.parse({ id: FOLLOW_UP_ID, pomodoroBreaks: 0 })
+    ).not.toThrow();
+  });
+
+  it('keeps an explicit null and counts it for the "at least one field" rule', () => {
+    const parsed = activityFollowUpEditInputSchema.parse({
+      id: FOLLOW_UP_ID,
+      pomodoroBlocks: null,
+      pomodoroBreaks: null,
+    });
+
+    expect(parsed.pomodoroBlocks).toBeNull();
+    expect(parsed.pomodoroBreaks).toBeNull();
+  });
+
+  it('drops the keys when absent', () => {
+    const parsed = activityFollowUpEditInputSchema.parse({ id: FOLLOW_UP_ID, notes: 'x' });
+
+    expect('pomodoroBlocks' in parsed).toBe(false);
+    expect('pomodoroBreaks' in parsed).toBe(false);
+  });
+
+  it('rejects negatives, decimals and more than 100', () => {
+    for (const value of [-1, 2.5, 101]) {
+      expect(() =>
+        activityFollowUpEditInputSchema.parse({ id: FOLLOW_UP_ID, pomodoroBlocks: value })
+      ).toThrow();
+      expect(() =>
+        activityFollowUpEditInputSchema.parse({ id: FOLLOW_UP_ID, pomodoroBreaks: value })
+      ).toThrow();
+    }
+  });
+});

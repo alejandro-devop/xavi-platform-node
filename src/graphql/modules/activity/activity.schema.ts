@@ -51,6 +51,14 @@ export const activityTypeDefs = gql`
     endDateTime: String
     notes: String
     linkedTodoId: ID
+    """
+    Bloques de trabajo Pomodoro de la sesión. Null: sin dato.
+    """
+    pomodoroBlocks: Int
+    """
+    Descansos Pomodoro de la sesión. Null: sin dato.
+    """
+    pomodoroBreaks: Int
     createdAt: DateTime!
     updatedAt: DateTime!
     activity: Activity
@@ -255,5 +263,13 @@ export const activityTypeDefs = gql`
     """
     durationMinutes: Int
     notes: String
+    """
+    Bloques de trabajo Pomodoro, 0..100 (o null para limpiar).
+    """
+    pomodoroBlocks: Int
+    """
+    Descansos Pomodoro, 0..100 (o null para limpiar).
+    """
+    pomodoroBreaks: Int
   }
 `;

@@ -1,3 +1,16 @@
+/** Configuración del Pomodoro de Vida. Se guarda y se reemplaza entera. */
+export interface VidaPomodoro {
+  enabled: boolean;
+  /** Categorías de actividad (UUID) en las que se ofrece el Pomodoro. */
+  categoryIds: string[];
+  workMinutes: number;
+  breakMinutes: number;
+  /** Descanso largo; null junto con longBreakEvery → sin descanso largo. */
+  longBreakMinutes: number | null;
+  /** Cada cuántos bloques toca el descanso largo. */
+  longBreakEvery: number | null;
+}
+
 export interface UserSettings {
   userId: number;
   hideHiddenHabits: boolean;
@@ -24,6 +37,8 @@ export interface UserSettings {
   vidaNightWakeTime: string | null;
   /** Noches en las que aplica, por el día en que se acuesta; null → todas. */
   vidaNightDays: string[] | null;
+  /** Pomodoro de Vida; null → no configurado. */
+  vidaPomodoro: VidaPomodoro | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -47,4 +62,6 @@ export interface UpdateUserSettingsInput {
   vidaNightWakeTime?: string | null;
   /** Noches en las que aplica; null limpia el valor. */
   vidaNightDays?: string[] | null;
+  /** Pomodoro de Vida, entero; null limpia el valor. */
+  vidaPomodoro?: VidaPomodoro | null;
 }

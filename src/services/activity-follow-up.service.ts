@@ -29,6 +29,8 @@ type FollowUpRow = {
   duration_minutes: number | null;
   notes: string | null;
   linked_todo_id: number | null;
+  pomodoro_blocks?: number | null;
+  pomodoro_breaks?: number | null;
   created_at: Date;
   updated_at: Date;
 };
@@ -74,6 +76,8 @@ function mapFollowUp(row: FollowUpRow): ActivityFollowUp {
       endDateTime: null,
       notes: row.notes,
       linkedTodoId: row.linked_todo_id !== null ? String(row.linked_todo_id) : null,
+      pomodoroBlocks: row.pomodoro_blocks ?? null,
+      pomodoroBreaks: row.pomodoro_breaks ?? null,
       createdAt: row.created_at,
       updatedAt: row.updated_at,
     };
@@ -93,6 +97,8 @@ function mapFollowUp(row: FollowUpRow): ActivityFollowUp {
     endDateTime: end.endDateTime,
     notes: row.notes,
     linkedTodoId: row.linked_todo_id !== null ? String(row.linked_todo_id) : null,
+    pomodoroBlocks: row.pomodoro_blocks ?? null,
+    pomodoroBreaks: row.pomodoro_breaks ?? null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -397,6 +403,14 @@ async function updateFollowUp(
   if (input.notes !== undefined) {
     updates.push(`notes = $${i++}`);
     params.push(input.notes);
+  }
+  if (input.pomodoroBlocks !== undefined) {
+    updates.push(`pomodoro_blocks = $${i++}`);
+    params.push(input.pomodoroBlocks);
+  }
+  if (input.pomodoroBreaks !== undefined) {
+    updates.push(`pomodoro_breaks = $${i++}`);
+    params.push(input.pomodoroBreaks);
   }
 
   if (updates.length === 0) {

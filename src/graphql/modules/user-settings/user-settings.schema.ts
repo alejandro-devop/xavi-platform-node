@@ -1,6 +1,45 @@
 import { gql } from 'graphql-tag';
 
 export const userSettingsTypeDefs = gql`
+  """
+  Pomodoro de Vida. longBreakMinutes y longBreakEvery van juntos: los dos o ninguno.
+  """
+  type VidaPomodoro {
+    enabled: Boolean!
+    """
+    Categorías de actividad en las que se ofrece el Pomodoro.
+    """
+    categoryIds: [ID!]!
+    workMinutes: Int!
+    breakMinutes: Int!
+    longBreakMinutes: Int
+    longBreakEvery: Int
+  }
+
+  input VidaPomodoroInput {
+    enabled: Boolean!
+    """
+    UUIDs de categorías de actividad (máx. 50; los repetidos se quitan).
+    """
+    categoryIds: [ID!]!
+    """
+    Minutos de trabajo por bloque, 5..240.
+    """
+    workMinutes: Int!
+    """
+    Minutos de descanso corto, 1..60.
+    """
+    breakMinutes: Int!
+    """
+    Minutos de descanso largo, 1..120. Junto con longBreakEvery, o los dos null.
+    """
+    longBreakMinutes: Int
+    """
+    Cada cuántos bloques toca el descanso largo, 2..10.
+    """
+    longBreakEvery: Int
+  }
+
   type UserSettings {
     userId: Int!
     hideHiddenHabits: Boolean!
@@ -46,6 +85,10 @@ export const userSettingsTypeDefs = gql`
     Noches en las que aplica, nombradas por el día en que se acuesta. Null: todas.
     """
     vidaNightDays: [VidaDayOfWeek!]
+    """
+    Pomodoro de Vida. Null si aún no lo configuró.
+    """
+    vidaPomodoro: VidaPomodoro
     createdAt: DateTime!
     updatedAt: DateTime!
   }
@@ -100,5 +143,9 @@ export const userSettingsTypeDefs = gql`
     Noches en las que aplica, por el día en que se acuesta (o null para limpiar).
     """
     vidaNightDays: [VidaDayOfWeek!]
+    """
+    Pomodoro de Vida, entero: reemplaza al anterior (o null para limpiar).
+    """
+    vidaPomodoro: VidaPomodoroInput
   }
 `;

@@ -28,6 +28,34 @@ const nightDaysArray = z
   })
   .nullable();
 
+/**
+ * El Pomodoro de Vida. Llega entero y reemplaza entero al anterior. El
+ * descanso largo es un par: o vienen los dos campos o ninguno, porque uno sin
+ * el otro no dice nada. Las categorías repetidas se quitan en silencio.
+ */
+const vidaPomodoroSchema = z
+  .object({
+    enabled: z.boolean(),
+    categoryIds: z
+      .array(uuidString)
+      .max(50)
+      .transform((ids) => [...new Set(ids)]),
+    workMinutes: z.number().int().min(5).max(240),
+    breakMinutes: z.number().int().min(1).max(60),
+    longBreakMinutes: z.number().int().min(1).max(120).nullable().optional(),
+    longBreakEvery: z.number().int().min(2).max(10).nullable().optional(),
+  })
+  .transform((d) => ({
+    ...d,
+    longBreakMinutes: d.longBreakMinutes ?? null,
+    longBreakEvery: d.longBreakEvery ?? null,
+  }))
+  .refine((d) => (d.longBreakMinutes === null) === (d.longBreakEvery === null), {
+    message: 'longBreakMinutes and longBreakEvery must be both set or both null',
+    path: ['longBreakEvery'],
+  })
+  .nullable();
+
 export const updateUserSettingsInputSchema = z.object({
   hideHiddenHabits: z.boolean().optional(),
   sleepActivityCategoryId: uuidString.nullable().optional(),
@@ -45,4 +73,5 @@ export const updateUserSettingsInputSchema = z.object({
   vidaNightBedTime: timeSchema.optional(),
   vidaNightWakeTime: timeSchema.optional(),
   vidaNightDays: nightDaysArray.optional(),
+  vidaPomodoro: vidaPomodoroSchema.optional(),
 });

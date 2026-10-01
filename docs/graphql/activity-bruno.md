@@ -306,6 +306,10 @@ mutation ActivityFollowUpAdd($input: ActivityFollowUpAddInput!) {
 
 Enviar `durationMinutes` cierra un follow-up abierto.
 
+`pomodoroBlocks` y `pomodoroBreaks` (0..100, o `null` para limpiar) guardan
+cuántos bloques de trabajo y cuántos descansos tuvo la sesión con Pomodoro.
+Omitirlos no los toca.
+
 ```graphql
 mutation ActivityFollowUpEdit($input: ActivityFollowUpEditInput!) {
   activityFollowUpEdit(input: $input) {
@@ -313,6 +317,8 @@ mutation ActivityFollowUpEdit($input: ActivityFollowUpEditInput!) {
     durationMinutes
     isOpen
     endTime
+    pomodoroBlocks
+    pomodoroBreaks
   }
 }
 ```

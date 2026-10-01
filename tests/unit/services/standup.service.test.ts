@@ -344,6 +344,7 @@ describe('StandupService', () => {
         vidaNightBedTime: null,
         vidaNightWakeTime: null,
         vidaNightDays: null,
+        vidaPomodoro: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       });
@@ -372,6 +373,7 @@ describe('StandupService', () => {
         vidaNightBedTime: null,
         vidaNightWakeTime: null,
         vidaNightDays: null,
+        vidaPomodoro: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       });
